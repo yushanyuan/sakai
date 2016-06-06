@@ -268,7 +268,7 @@
                     <a href="#" role="menuitem" rsf:id="add-content" class="add-before-param"><span rsf:id="msg.simplepage.add-student-content"></span></a>
                   </li>
                   <li rsf:id="addwebsite-li">
-                    <a href="#" role="menuitem" rsf:id="add-website" class="add-website"><span rsf:id="msg.simplepage.website"></span></a>
+                    <a href="#" role="menuitem" rsf:id="add-website" class="add-website add-before-param"><span rsf:id="msg.simplepage.website"></span></a>
                   </li>
                   <li rsf:id="blti-tool:">
                     <a href="#" role="menuitem" rsf:id="add-blti-tool" class="add-before-param"><span rsf:id="msg.simplepage.blti"></span></a>
@@ -1047,6 +1047,13 @@
                     </div>
 
                     <div class="border2 controlsPanel">                 
+		        <div id="mm-name-section">
+                          <p class="shorttext required">
+                            <label rsf:id="msg=simplepage.name_label" for="mm-name"></label>
+                            <input type="text" name="mm-name" rsf:id="mm-name" id="mm-name" size="30" maxlength="99" class="edit-form-input" />
+                          </p>
+			  <hr />
+			</div>
                         <p class="required">
                             <label rsf:id="msg=simplepage.upload_label" for="mm-file">File</label>
                             <input type="file" name="mm-file" id="mm-file" style="width:95%" class="edit-multimedia-input" multiple="multiple" />

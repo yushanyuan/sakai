@@ -14,7 +14,7 @@ UPDATE sakai_site_tool SET registration = 'sakai.simple.rss' WHERE registration 
 -- New permissions
 
 -- KNL-1350 / SAK-11647
-INSERT INTO SAKAI_REALM_FUNCTION VALUES (DEFAULT, 'dropbox.maintain.own.groups');
+INSERT INTO SAKAI_REALM_FUNCTION VALUES (SAKAI_REALM_FUNCTION_SEQ.nextval, 'dropbox.maintain.own.groups');
 INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.course'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Teaching Assistant'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'dropbox.maintain.own.groups'))
 INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!group.template.course'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Teaching Assistant'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'dropbox.maintain.own.groups'))
 -- END KNL-1350 / SAK-11647
@@ -272,7 +272,7 @@ DROP TABLE PERMISSIONS_SRC_TEMP;
 -- ------------------------------
 
 -- KNL-1336 - Add status for all nodes in a cluster.
-ALTER TABLE SAKAI_CLUSTER COLUMN STATUS VARCHAR(8);
+ALTER TABLE SAKAI_CLUSTER ADD STATUS VARCHAR(8);
 -- We rename the column so we don't have update the primary key index
 ALTER TABLE SAKAI_CLUSTER RENAME COLUMN SERVER_ID TO SERVER_ID_INSTANCE;
 ALTER TABLE SAKAI_CLUSTER ADD SERVER_ID VARCHAR (64);
@@ -396,6 +396,10 @@ INSERT INTO SAKAI_SITE_PAGE_PROPERTY VALUES('!admin', '!admin-1600', 'sitePage.c
 -- SAK-29571 MFR_MESSAGE_DELETD_I causes bad performance
 drop index MFR_MESSAGE_DELETED_I;
 -- END SAK-29571 MFR_MESSAGE_DELETD_I causes bad performance
+
+-- LSNBLDR-646
+drop index lb_qr_questionId;
+-- END LSNBLDR-646
 
 -- SAK-29546 Add site visit totals per user
 CREATE TABLE SST_PRESENCE_TOTALS (
@@ -883,8 +887,163 @@ CREATE SEQUENCE LB_PEER_EVAL_RESULT_S;
 -- SAM-2751
 ALTER TABLE SAM_ASSESSACCESSCONTROL_T ADD HONORPLEDGE NUMBER(1,0);
 ALTER TABLE SAM_PUBLISHEDACCESSCONTROL_T ADD HONORPLEDGE NUMBER(1,0);
-INSERT INTO SAM_ASSESSMETADATA_T (ASSESSMENTID, LABEL, ENTRY)
-     SELECT DISTINCT ASSESSMENTID, 'honorpledge_isInstructorEditable' as LABEL, 'true' as ENTRY
-       FROM SAM_ASSESSMETADATA_T WHERE ASSESSMENTID NOT IN
-         (SELECT DISTINCT ASSESSMENTID FROM SAM_ASSESSMETADATA_T WHERE LABEL = 'honorpledge_isInstructorEditable');
+INSERT INTO SAM_ASSESSMETADATA_T (ASSESSMENTMETADATAID, ASSESSMENTID, LABEL, ENTRY)
+    SELECT SAM_ASSESSMETADATA_ID_S.nextval, ASSESSMENTID, LABEL, ENTRY
+     FROM (SELECT DISTINCT ASSESSMENTID, 'honorpledge_isInstructorEditable' as LABEL, 'true' as ENTRY
+            FROM SAM_ASSESSMETADATA_T WHERE ASSESSMENTID NOT IN
+            (SELECT DISTINCT ASSESSMENTID FROM SAM_ASSESSMETADATA_T WHERE LABEL = 'honorpledge_isInstructorEditable'));
 -- END SAM-2751
+
+-- SAM-1200 Oracle conversion, size increases of Samigo columns
+alter table SAM_PUBLISHEDASSESSMENT_T add tempcol clob;
+update SAM_PUBLISHEDASSESSMENT_T set tempcol=description;
+alter table SAM_PUBLISHEDASSESSMENT_T drop column description;
+alter table SAM_PUBLISHEDASSESSMENT_T rename column tempcol to description;
+
+alter table SAM_PUBLISHEDSECTION_T add tempcol clob;
+update SAM_PUBLISHEDSECTION_T set tempcol=description;
+alter table SAM_PUBLISHEDSECTION_T drop column description;
+alter table SAM_PUBLISHEDSECTION_T rename column tempcol to description;
+
+alter table SAM_ASSESSMENTBASE_T add tempcol clob;
+update SAM_ASSESSMENTBASE_T set tempcol=description;
+alter table SAM_ASSESSMENTBASE_T drop column description;
+alter table SAM_ASSESSMENTBASE_T rename column tempcol to description;
+
+alter table SAM_SECTION_T add tempcol clob;
+update SAM_SECTION_T set tempcol=description;
+alter table SAM_SECTION_T drop column description;
+alter table SAM_SECTION_T rename column tempcol to description;
+
+alter table SAM_ITEMGRADING_T add tempcol clob;
+update SAM_ITEMGRADING_T set tempcol=comments;
+alter table SAM_ITEMGRADING_T drop column comments;
+alter table SAM_ITEMGRADING_T rename column tempcol to comments;
+
+alter table SAM_ASSESSMENTGRADING_T add tempcol clob;
+update SAM_ASSESSMENTGRADING_T set tempcol=comments;
+alter table SAM_ASSESSMENTGRADING_T drop column comments;
+alter table SAM_ASSESSMENTGRADING_T rename column tempcol to comments;
+-- END SAM-1200
+
+CREATE TABLE SST_LESSONBUILDER
+(ID             NUMBER(19) PRIMARY KEY,
+ USER_ID        VARCHAR2(99) NOT NULL,
+ SITE_ID        VARCHAR2(99) NOT NULL,
+ PAGE_REF       VARCHAR2(255) NOT NULL,
+ PAGE_ID        NUMBER(19) NOT NULL,
+ PAGE_ACTION    VARCHAR2(12) NOT NULL,
+ PAGE_DATE      DATE NOT NULL,
+ PAGE_COUNT     NUMBER(19) NOT NULL
+);
+
+CREATE SEQUENCE SST_LESSONBUILDER_ID;
+
+CREATE INDEX SST_LESSONBUILDER_PAGE_ACT_IDX ON SST_LESSONBUILDER (PAGE_ACTION);
+
+CREATE INDEX SST_LESSONBUILDER_DATE_IX ON SST_LESSONBUILDER (PAGE_DATE);
+
+CREATE INDEX SST_LESSONBUILDER_SITE_ID_IX ON SST_LESSONBUILDER (SITE_ID);
+
+CREATE INDEX SST_LESSONBUILDER_USER_ID_IX ON SST_LESSONBUILDER (USER_ID);
+
+CREATE TABLE MFR_ANONYMOUS_MAPPING_T (
+  SITE_ID varchar(255) NOT NULL,
+  USER_ID varchar(255) NOT NULL,
+  ANON_ID varchar(255) NOT NULL,
+  PRIMARY KEY (SITE_ID,USER_ID)
+);
+
+CREATE TABLE MFR_RANK_INDIVIDUAL_T (
+  RANK_ID number(19,0) NOT NULL,
+  USER_ID varchar(99) NOT NULL,
+  PRIMARY KEY (RANK_ID,USER_ID),
+  CONSTRAINT mfr_rank_indiv_fk FOREIGN KEY (RANK_ID) REFERENCES MFR_RANK_T (ID)
+);
+
+CREATE INDEX mfr_rank_indiv_idx ON MFR_RANK_INDIVIDUAL_T (RANK_ID);
+
+-- SAK-30141 New permissions
+INSERT INTO SAKAI_REALM_FUNCTION VALUES (SAKAI_REALM_FUNCTION_SEQ.nextval, 'syllabus.add.item');
+INSERT INTO SAKAI_REALM_FUNCTION VALUES (SAKAI_REALM_FUNCTION_SEQ.nextval, 'syllabus.bulk.add.item');
+INSERT INTO SAKAI_REALM_FUNCTION VALUES (SAKAI_REALM_FUNCTION_SEQ.nextval, 'syllabus.bulk.edit.item');
+INSERT INTO SAKAI_REALM_FUNCTION VALUES (SAKAI_REALM_FUNCTION_SEQ.nextval, 'syllabus.redirect');
+
+-- maintain
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.user'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'maintain'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.add.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.user'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'maintain'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.bulk.add.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.user'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'maintain'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.bulk.edit.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.user'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'maintain'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.redirect'));
+
+-- maintain
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'maintain'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.add.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'maintain'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.bulk.add.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'maintain'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.bulk.edit.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'maintain'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.redirect'));
+
+-- Instructor
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.course'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Instructor'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.add.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.course'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Instructor'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.bulk.add.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.course'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Instructor'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.bulk.edit.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.course'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Instructor'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.redirect'));
+
+-- Administrator
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.lti'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Administrator'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.add.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.lti'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Administrator'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.bulk.add.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.lti'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Administrator'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.bulk.edit.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.lti'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Administrator'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.redirect'));
+
+-- Instructor
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.lti'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Instructor'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.add.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.lti'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Instructor'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.bulk.add.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.lti'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Instructor'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.bulk.edit.item'));
+INSERT INTO SAKAI_REALM_RL_FN VALUES((select REALM_KEY from SAKAI_REALM where REALM_ID = '!site.template.lti'), (select ROLE_KEY from SAKAI_REALM_ROLE where ROLE_NAME = 'Instructor'), (select FUNCTION_KEY from SAKAI_REALM_FUNCTION where FUNCTION_NAME = 'syllabus.redirect'));
+
+-- Permission backfill
+
+-- for each realm that has a role matching something in this table, we will add to that role the function from this table
+CREATE TABLE PERMISSIONS_SRC_TEMP (ROLE_NAME VARCHAR(99), FUNCTION_NAME VARCHAR(99));
+
+-- maintain
+INSERT INTO PERMISSIONS_SRC_TEMP values ('maintain','syllabus.add.item');
+INSERT INTO PERMISSIONS_SRC_TEMP values ('maintain','syllabus.bulk.add.item');
+INSERT INTO PERMISSIONS_SRC_TEMP values ('maintain','syllabus.bulk.edit.item');
+INSERT INTO PERMISSIONS_SRC_TEMP values ('maintain','syllabus.redirect');
+
+-- Instructor
+INSERT INTO PERMISSIONS_SRC_TEMP values ('Instructor','syllabus.add.item');
+INSERT INTO PERMISSIONS_SRC_TEMP values ('Instructor','syllabus.bulk.add.item');
+INSERT INTO PERMISSIONS_SRC_TEMP values ('Instructor','syllabus.bulk.edit.item');
+INSERT INTO PERMISSIONS_SRC_TEMP values ('Instructor','syllabus.redirect');
+
+-- lookup the role and function numbers
+CREATE TABLE PERMISSIONS_TEMP (ROLE_KEY INTEGER, FUNCTION_KEY INTEGER);
+INSERT INTO PERMISSIONS_TEMP (ROLE_KEY, FUNCTION_KEY)
+SELECT SRR.ROLE_KEY, SRF.FUNCTION_KEY
+from PERMISSIONS_SRC_TEMP TMPSRC
+JOIN SAKAI_REALM_ROLE SRR ON (TMPSRC.ROLE_NAME = SRR.ROLE_NAME)
+JOIN SAKAI_REALM_FUNCTION SRF ON (TMPSRC.FUNCTION_NAME = SRF.FUNCTION_NAME);
+
+-- insert the new functions into the roles of any existing realm that has the role (don't convert the "!site.helper" OR "!user.template")
+INSERT INTO SAKAI_REALM_RL_FN (REALM_KEY, ROLE_KEY, FUNCTION_KEY)
+SELECT
+    SRRFD.REALM_KEY, SRRFD.ROLE_KEY, TMP.FUNCTION_KEY
+FROM
+    (SELECT DISTINCT SRRF.REALM_KEY, SRRF.ROLE_KEY FROM SAKAI_REALM_RL_FN SRRF) SRRFD
+    JOIN PERMISSIONS_TEMP TMP ON (SRRFD.ROLE_KEY = TMP.ROLE_KEY)
+    JOIN SAKAI_REALM SR ON (SRRFD.REALM_KEY = SR.REALM_KEY)
+    WHERE SR.REALM_ID != '!site.helper' AND SR.REALM_ID NOT LIKE '!user.template%'
+    AND NOT EXISTS (
+        SELECT 1
+            FROM SAKAI_REALM_RL_FN SRRFI
+            WHERE SRRFI.REALM_KEY=SRRFD.REALM_KEY AND SRRFI.ROLE_KEY=SRRFD.ROLE_KEY AND SRRFI.FUNCTION_KEY=TMP.FUNCTION_KEY
+    );
+
+-- clean up the temp tables
+DROP TABLE PERMISSIONS_TEMP;
+DROP TABLE PERMISSIONS_SRC_TEMP;
+-- ------------------------------
+--  END permission backfill -----
+-- ------------------------------
+
+-- END SAK-30141

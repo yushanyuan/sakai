@@ -1,19 +1,4 @@
 .#{$namespace}sakai-samigo{
-	.navIntraTool{
-		li {
-		    display: inline-block;
-		    margin: 0 0 0 0;
-		    span{
-		    	display: inline-block;
-		    	a{
-		    		display: block;
-		    		padding: 0.5em 0.5em 0.6em 0.2em;
-		    		margin: 0 0 0 0;
-		    	}
-		    }
-		}
-	}
-
 	.samigo-inline-form {
 		td {
 			label{
@@ -30,7 +15,9 @@
 	}
 
 	.samigo-question-callout {
-			@include bs-callout($toolBorderColor, $background-color);
+			border-left: 5px solid $toolBorderColor;
+			margin: 2em 0;
+			padding: 1.5em 2.5em 1.5em 1.5em;
 			input[type="checkbox"], input[type="radio"] {
 				margin-right: 0.25em;
 			}
@@ -147,5 +134,9 @@
 	   			margin-right: 5px;
 	   		}
 	   	}
+	}
+	
+	#samLiteEntryForm\:data{
+		margin-top: 1.2em;
 	}
 }

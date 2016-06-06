@@ -1016,82 +1016,7 @@ public class ItemAuthorBean
 
 		return outcome;
 	}
-
-/**
- * delete specified Item
- */
-  public String deleteItem() {
-	  ItemService delegate = new ItemService();
-	  Long deleteId= this.getItemToDelete().getItemId();
-	  ItemFacade itemf = delegate.getItem(deleteId, AgentFacade.getAgentString());
-	  // save the currSection before itemf.setSection(null), used to reorder question sequences
-	  SectionFacade  currSection = (SectionFacade) itemf.getSection();
-	  Integer  currSeq = itemf.getSequence();
-
-	  QuestionPoolService qpdelegate = new QuestionPoolService();
-	  if (qpdelegate.getPoolIdsByItem(deleteId.toString()) ==  null || qpdelegate.getPoolIdsByItem(deleteId.toString()).isEmpty()){
-		  // if no reference to this item at all, ie, this item is created in assessment but not assigned to any pool
-
-		  AuthorizationBean authzBean = (AuthorizationBean) ContextUtil.lookupBean("authorization");
-		  AssessmentService assessdelegate = new AssessmentService();
-		  AssessmentFacade af = assessdelegate.getBasicInfoOfAnAssessmentFromSectionId(currSection.getSectionId());
-		  if (!authzBean.isUserAllowedToEditAssessment(af.getAssessmentBaseId().toString(), af.getCreatedBy(), false)) {
-		      throw new IllegalArgumentException("User does not have permission to delete item in assessment: " + af.getAssessmentBaseId());
-		  }
-
-		  delegate.deleteItem(deleteId, AgentFacade.getAgentString());
-	  }
-	  else {
-		  if (currSection == null) {
-			  // if this item is created from question pool
-			  QuestionPoolBean  qpoolbean= (QuestionPoolBean) ContextUtil.lookupBean("questionpool");
-	          ItemFacade itemfacade= delegate.getItem(deleteId, AgentFacade.getAgentString());
-	          ArrayList items = new ArrayList();
-	          items.add(itemfacade);
-	          qpoolbean.setItemsToDelete(items);
-			  qpoolbean.removeQuestionsFromPool();
-			  return "editPool";
-		  }
-		  else {
-			  // 
-			  // if some pools still reference to this item, ie, this item is 
-			  // created in assessment but also assigned a a pool
-			  // then just set section = null
-			  itemf.setSection(null);
-			  delegate.saveItem(itemf);
-		  }
-	  }
-	//An item has been deleted
-	EventTrackingService.post(EventTrackingService.newEvent("sam.assessment.item.delete", "/sam/" +AgentFacade.getCurrentSiteId() + "/removed itemId=" + deleteId, true));
-
-	AssessmentService assessdelegate = new AssessmentService();
-      // reorder item numbers
-
-	  SectionFacade sectfacade = assessdelegate.getSection(currSection.getSectionId().toString());
-	  Set itemset = sectfacade.getItemFacadeSet();
-	  // should be size-1 now.
-	  Iterator iter = itemset.iterator();
-	  while (iter.hasNext()) {
-		  ItemFacade  itemfacade = (ItemFacade) iter.next();
-		  Integer itemfacadeseq = itemfacade.getSequence();
-		  if (itemfacadeseq.compareTo(currSeq) > 0 ){
-			  itemfacade.setSequence( Integer.valueOf(itemfacadeseq.intValue()-1) );
-			  delegate.saveItem(itemfacade);
-		  }
-	  }
-
-	  //  go to editAssessment.jsp, need to first reset assessmentBean
-	  AssessmentBean assessmentBean = (AssessmentBean) ContextUtil.lookupBean(
-                                          "assessmentBean");
-	  AssessmentFacade assessment = assessdelegate.getAssessment(assessmentBean.getAssessmentId());
-	  assessmentBean.setAssessment(assessment);
-	  assessdelegate.updateAssessmentLastModifiedInfo(assessment);
-  	  //Assessment has been revised
-	  EventTrackingService.post(EventTrackingService.newEvent("sam.assessment.revise", "/sam/" +AgentFacade.getCurrentSiteId() + "/removed itemId=" + deleteId + "from assessmentId=" + assessmentBean.getAssessmentId(), true));
-	  return "editAssessment";
-  }
-
-
+	
  public String confirmDeleteItem(){
 
         ItemService delegate = new ItemService();
@@ -1345,12 +1270,11 @@ public class ItemAuthorBean
 			try {
 				ResourcePropertiesEdit resourceProperties = AssessmentService.getContentHostingService().newResourceProperties();
 				resourceProperties.addProperty(ResourceProperties.PROP_DISPLAY_NAME, ToolManager.getCurrentPlacement().getContext());
-				//resourceProperties.addProperty(ResourceProperties.PROP_HIDDEN_WITH_ACCESSIBLE_CONTENT, "true");
+				resourceProperties.addProperty(ResourceProperties.PROP_HIDDEN_WITH_ACCESSIBLE_CONTENT, "true");
 				
 				ContentCollectionEdit edit = (ContentCollectionEdit)AssessmentService.getContentHostingService().addCollection(collectionId, resourceProperties);
 				
-				edit.setPublicAccess();
-				AssessmentService.getContentHostingService().commitCollection(edit);
+				AssessmentService.getContentHostingService().setPubView(collectionId,true);
 			}catch(Exception ee){
 				log.warn(ee.getMessage());
 			}
@@ -1360,15 +1284,14 @@ public class ItemAuthorBean
 		}
 
 		try {
-			if(/*!"true".equals(AssessmentService.getContentHostingService().getProperties(Entity.SEPARATOR + "private"+ Entity.SEPARATOR).get(ResourceProperties.PROP_HIDDEN_WITH_ACCESSIBLE_CONTENT)) || */!AssessmentService.getContentHostingService().isPubView(collectionId))
+			if(!"true".equals(AssessmentService.getContentHostingService().getProperties(Entity.SEPARATOR + "private"+ Entity.SEPARATOR).get(ResourceProperties.PROP_HIDDEN_WITH_ACCESSIBLE_CONTENT)) || !AssessmentService.getContentHostingService().isPubView(collectionId))
 			{
 			
 				ContentCollectionEdit edit = AssessmentService.getContentHostingService().editCollection(collectionId);
 				ResourcePropertiesEdit resourceProperties = edit.getPropertiesEdit();
-				//resourceProperties.addProperty(ResourceProperties.PROP_HIDDEN_WITH_ACCESSIBLE_CONTENT, "true");
-
+				resourceProperties.addProperty(ResourceProperties.PROP_HIDDEN_WITH_ACCESSIBLE_CONTENT, "true");
 				edit.setPublicAccess();
-				
+
 				AssessmentService.getContentHostingService().commitCollection(edit);
 				
 			}

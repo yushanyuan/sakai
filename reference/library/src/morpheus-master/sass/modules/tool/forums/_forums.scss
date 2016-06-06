@@ -49,6 +49,19 @@
 			}
 		}
 	}
+	
+	.permissionPanel{
+		input[type="checkbox"]{
+			@media #{$nonPhone}{
+				float:left;
+				& + label {
+					overflow:auto;
+					display:block;
+					padding-top: 2px;
+				}
+			}
+		}
+	}
 
 	#msgForum{
 		.itemNav{

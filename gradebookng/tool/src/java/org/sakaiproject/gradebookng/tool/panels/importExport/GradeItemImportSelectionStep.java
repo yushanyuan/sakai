@@ -30,12 +30,14 @@ import org.sakaiproject.gradebookng.tool.model.ImportWizardModel;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Created by chmaurer on 1/22/15.
+ * Page to allow the user to select which items in the imported file ar to be imported
  */
 @Slf4j
 public class GradeItemImportSelectionStep extends Panel {
 
-    private String panelId;
+	private static final long serialVersionUID = 1L;
+	
+	private String panelId;
     private IModel<ImportWizardModel> model;
 
     public GradeItemImportSelectionStep(String id, IModel<ImportWizardModel> importWizardModel) {
@@ -53,11 +55,10 @@ public class GradeItemImportSelectionStep extends Panel {
 
         final CheckGroup<ImportedGrade> group = new CheckGroup<ImportedGrade>("group", new ArrayList<ImportedGrade>());
 
-        Form<?> form = new Form("form")
-        {
-            @Override
-            protected void onSubmit()
-            {
+        Form<?> form = new Form("form"){
+            
+        	@Override
+            protected void onSubmit(){
                 info("selected grade(s): " + group.getDefaultModelObjectAsString());
 
                 List<ProcessedGradeItem> selectedGradeItems = (List<ProcessedGradeItem>)group.getDefaultModelObject();
@@ -74,12 +75,12 @@ public class GradeItemImportSelectionStep extends Panel {
                 log.debug("Filtered Create items: " + itemsToCreate.size());
 
                 List<ProcessedGradeItem> gbItemsToCreate = new ArrayList<ProcessedGradeItem>();
-                for (ProcessedGradeItem item : itemsToCreate) {
-                    //Don't want comment items here
+                itemsToCreate.forEach(item -> {
+                	//Don't want comment items here
                     if (!"N/A".equals(item.getItemPointValue())) {
                         gbItemsToCreate.add(item);
                     }
-                }
+                });
 
                 log.debug("Actual items to create: " + gbItemsToCreate.size());
 
@@ -124,11 +125,13 @@ public class GradeItemImportSelectionStep extends Panel {
             @Override
             protected void populateItem(ListItem<ProcessedGradeItem> item) {
 
-                item.add(new Check<ProcessedGradeItem>("checkbox", item.getModel()));
+
+                Check<ProcessedGradeItem> checkbox = new Check<>("checkbox", item.getModel());
                 Label itemTitle = new Label("itemTitle",new PropertyModel<String>(item.getDefaultModel(), "itemTitle"));
                 Label itemPointValue = new Label("itemPointValue", new PropertyModel<String>(item.getDefaultModel(),"itemPointValue"));
                 Label itemStatus = new Label("itemStatus");
                 
+                item.add(checkbox);
                 item.add(itemTitle);
                 item.add(itemPointValue);
                 item.add(itemStatus);
@@ -146,8 +149,9 @@ public class GradeItemImportSelectionStep extends Panel {
                 	
                 	itemStatus.setDefaultModel(new ResourceModel("importExport.status." + status.getStatusCode()));
                 	
-                	//if no changes, grey it out
+                	//if no changes, grey it out and remove checkbox
                 	if(status.getStatusCode() == ProcessedGradeItemStatus.STATUS_NA) {
+                		checkbox.setVisible(false);
                 		item.add(new AttributeAppender("class", Model.of("no_changes"), " "));
                 	}
                 	

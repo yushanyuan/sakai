@@ -1,19 +1,4 @@
 .#{$namespace}sakai-samigo{
-	.navIntraTool{
-		li {
-		    display: inline-block;
-		    margin: 0 0 0 0;
-		    span{
-		    	display: inline-block;
-		    	a{
-		    		display: block;
-		    		padding: 0.5em 0.5em 0.6em 0.2em;
-		    		margin: 0 0 0 0;
-		    	}
-		    }
-		}
-	}
-
 	.samigo-inline-form {
 		td {
 			label{
@@ -80,11 +65,15 @@
 		text-decoration: line-through;
 	}
 
-	form{
+	#assessmentSettingsAction,#itemForm{
 		ul{
 			list-style: none;
 			padding: 0 0 0 0;
 		}
+	}
+	.mcscFixUp > ul{
+		list-style: none;
+		padding: 0 0 0 0;
 	}
 
 	#itemForm\:partialCredit_toggle.tier3,
@@ -149,5 +138,9 @@
 	   			margin-right: 5px;
 	   		}
 	   	}
+	}
+	
+	#samLiteEntryForm\:data{
+		margin-top: 1.2em;
 	}
 }

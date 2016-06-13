@@ -6,7 +6,7 @@ This feature forces the submission of saved assessments for students who have NO
 This is not a OOTB feature. To turn this on, add
 samigo.autoSubmit.enabled=true to sakai.properties. Also, administrators need to set up a quartz job to auto-submit the assessments.
 
-If the autoSubmit is enabled in sakai.properteis, there will be a configurable option in the Submissions portion of Settings, deselected by default.
+If the autoSubmit is enabled in sakai.properties, there will be a configurable option in the Submissions portion of Settings, deselected by default.
 
 LOGIC:
 
@@ -16,4 +16,4 @@ LOGIC:
 - If attempt date is after due date, mark LATE as normal 
 
 
-After this feature enabled, please run auto_submit_oracle.sql or auto_submit_mysql.sql to make it show up in the pre-populated assessment types.
+After this feature enabled, please run [auto_submit_oracle.sql or auto_submit_mysql.sql](https://github.com/sakaiproject/sakai/tree/master/samigo/docs/auto_submit) to make it show up in the pre-populated assessment types.

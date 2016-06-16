@@ -295,13 +295,17 @@ label.panelGridLabel{
 
 /*** Drop files bar for Resources & Dropbox ***/
 .dropzone {
-	overflow: hidden;
+	overflow: visible;
 	border: 2px dashed $toolMenuColor !important;
 	border-radius: 5px;
 	background-color: $toolMenuBGColor !important;
 	&:hover {
 		border-color: lighten( $toolMenuColor, 5% ) !important;
 		background-color: lighten( $toolMenuBGColor, 5% ) !important;
+	}
+	
+	.dz-progress{
+		top: 70% !important;
 	}
 }
 

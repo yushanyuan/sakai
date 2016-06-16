@@ -207,7 +207,7 @@ public class ContentSiteVolumeFactory implements SiteVolumeFactory {
                     contentEntity = contentHostingService.getResource(id);
                 }
                 Date date = contentEntity.getProperties().getDateProperty(ResourceProperties.PROP_MODIFIED_DATE);
-                return date.getTime();
+                return date.getTime() / 1000;
             } catch (SakaiException se) {
                 LOG.warn("Failed to get last modified date for: " + id, se);
             } catch (EntityPropertyTypeException e) {
@@ -265,9 +265,8 @@ public class ContentSiteVolumeFactory implements SiteVolumeFactory {
 
         public FsItem getParent(FsItem fsi) {
             String rootId = asId(getRoot());
-            String id1 = asId(fsi);
-            if (!rootId.equals(id1)) {
-                String id = asId(fsi);
+            String id = asId(fsi);
+            if (id.startsWith(rootId) && !rootId.equals(id))  {
                 String parentId = contentHostingService.getContainingCollectionId(id);
                 return fromPath(parentId);
             } else {

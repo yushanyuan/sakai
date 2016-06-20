@@ -95,9 +95,10 @@ public class GradebookPage extends BasePage {
 	GbModalWindow updateCourseGradeDisplayWindow;
 
 	Label liveGradingFeedback;
+	boolean hasAssignmentsAndGrades;
 
 	Form<Void> form;
-	
+
 	List<PermissionDefinition> permissions = new ArrayList<>();
 	boolean showGroupFilter = true;
 
@@ -211,6 +212,8 @@ public class GradebookPage extends BasePage {
 		// get the grade matrix. It should be sorted if we have that info
 		final List<GbStudentGradeInfo> grades = this.businessService.buildGradeMatrix(assignments, settings);
 
+		hasAssignmentsAndGrades = !assignments.isEmpty() && !grades.isEmpty();
+
 		// mark the current timestamp so we can use this date to check for any changes since now
 		final Date gradesTimestamp = new Date();
 
@@ -308,6 +311,7 @@ public class GradebookPage extends BasePage {
 				// event
 				final Map<String, Object> modelData = new HashMap<>();
 				modelData.put("courseGradeDisplay", studentGradeInfo.getCourseGrade().getDisplayString());
+				modelData.put("hasCourseGradeOverride", studentGradeInfo.getCourseGrade().getCourseGrade().getEnteredGrade() != null);
 				modelData.put("studentUuid", studentGradeInfo.getStudentUuid());
 				modelData.put("currentUserUuid", GradebookPage.this.currentUserUuid);
 				modelData.put("currentUserRole", GradebookPage.this.role);
@@ -523,7 +527,7 @@ public class GradebookPage extends BasePage {
 
 		// Populate the toolbar
 		final WebMarkupContainer toolbar = new WebMarkupContainer("toolbar");
-		toolbar.setVisible(!assignments.isEmpty() && !grades.isEmpty());
+		toolbar.setVisible(hasAssignmentsAndGrades);
 		this.form.add(toolbar);
 
 		toolbar.add(constructTableSummaryLabel("studentSummary", table));
@@ -864,6 +868,7 @@ public class GradebookPage extends BasePage {
 		// add simple feedback nofication to sit above the table
 		// which is reset every time the page renders
 		this.liveGradingFeedback = new Label("liveGradingFeedback", getString("feedback.saved"));
+		this.liveGradingFeedback.setVisible(hasAssignmentsAndGrades);
 		this.liveGradingFeedback.setOutputMarkupId(true);
 
 		// add the 'saving...' message to the DOM as the JavaScript will

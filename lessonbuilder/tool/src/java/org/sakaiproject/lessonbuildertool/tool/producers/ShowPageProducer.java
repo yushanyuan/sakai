@@ -135,6 +135,7 @@ import uk.org.ponder.rsf.components.UIELBinding;
 import uk.org.ponder.rsf.components.UIForm;
 import uk.org.ponder.rsf.components.UIInitBlock;
 import uk.org.ponder.rsf.components.UIInput;
+import uk.org.ponder.rsf.components.UIInputMany;
 import uk.org.ponder.rsf.components.UIInternalLink;
 import uk.org.ponder.rsf.components.UILink;
 import uk.org.ponder.rsf.components.UIOutput;
@@ -1129,7 +1130,8 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 					boolean collapsible = i.getAttribute("collapsible") != null && (!"0".equals(i.getAttribute("collapsible")));
 					boolean defaultClosed = i.getAttribute("defaultClosed") != null && (!"0".equals(i.getAttribute("defaultClosed")));
 					UIOutput sectionHeader = UIOutput.make(sectionWrapper, "sectionHeader");
-					UIOutput.make(sectionWrapper, "sectionHeaderText", i.getName() == null ? "" : i.getName());
+					// only do this is there's an actual section break. Implicit ones don't have an item to hold the title
+					UIOutput.make(sectionWrapper, "sectionHeaderText", (!"section".equals(i.getFormat()) || i.getName() == null) ? "" : i.getName());
 					sectionHeader.decorate(new UIStyleDecorator(i.getName() == null || i.getName().isEmpty() ? "skip" : ""));
 					sectionContainer = UIBranchContainer.make(sectionWrapper, "section:");
 					if (collapsible) {
@@ -3909,6 +3911,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		makeCsrf(form, "csrf9");
 
 		UIInput.make(form, "mm-name", "#{simplePageBean.name}");
+		UIInput.make(form, "mm-names", "#{simplePageBean.names}");
 		UIOutput.make(form, "mm-file-label", messageLocator.getMessage("simplepage.upload_label"));
 
 		UIOutput.make(form, "mm-url-label", messageLocator.getMessage("simplepage.addLink_label"));

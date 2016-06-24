@@ -1023,10 +1023,6 @@ GradebookSpreadsheet.prototype._refreshColumnOrder = function() {
     return self.getCellModel($(this));
   });
 
-  self_COLUMN_ORDER = self._COLUMN_ORDER.sort(function(a, b) {
-    return a.getSortOrder() > b.getSortOrder();
-  });
-
   $.each(self._COLUMN_ORDER, function(i, model) {
     var category = model.getCategory();
 
@@ -1071,26 +1067,6 @@ GradebookSpreadsheet.prototype._refreshColumnOrder = function() {
     }
 
     return self._CATEGORY_DATA[a].order > self._CATEGORY_DATA[b].order;
-  });
-
-  $.each(self._CATEGORIES_MAP, function(category, models) {
-    self._CATEGORIES_MAP[category] = models.sort(function(a, b) {
-      var order_a = a.getCategorizedOrder();
-      var order_b = b.getCategorizedOrder();
-
-      var id_a = a.columnKey;
-      var id_b = b.columnKey;
-
-      if (order_a == order_b) {
-        return id_a > id_b;
-      } else if (order_a == -1) {
-        return 1;
-      } else if (order_b == -1) {
-        return -1;
-      }
-
-      return order_a > order_b
-    });
   });
 }
 
@@ -1730,11 +1706,15 @@ GradebookEditableCell.prototype.setupInput = function() {
 
   function prepareForEdit(event) {
     self.$cell.addClass("gb-cell-editing");
-
+    
+    //strip any symbols and put it back into the input field
+    var inputVal = strip(self.$input.val());
+    self.$input.val(inputVal);
+    
     self.$cell.data("originalValue", self.$input.val());
 
     var withValue = self.$cell.data("initialValue");
-
+   
     if (withValue != null && withValue != "") {
       self.$input.val(withValue);
     } else {
@@ -1765,6 +1745,10 @@ GradebookEditableCell.prototype.setupInput = function() {
       self.$cell.data("_pendingReplacement", true);
       self.$input.trigger("scorechange.sakai");
     }
+  }
+  
+  function strip(value) {
+	  return value.replace('%','');
   }
 
   self.$input.off("focus", prepareForEdit).on("focus", prepareForEdit);
@@ -2043,16 +2027,6 @@ GradebookHeaderCell.prototype.hide = function() {
     }
   }
 };
-
-
-GradebookHeaderCell.prototype.getSortOrder = function() {
-  return this.$cell.find("[data-sort-order]").data("sort-order");
-}
-
-
-GradebookHeaderCell.prototype.getCategorizedOrder = function() {
-  return this.$cell.find("[data-categorized-sort-order]").data("categorized-sort-order");
-}
 
 
 GradebookHeaderCell.prototype.setupTooltip = function() {

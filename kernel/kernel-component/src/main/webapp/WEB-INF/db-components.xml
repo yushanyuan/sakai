@@ -263,6 +263,10 @@
 		<property name="validationTimeout">
 			<value>5000</value>
 		</property>
+		
+		<property name="validationQuery">
+			<value>select 1 from INFORMATION_SCHEMA.SYSTEM_USERS</value>
+		</property>
 
 		<!-- Additional data source properties -->
 		<property name="dataSourceProperties">

@@ -117,6 +117,8 @@
                 <module>velocity</module>
                 <module>web</module>
                 <module>webservices</module>
+				<module>bbb-tool</module>
+                <module>cms-rest-tool</module>
             </modules>
         </profile>
         <profile>
@@ -225,6 +227,13 @@
             <modules>
                 <module>master</module>
                 <module>pack/pack-demo</module>
+            </modules>
+        </profile>
+		 <profile>
+            <id>pack-bupt</id>
+            <modules>
+                <module>master</module>
+                <module>pack/pack-bupt</module>
             </modules>
         </profile>
         <profile>

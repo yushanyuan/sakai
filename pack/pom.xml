@@ -27,6 +27,7 @@
     <modules>
         <module>pack-bin</module>
         <module>pack-demo</module>
+		<module>pack-bupt</module>
         <module>pack-src</module>
     </modules>
     

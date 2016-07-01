@@ -117,8 +117,9 @@
                 <module>velocity</module>
                 <module>web</module>
                 <module>webservices</module>
+				<!--
 				<module>bbb-tool</module>
-                <module>cms-rest-tool</module>
+                <module>cms-rest-tool</module>-->
             </modules>
         </profile>
         <profile>

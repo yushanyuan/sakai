@@ -67,10 +67,32 @@ function checkgroups(elt, groups) {
     }
 }
 
-function safeParseFloat(s) {
-    if (!/^[0-9.]+$/.test(s))
+// maxpoints is an Integer. Actually in GB it's float, but
+// our code in SimplePageBean parses the string as Integer, so make
+// sure it's OK. At least according to ecmascript, parseInt will do
+// weird things if the value is >= 2^31. It is impossible to catch
+// this with numerical functions, so I have to do string comparison
+// 2^31 is 2147483648. length is 10
+function safeParseInt(s) {
+    if (!/^[0-9]+$/.test(s))
 	return NaN;
-    return parseFloat(s);
+    if (s.length > 10) {
+	return Infinity;
+    }
+    if (s.length === 10) {
+	if (s >= "2147483648") {
+	    return Infinity;
+	}
+    }
+    return parseInt(s);
+}
+// get the right error message. called when ifFinite(i) returns false
+// that happens if it is not a number or is too big
+function intError(i) {
+    if (isNaN(i))
+	return msg("simplepage.integer-expected");
+    else
+	return msg('simplepage.integer-too-big');
 }
 
 var blankRubricTemplate, blankRubricRow;
@@ -2121,7 +2143,7 @@ $(document).ready(function() {
 
 		// and move current item and following into the first col of the new section
 		if (addAboveItem > 0)
-		    section.find("ul").append(addAboveLI, tail_lis);
+		    section.find("ul.mainList").append(addAboveLI, tail_lis);
 		section.find(".column").append(tail_uls);
 		section.append(tail_cols);
 
@@ -2150,7 +2172,7 @@ $(document).ready(function() {
 		column = column.next();
 		// and move current item and following into the first col of the new section
 		if (addAboveItem > 0)
-		    column.find("ul").append(addAboveLI, tail_lis);
+		    column.find("ul.mainList").append(addAboveLI, tail_lis);
 		column.find(".column").append(tail_uls);
 		// need trigger on the A we just added
 		column.find('.column-merge-link').click(columnMergeLink);
@@ -2177,7 +2199,7 @@ $(document).ready(function() {
 		var section = thisCol.parent();
 		var sectionHeader = section.prev('.sectionHeader');
 		// append rest of ul last one in prevous section
-		sectionHeader.parent().prev().find('ul').last().append(tail_lis);
+		sectionHeader.parent().prev().find('ul.mainList').last().append(tail_lis);
 		sectionHeader.parent().prev().find('.column').last().append(tail_uls);
 		sectionHeader.parent().prev().append(tail_cols);
 		// nothing should be left in current section. kill it
@@ -2201,7 +2223,7 @@ $(document).ready(function() {
 		var tail_uls = thisCol.find('.mainList').nextAll();
 
 		// append rest of ul last one in prevous column;
-		thisCol.prev().find('ul').last().append(tail_lis);
+		thisCol.prev().find('ul.mainList').last().append(tail_lis);
 		thisCol.prev().append(tail_uls);
 		// nothing should be left in current section. kill it
 		thisCol.remove();
@@ -2554,8 +2576,8 @@ function checkEditTitleForm() {
 		$('#edit-title-error').text(msg("simplepage.title_notblank"));
 		$('#edit-title-error-container').show();
 		return false;
-	}else if ($("#page-gradebook").prop("checked") && !isFinite(safeParseFloat($("#page-points").val()))) {
-		$('#edit-title-error').text(msg("simplepage.integer-expected"));
+	}else if ($("#page-gradebook").prop("checked") && !isFinite(safeParseInt($("#page-points").val()))) {
+		$('#edit-title-error').text(intError(safeParseInt($("#page-points").val())));
 		$('#edit-title-error-container').show();
 	}else {
 		$('#edit-title-error-container').hide();
@@ -2696,8 +2718,8 @@ function checkEditItemForm() {
 		$('#edit-item-error-container').show();
 		return false;
         } else if ((requirementType === '3' || requirementType === '6') && 
-		   $("#item-required2").prop("checked") && !isFinite(safeParseFloat($("#assignment-points").val()))) {
-		$('#edit-item-error').text(msg("simplepage.integer-expected"));
+		   $("#item-required2").prop("checked") && !isFinite(safeParseInt($("#assignment-points").val()))) {
+		$('#edit-item-error').text(intError(safeParseInt($("#assignment-points").val())));
 		$('#edit-item-error-container').show();
 		return false;
 	}else {
@@ -2896,8 +2918,8 @@ function buttonOpenDropdowna() {
 
 function buttonOpenDropdownb() {
     oldloc = $(this);
-    addAboveItem = '-' + $(this).closest('.column').find('ul').children().last().find("span.itemid").text();
-    addAboveLI = $(this).closest('.column').find('ul').children().last().closest("li");
+    addAboveItem = '-' + $(this).closest('.column').find('ul.mainList').children().last().find("span.itemid").text();
+    addAboveLI = $(this).closest('.column').find('ul.mainList').children().last().closest("li");
     $(".addbreak").show();
     openDropdown($("#addContentDiv"), $("#dropdownc"));
     return false;
@@ -3052,8 +3074,8 @@ function checkQuestionGradedForm() {
 
 // Prepares the question dialog to be submitted
 function prepareQuestionDialog() {
-	if ($("#question-graded").prop("checked") && !isFinite(safeParseFloat($("#question-max").val()))) {
-	    $('#question-error').text(msg("simplepage.integer-expected"));
+	if ($("#question-graded").prop("checked") && !isFinite(safeParseInt($("#question-max").val()))) {
+	    $('#question-error').text(intError(safeParseInt($("#question-max").val())));
 	    $('#question-error-container').show();
 	    return false;
 	} else if($("#question-graded").prop("checked") && $("#question-gradebook-title").val() === '') {

@@ -1159,8 +1159,12 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 					boolean defaultClosed = i.getAttribute("defaultClosed") != null && (!"0".equals(i.getAttribute("defaultClosed")));
 					UIOutput sectionHeader = UIOutput.make(sectionWrapper, "sectionHeader");
 					// only do this is there's an actual section break. Implicit ones don't have an item to hold the title
-					UIOutput.make(sectionWrapper, "sectionHeaderText", (!"section".equals(i.getFormat()) || i.getName() == null) ? "" : i.getName());
-					sectionHeader.decorate(new UIStyleDecorator(i.getName() == null || i.getName().isEmpty() ? "skip" : ""));
+					String headerText = "";
+					if ("section".equals(i.getFormat()) && i.getName() != null) {
+					    headerText = i.getName();
+					}
+					UIOutput.make(sectionWrapper, "sectionHeaderText", headerText);
+					sectionHeader.decorate(new UIStyleDecorator(headerText.equals("")? "skip" : ""));
 					sectionContainer = UIBranchContainer.make(sectionWrapper, "section:");
 					if (collapsible) {
 						sectionHeader.decorate(new UIStyleDecorator("collapsibleSectionHeader"));
@@ -1324,6 +1328,8 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 					UIBranchContainer linkdiv = null;
 					if (!isInline) {
 					    linkdiv = UIBranchContainer.make(tableRow, "link-div:");
+					}
+					if (!isInline && !navButton) {
 					    UIOutput itemicon = UIOutput.make(linkdiv,"item-icon");
 					    switch (i.getType()) {
 					    case SimplePageItem.FORUM:
@@ -2610,7 +2616,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
  
 							// Never visited page
 							if(entry == null) {
-							    UIOutput.make(row, "newPageImg").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.new-student-page")));
+							    UIOutput.make(row, "newPageImg").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.new-student-content-page")));
 							} else
 							    UIOutput.make(row, "newPageImgT");
 
@@ -3977,7 +3983,10 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		
 		UILink link = UIInternalLink.make(form, "mm-choose", messageLocator.getMessage("simplepage.choose_existing_or"), fileparams);
 
-		UIBoundBoolean.make(form, "mm-prerequisite", "#{simplePageBean.prerequisite}", false);
+		if (currentPage.getOwner() == null) {
+		    UIOutput.make(form, "mm-prerequisite-section");
+		    UIBoundBoolean.make(form, "mm-prerequisite", "#{simplePageBean.prerequisite}", false);
+		}
 		UIBoundBoolean.make(form, "mm-file-replace", "#{simplePageBean.replacefile}", false);
 
 		UICommand.make(form, "mm-add-item", messageLocator.getMessage("simplepage.save_message"), "#{simplePageBean.addMultimedia}");
@@ -4165,7 +4174,10 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		UIOutput.make(form, "description2-label", messageLocator.getMessage("simplepage.description_label"));
 		UIInput.make(form, "description2", "#{simplePageBean.description}");
 
-		UIBoundBoolean.make(form, "multi-prerequisite", "#{simplePageBean.prerequisite}",false);
+		if (currentPage.getOwner() == null) {
+		    UIOutput.make(form, "multi-prerequisite-section");
+		    UIBoundBoolean.make(form, "multi-prerequisite", "#{simplePageBean.prerequisite}",false);
+		}
 
 		FilePickerViewParameters fileparams = new FilePickerViewParameters();
 		fileparams.setSender(currentPage.getPageId());

@@ -746,6 +746,8 @@ INSERT INTO SAM_ASSESSMETADATA_T (ASSESSMENTMETADATAID, ASSESSMENTID, LABEL,
       'displayScores_isInstructorEditable', 'true');
 
 -- LTI CHANGES !!!
+ALTER TABLE lti_binding MODIFY settings MEDIUMTEXT;
+
 alter table lti_content add FA_ICON varchar(1024);
 alter table lti_content add CONTENTITEM mediumtext;
 alter table lti_tools add pl_launch tinyint(4) default 0;
@@ -756,12 +758,17 @@ alter table lti_tools add pl_assessmentselection tinyint(4) default 0;
 alter table lti_tools add pl_importitem tinyint(4) default 0;
 alter table lti_tools add fa_icon varchar(1024);
 alter table lti_tools add tool_proxy_binding mediumtext;
+ALTER TABLE lti_tools MODIFY settings MEDIUMTEXT;
+ALTER TABLE lti_tools MODIFY xmlimport MEDIUMTEXT;
 
 ALTER TABLE lti_content MODIFY title VARCHAR(1024);
 ALTER TABLE lti_content MODIFY pagetitle VARCHAR(1024);
 ALTER TABLE lti_content MODIFY consumerkey VARCHAR(1024);
 ALTER TABLE lti_content MODIFY secret VARCHAR(1024);
 alter table lti_content modify custom varchar(65536);
+ALTER TABLE lti_content MODIFY xmlimport MEDIUMTEXT;
+ALTER TABLE lti_content MODIFY settings MEDIUMTEXT;
+ALTER TABLE lti_content MODIFY settings_ext MEDIUMTEXT;
 
 ALTER TABLE lti_tools MODIFY title VARCHAR(1024);
 ALTER TABLE lti_tools MODIFY pagetitle VARCHAR(1024);
@@ -769,6 +776,8 @@ ALTER TABLE lti_tools MODIFY consumerkey VARCHAR(1024);
 ALTER TABLE lti_tools MODIFY secret VARCHAR(1024);
 alter table lti_tools modify custom varchar(65536);
 
+ALTER TABLE lti_deploy MODIFY reg_profile MEDIUMTEXT;
+ALTER TABLE lti_deploy MODIFY settings MEDIUMTEXT;
 ALTER TABLE lti_deploy MODIFY title VARCHAR(1024);
 ALTER TABLE lti_deploy MODIFY pagetitle VARCHAR(1024);
 ALTER TABLE lti_deploy ADD allowcontentitem tinyint(4) DEFAULT 0;
@@ -788,8 +797,6 @@ CREATE TABLE lti_memberships_jobs (
 );
 -- END LTI CHANGES !!
 
--- LSNBLDR-500
-alter table lesson_builder_pages add folder varchar(250);
 -- LSNBLDR-622
 alter table lesson_builder_items modify column name varchar(255);
 alter table lesson_builder_pages modify column title varchar(255);
@@ -807,7 +814,6 @@ create table lesson_builder_ch_status (
         primary key (checklistId,checklistItemId,owner)
  );
 create index lesson_builder_p_eval_res_row on lesson_builder_p_eval_results(page_id);
-create index lesson_builder_page_folder on lesson_builder_pages(siteId, folder);
 
 -- ---------------------------------------------------------------------------
 -- SAKAI_CONFIG_ITEM - KNL-1063 - MYSQL

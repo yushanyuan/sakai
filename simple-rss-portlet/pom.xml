@@ -8,7 +8,6 @@
   	<description>An RSS/Atom feed reader.</description>
   	<url>https://wiki.jasig.org/display/PLT/Simple+RSS+Portlet</url>
   	
-  	<version>1.2.3-SNAPSHOT</version>
   	<packaging>war</packaging>
   	
     <parent>
@@ -144,6 +143,7 @@
 		<project.build.sourceVersion>1.6</project.build.sourceVersion>
 		<project.build.targetVersion>1.6</project.build.targetVersion>
 		<maven.deploy.skip>true</maven.deploy.skip>
+		<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
 	</properties>
   
 	<build>

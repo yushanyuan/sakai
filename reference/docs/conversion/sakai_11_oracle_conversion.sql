@@ -810,16 +810,7 @@ ALTER TABLE SAKAI_CONFIG_ITEM
 CREATE INDEX SCI_NODE_IDX ON SAKAI_CONFIG_ITEM (NODE ASC);
 CREATE INDEX SCI_NAME_IDX ON SAKAI_CONFIG_ITEM (NAME ASC);
 
-CREATE SEQUENCE SAKAI_CFG_ITEM_S;
-
--- This is not needed if sequence match name in file HibernateConfigItem.hbm.xml
---CREATE OR REPLACE TRIGGER SCI_ID_AI
---BEFORE INSERT ON SAKAI_CONFIG_ITEM
---FOR EACH ROW
---BEGIN
---  SELECT SAKAI_CFG_ITEM_SEQ.NEXTVAL INTO :new.ID FROM dual;
---END;
---/
+CREATE SEQUENCE SAKAI_CONFIG_ITEM_S;
 
 -- SAK-30032 Create table to handle Peer Review attachments --
 CREATE TABLE ASN_PEER_ASSESSMENT_ATTACH_T (
@@ -1054,3 +1045,13 @@ ALTER TABLE VALIDATIONACCOUNT_ITEM ADD EID VARCHAR2(255);
 UPDATE SAKAI_SITE_TOOL SET TITLE='Gradebook Classic' WHERE TITLE='Gradebook';
 UPDATE SAKAI_SITE_PAGE SET TITLE='Gradebook Classic' WHERE TITLE='Gradebook';
 
+-- SAK-31507/KNL-1394 Oracle conversion, size increases of Message Bundle columns
+alter table SAKAI_MESSAGE_BUNDLE add tempcol clob;
+update SAKAI_MESSAGE_BUNDLE set tempcol=DEFAULT_VALUE;
+alter table SAKAI_MESSAGE_BUNDLE drop column DEFAULT_VALUE;
+alter table SAKAI_MESSAGE_BUNDLE rename column tempcol to DEFAULT_VALUE;
+
+alter table SAKAI_MESSAGE_BUNDLE add tempcol clob;
+update SAKAI_MESSAGE_BUNDLE set tempcol=PROP_VALUE;
+alter table SAKAI_MESSAGE_BUNDLE drop column PROP_VALUE;
+alter table SAKAI_MESSAGE_BUNDLE rename column tempcol to PROP_VALUE;

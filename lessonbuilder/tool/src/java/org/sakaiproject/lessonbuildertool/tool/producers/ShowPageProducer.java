@@ -1158,24 +1158,32 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 					boolean collapsible = i.getAttribute("collapsible") != null && (!"0".equals(i.getAttribute("collapsible")));
 					boolean defaultClosed = i.getAttribute("defaultClosed") != null && (!"0".equals(i.getAttribute("defaultClosed")));
 					UIOutput sectionHeader = UIOutput.make(sectionWrapper, "sectionHeader");
+
 					// only do this is there's an actual section break. Implicit ones don't have an item to hold the title
 					String headerText = "";
 					if ("section".equals(i.getFormat()) && i.getName() != null) {
 					    headerText = i.getName();
 					}
 					UIOutput.make(sectionWrapper, "sectionHeaderText", headerText);
+					UIOutput collapsedIcon = UIOutput.make(sectionWrapper, "sectionCollapsedIcon");
 					sectionHeader.decorate(new UIStyleDecorator(headerText.equals("")? "skip" : ""));
 					sectionContainer = UIBranchContainer.make(sectionWrapper, "section:");
+					boolean needIcon = false;
 					if (collapsible) {
 						sectionHeader.decorate(new UIStyleDecorator("collapsibleSectionHeader"));
+						sectionHeader.decorate(new UIFreeAttributeDecorator("aria-controls", sectionContainer.getFullID()));
+						sectionHeader.decorate(new UIFreeAttributeDecorator("aria-expanded", (defaultClosed?"false":"true")));
 						sectionContainer.decorate(new UIStyleDecorator("collapsible"));
 						if (defaultClosed ) {
 							sectionHeader.decorate(new UIStyleDecorator("closedSectionHeader"));
 							sectionContainer.decorate(new UIStyleDecorator("defaultClosed"));
+							needIcon = true;
 						} else {
 							sectionHeader.decorate(new UIStyleDecorator("openSectionHeader"));
 						}
 					}
+					if (!needIcon)
+					    collapsedIcon.decorate(new UIFreeAttributeDecorator("style", "display:none"));
 					cols = colCount(itemList, i.getId());
 					sectionbreak = true;
 					colnum = 0;
@@ -1268,7 +1276,10 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 				case SimplePageItem.CHECKLIST: itemClassName = "checklistType"; break;
 				}
 
-				if (listItem){
+				// inline LTI. Our code calls all BLTI items listItem, but the inline version really isn't
+				boolean isInline = (i.getType() == SimplePageItem.BLTI && "inline".equals(i.getFormat()));
+
+				if (listItem && !isInline){
 				    itemClassName = itemClassName + " listType";
 				}
 				if (canEditPage) {
@@ -1314,8 +1325,6 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 							notDone = true;
 						}
 					}
-
-					boolean isInline = (i.getType() == SimplePageItem.BLTI && "inline".equals(i.getFormat()));
 
 					UIOutput linktd = UIOutput.make(tableRow, "item-td");
 					

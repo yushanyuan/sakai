@@ -759,8 +759,6 @@ CREATE TABLE lti_memberships_jobs (
 );
 -- END LTI CHANGES !!
 
--- LSNBLDR-500
-alter table lesson_builder_pages add folder varchar2(250);
 -- LSNBLDR-622
 alter table lesson_builder_items modify (name varchar2(255 char));
 alter table lesson_builder_pages modify (title varchar2(255 char));
@@ -782,7 +780,6 @@ create table lesson_builder_ch_status (
         primary key (checklistId,checklistItemId,owner)
  );
 create index lb_p_eval_res_row on lesson_builder_p_eval_results(page_id);
-create index lb_page_folder on lesson_builder_pages(siteId, folder);
 
 -----------------------------------------------------------------------------
 -- SAKAI_CONFIG_ITEM - KNL-1063 - ORACLE
@@ -813,16 +810,7 @@ ALTER TABLE SAKAI_CONFIG_ITEM
 CREATE INDEX SCI_NODE_IDX ON SAKAI_CONFIG_ITEM (NODE ASC);
 CREATE INDEX SCI_NAME_IDX ON SAKAI_CONFIG_ITEM (NAME ASC);
 
-CREATE SEQUENCE SAKAI_CFG_ITEM_S;
-
--- This is not needed if sequence match name in file HibernateConfigItem.hbm.xml
---CREATE OR REPLACE TRIGGER SCI_ID_AI
---BEFORE INSERT ON SAKAI_CONFIG_ITEM
---FOR EACH ROW
---BEGIN
---  SELECT SAKAI_CFG_ITEM_SEQ.NEXTVAL INTO :new.ID FROM dual;
---END;
---/
+CREATE SEQUENCE SAKAI_CONFIG_ITEM_S;
 
 -- SAK-30032 Create table to handle Peer Review attachments --
 CREATE TABLE ASN_PEER_ASSESSMENT_ATTACH_T (

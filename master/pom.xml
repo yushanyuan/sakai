@@ -100,6 +100,7 @@
     <sakai.lucene.version>4.10.4</sakai.lucene.version>
     <sakai.pluto.version>1.1.7</sakai.pluto.version>
     <sakai.quartz.version>2.2.2</sakai.quartz.version>
+    <sakai.opencsv.version>2.3</sakai.opencsv.version>
     <sakai.servletapi.version>2.4</sakai.servletapi.version>
     <sakai.sigar.version>1.6.4</sakai.sigar.version>
     <sakai.spatial4j.version>0.4.1</sakai.spatial4j.version>
@@ -149,6 +150,9 @@
       <id>sakai-release</id>
       <activation>
         <activeByDefault>false</activeByDefault>
+        <property>
+            <name>sakai-release</name>
+        </property>
       </activation>
       <build>
         <plugins>
@@ -574,6 +578,12 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>1</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
         <groupId>geronimo-spec</groupId>
         <artifactId>geronimo-spec-jms</artifactId>
         <version>1.1-rc4</version>
@@ -867,6 +877,12 @@
         <groupId>org.quartz-scheduler</groupId>
         <artifactId>quartz</artifactId>
         <version>${sakai.quartz.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>net.sf.opencsv</groupId>
+        <artifactId>opencsv</artifactId>
+        <version>${sakai.opencsv.version}</version>
         <scope>provided</scope>
       </dependency>
       <!-- Added to shared by the kernel (duplicate definition in kernel/pom.xml) -->
@@ -2024,8 +2040,9 @@
             <!--suppress MavenModelInspection -->
             <test.sakai.home>${test.sakai.home}</test.sakai.home>
           </systemPropertyVariables>
-          <!-- This is to stop it stealing focus on developer machines (OSX) -->
-          <argLine>-Djava.awt.headless=true</argLine>
+          <!-- headless is to stop it stealing focus on developer machines (OSX) -->
+          <!-- file.encoding is for windows which was failing tests under maven without this -->
+          <argLine>-Djava.awt.headless=true -Dfile.encoding=${project.build.sourceEncoding}</argLine>
         </configuration>
       </plugin>
       <plugin>

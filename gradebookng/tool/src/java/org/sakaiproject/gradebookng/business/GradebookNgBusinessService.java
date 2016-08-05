@@ -250,7 +250,7 @@ public class GradebookNgBusinessService {
 	/**
 	 * Get a list of assignments in the gradebook in the current site that the current user is allowed to access
 	 *
-	 * @return a list of assignments or null if no gradebook
+	 * @return a list of assignments or empty list if none/no gradebook
 	 */
 	public List<Assignment> getGradebookAssignments() {
 		return getGradebookAssignments(getCurrentSiteId(), SortType.SORT_BY_SORTING);
@@ -259,7 +259,7 @@ public class GradebookNgBusinessService {
 	/**
 	 * Get a list of assignments in the gradebook in the current site that the current user is allowed to access
 	 *
-	 * @return a list of assignments or null if no gradebook
+	 * @return a list of assignments or empty list if none/no gradebook
 	 */
 	public List<Assignment> getGradebookAssignments(final String siteId) {
 		return getGradebookAssignments(siteId, SortType.SORT_BY_SORTING);
@@ -269,7 +269,7 @@ public class GradebookNgBusinessService {
 	 * Get a list of assignments in the gradebook in the current site that the current user is allowed to access sorted by the provided
 	 * SortType
 	 *
-	 * @return a list of assignments or null if no gradebook
+	 * @return a list of assignments or empty list if none/no gradebook
 	 */
 	public List<Assignment> getGradebookAssignments(final SortType sortBy) {
 		return getGradebookAssignments(getCurrentSiteId(), sortBy);
@@ -282,7 +282,7 @@ public class GradebookNgBusinessService {
 	 * This should only be called if you are wanting to view the assignments that a student would see (ie if you ARE a student, or if you
 	 * are an instructor using the student review mode)
 	 *
-	 * @return a list of assignments or null if no gradebook
+	 * @return a list of assignments or empty list if none/no gradebook
 	 */
 	public List<Assignment> getGradebookAssignmentsForStudent(final String studentUuid) {
 
@@ -1287,8 +1287,7 @@ public class GradebookNgBusinessService {
 	 * @return
 	 */
 	public Assignment getAssignment(final long assignmentId) {
-		final String siteId = getCurrentSiteId();
-		return this.getAssignment(siteId, assignmentId);
+		return this.getAssignment(getCurrentSiteId(), assignmentId);
 	}
 
 	/**
@@ -1302,6 +1301,34 @@ public class GradebookNgBusinessService {
 		final Gradebook gradebook = getGradebook(siteId);
 		if (gradebook != null) {
 			return this.gradebookService.getAssignment(gradebook.getUid(), assignmentId);
+		}
+		return null;
+	}
+
+	/**
+	 * Get an Assignment in the current site given the assignment name
+	 * This should be avoided where possible but is required for the import process to allow modification of assignment point values
+	 *
+	 * @param assignmentName
+	 * @return
+	 */
+	public Assignment getAssignment(final String assignmentName) {
+		return this.getAssignment(getCurrentSiteId(), assignmentName);
+	}
+
+	/**
+	 * Get an Assignment in the specified site given the assignment name
+	 * This should be avoided where possible but is required for the import process to allow modification of assignment point values
+	 *
+	 * @param siteId
+	 * @param assignmentName
+	 * @return
+	 */
+	@SuppressWarnings("deprecation")
+	public Assignment getAssignment(final String siteId, final String assignmentName) {
+		final Gradebook gradebook = getGradebook(siteId);
+		if (gradebook != null) {
+			return this.gradebookService.getAssignment(gradebook.getUid(), assignmentName);
 		}
 		return null;
 	}

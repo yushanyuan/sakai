@@ -113,6 +113,19 @@
 .nextprev {
 	font-size: 95% !important
 }
+.Mrphs-siteHierarchy {
+	display:flex
+}
+span.nextprev {
+	flex: none;
+}
+.hierarchyWrap {
+	flex: auto;
+}
+div.action span .nextbutton, .Mrphs-siteHierarchy span .nextbutton{
+        border: solid 1px !important; 
+        padding:2px 5px !important
+}
 .neoPortletTitleWrap {
 	padding-bottom: 4px;
 }
@@ -224,7 +237,7 @@
 .disabled:hover {
 	color: #cccccc
 }
-a.ui-button:link, a.ui-button:visited {
+.portletBody a.ui-button:link, .portletBody a.ui-button:visited {
 	color: black;
 	text-decoration: none !important;
 }
@@ -527,6 +540,9 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
 .shortanswerDiv .bold {
   display: block;
 }
+.questionPollGraph {
+  max-width: 100%;
+}
 .questionStatusText {
 }
 .mainList li .textbox {
@@ -553,9 +569,20 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
     font-size:100%;
     margin-left:3px;
 }
+.listType .link-div h3.link-div-head {
+    display:inline-block;
+    margin-top:0px;
+    width: calc(100% - 30px);
+    vertical-align: text-top;
+}
+.listType .link-div .fa-item-text {
+    display:inline-block;
+    vertical-align: text-top;
+}
+
 
 .ui-button-text {
-	font-weight: bold;
+	font-weight: bold !important;
 	padding: 0px 4px !important;
 }
 .edit-col .ui-button-text, #submit-grading .ui-button-text, .portalmenu .ui-button-text {
@@ -711,6 +738,12 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
 .returnheader a:hover, returnheader  a:active {
 	background-color: #edd !important;
 	color:black !important;
+}
+.showItemNoMorpheus .returnheader {
+    display:block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
 }
 .showItemMorpheus .returnheader a:link, .showItemMorpheus .returnheader a:visited,
 .showItemMorpheus .returnheader a:hover,.showItemMorpheus .returnheader a:active {
@@ -924,7 +957,7 @@ ul#toolbar li em {
     font-size: .85em !important
 }
 .Mrphs-siteHierarchy span.nextprev {
-   float:right
+
 }
 .lessons-siteHierarchy-title {
    font-weight: bold;
@@ -942,7 +975,8 @@ span.nextprev {
   margin-right: 0.5em;
 }
 a.nextprev {
-	margin-left: 5px;
+	margin-left: 5px !important;
+	margin-right: 0px !important;
 }
 img {
 	z-index: 1
@@ -1252,6 +1286,17 @@ div[role="dialog"] {
 .right-col {
  display: inline-block;
 }
+
+.listType .right-col {
+  display:flex
+}
+.listType .statusCol {
+  flex:none; width:20px
+}
+.listType .contentCol {
+  flex:auto
+}
+
 /* types that need to span the full column */
 .multimediaType .right-col, .textType .right-col {
  width:100%;
@@ -1271,7 +1316,6 @@ div[role="dialog"] {
 }
 div.navIntraTool {
   border-top:none;
-  margin-bottom:
 }
 
 /* temporary, to avoid changing old stuff for the moment */
@@ -1409,7 +1453,10 @@ font-size: 90%;
   line-height:10px;
   margin-bottom:5px;
 }
-/* without this it sticks up 1px into the top bar */
+/* fit the actual height, so it doesn't overlap title */
+.Mrphs-toolTitleNav__button_container {
+  height: 30px;
+}
 .portletBody {
   margin-top:2px;
 }
@@ -1488,6 +1535,9 @@ font-size: 90%;
 .hierFlex2 {
    display:none;
 }
+span.nextprev {
+	flex: auto;
+}
 }
 .lessonsToolButton {
   border-radius:15px !important;
@@ -1513,8 +1563,12 @@ font-size: 90%;
   padding-top:2px !important;
   padding-bottom:2px !important;
 }
-.navIntraTool li.contentButton a .fa-button-text {
+.navIntraTool li.contentButton a .fa-button-text, .fa-fw {
   font-family:FontAwesome;
+}
+.studentRow > .fa-fw {
+  width: 1em !important;
+  display: inline-block;
 }
 .fa-item-text {
   position:relative; 

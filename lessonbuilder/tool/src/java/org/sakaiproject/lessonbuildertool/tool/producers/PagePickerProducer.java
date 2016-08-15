@@ -409,7 +409,8 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
 		    
 		    if (entry.level < 0) {
 		    	UIOutput.make(row, "heading", messageLocator.getMessage("simplepage.chooser.unused"));
-			UIOutput.make(row, "chooseall");
+			if (summaryPage)
+			    UIOutput.make(row, "chooseall");
 		    }
 		    // if no itemid, it's unused. Only canedit people will see it
 		    else if (summaryPage && entry.itemId != null) {
@@ -592,8 +593,10 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
 			// return to Reorder, to add items from this page
 		    	UICommand.make(form, "submit", messageLocator.getMessage("simplepage.chooser.select"), "#{simplePageBean.selectPage}");
 		    } else if(((GeneralViewParameters) viewparams).newTopLevel) {
+			UIInput.make(form, "addBefore", "#{simplePageBean.addBefore}", ((GeneralViewParameters) viewparams).getAddBefore());
 		    	UICommand.make(form, "submit", messageLocator.getMessage("simplepage.chooser.select"), "#{simplePageBean.addOldPage}");
 		    }else {
+			UIInput.make(form, "addBefore", "#{simplePageBean.addBefore}", ((GeneralViewParameters) viewparams).getAddBefore());
 		    	UICommand.make(form, "submit", messageLocator.getMessage("simplepage.chooser.select"), "#{simplePageBean.createSubpage}");
 		    }
 		    UICommand.make(form, "cancel", messageLocator.getMessage("simplepage.cancel"), "#{simplePageBean.cancel}");

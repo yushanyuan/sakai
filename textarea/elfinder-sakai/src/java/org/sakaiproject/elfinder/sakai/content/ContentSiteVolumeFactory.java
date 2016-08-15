@@ -118,14 +118,21 @@ public class ContentSiteVolumeFactory implements SiteVolumeFactory {
         public void createFolder(FsItem fsi) throws IOException {
             String id = asId(fsi);
             try {
-                String collectionId = asId(getParent(fsi));
-                String path = asId(fsi);
-                String name = lastPathSegment(path);
-                ContentCollectionEdit edit = contentHostingService.addCollection(collectionId, name);
-                ResourcePropertiesEdit props = edit.getPropertiesEdit();
-                props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
-
-                contentHostingService.commitCollection(edit);
+                if (fsi instanceof ContentFsItem) {
+                    ContentFsItem cfsi = (ContentFsItem)fsi;
+                    String collectionId = asId(getParent(cfsi));
+                    String path = asId(cfsi);
+                    String name = lastPathSegment(path);
+                    ContentCollectionEdit edit = contentHostingService.addCollection(collectionId, name);
+                    ResourcePropertiesEdit props = edit.getPropertiesEdit();
+                    props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
+                    contentHostingService.commitCollection(edit);
+                    // Directories always end with a trailing slash
+                    // The creation appends this if missing, so make sure the item is in sync
+                    cfsi.setId(edit.getId());
+                } else {
+                    throw new IllegalArgumentException("Can only pass ContentFsItem");
+                }
             } catch (SakaiException se) {
                 throw new IOException("Failed to create new folder: " + id, se);
             }
@@ -205,7 +212,7 @@ public class ContentSiteVolumeFactory implements SiteVolumeFactory {
                     contentEntity = contentHostingService.getResource(id);
                 }
                 Date date = contentEntity.getProperties().getDateProperty(ResourceProperties.PROP_MODIFIED_DATE);
-                return date.getTime();
+                return date.getTime() / 1000;
             } catch (SakaiException se) {
                 LOG.warn("Failed to get last modified date for: " + id, se);
             } catch (EntityPropertyTypeException e) {

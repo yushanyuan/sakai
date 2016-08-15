@@ -300,27 +300,30 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	  		throw new IllegalArgumentException("Null argument in ProfileLogic.ignoreFriendRequest"); 
 	  	}
 		
-		//current user must be the user making the request
+		//current user must be the user making the request or the user receiving it.
 		String currentUserId = sakaiProxy.getCurrentUserId();
-		if(!StringUtils.equals(currentUserId, toUser)) {
+		if(!(StringUtils.equals(currentUserId, toUser) || StringUtils.equals(currentUserId, fromUser))) {
 			log.error("User: " + currentUserId + " attempted to ignore connection request from " + fromUser + " on behalf of " + toUser);
 			throw new SecurityException("You are not authorised to perform that action.");
 		}
-		
+
 		//get pending ProfileFriend object request for the given details
 		ProfileFriend profileFriend = dao.getPendingConnection(fromUser, toUser);
 
 		if(profileFriend == null) {
-			log.error("ProfileLogic.ignoreFriendRequest() failed. No pending friend request from userId: " + fromUser + " to friendId: " + toUser + " found.");   
-			return false;
+		    profileFriend = dao.getPendingConnection(toUser, fromUser);
+		    if (profileFriend == null) {
+				log.error("ProfileLogic.ignoreFriendRequest() failed. No pending friend request from userId: " + fromUser + " to friendId: " + toUser + " found.");
+				return false;
+			}
 		}
-	  	
+
 		//delete
 		if(dao.removeConnection(profileFriend)) {
 			log.info("User: " + toUser + " ignored friend request from: " + fromUser);  
 			return true;
 		}
-		
+
 		return false;
 	}
 	
@@ -505,12 +508,18 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	 */
 	private List<String> getConfirmedConnectionUserIdsForUser(final String userUuid) {
 
-		List<String> userUuids = new ArrayList<String>();
+		List<String> userUuids = null;
 		
 		if(cache.containsKey(userUuid)){
 			log.debug("Fetching connections from cache for: " + userUuid);
 			userUuids = (List<String>)cache.get(userUuid);
-		} else {
+			if(userUuids == null) {
+				// This means that the cache has expired. evict the key from the cache
+				log.debug("Connections cache appears to have expired for " + userUuid);
+				evictFromCache(userUuid);
+			}
+		}
+		if(userUuids == null) {
 			userUuids = dao.getConfirmedConnectionUserIdsForUser(userUuid);
 			if(userUuids != null){
 				log.debug("Adding connections to cache for: " + userUuid);
@@ -580,7 +589,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	 */
 	private void evictFromCache(String cacheKey) {
 		cache.remove(cacheKey);
-		log.info("Evicted data in cache for key: " + cacheKey);
+		log.debug("Evicted data in cache for key: " + cacheKey);
 	}
 
 	

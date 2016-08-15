@@ -23,6 +23,7 @@
  /* siteTitle is added by portal, but we don't want it */
 	 .siteTitle{display:none !important;}
 	 .pageTitle{width:auto !important;}
+
          .Mrphs-toolTitleNav .Mrphs-toolTitleNav__button_container {
             top:-10px !important;
          }
@@ -122,7 +123,7 @@
 		 <span rsf:id="gradingSpan" class="gradingarea">
 		     <a href="#" rsf:id="gradingBack" style="margin-right:2px;background:none" class="usebutton grading-nextprev">&#60;</a><img class="statusImg" src="$context/images/no-status.png" id="statusImg" height="16px" width="16px" alt=""></img><span style="*vertical-align:13%"  rsf:id="msg=simplepage.comments-points"></span><span style="display:none" class="uuidBox" rsf:id="commentsUUID"></span><span style="display:none" class="pointsSpan" rsf:id="commentPoints"></span> <input rsf:id="studentPointsBox"  id="studentPointsBox" type="text" style="font-size:100%"  size="3"></input> / <span rsf:id="topmaxpoints"></span> <a class="usebutton" href="#" rsf:id="msg=simplepage.submit" style="background:none; width:auto; *vertical-align:13%;margin-right:.5em" id="submit-grading"></a> <a style="background:none" href="#" rsf:id="gradingForward" class="usebutton grading-nextprev">&#62;</a>
 		 </span>
-		 <span class="nextprev buttonset" style="width:auto !important"> <a style="background:none; width:auto !important" href="#" rsf:id="prev" class="nextprev">next</a> <a style="background:none; width:auto !important"  href="#" rsf:id="next" class="nextprev">next</a> </span>
+		 <span class="nextprev buttonset"> <a style="background:none" href="#" rsf:id="prev" class="nextprev nextbutton">next</a> <a style="background:none"  href="#" rsf:id="next" class="nextprev nextbutton">next</a> </span>
 		   <a href="#" rsf:id="directurl" id="directurl" class="title-tools tool-directurl Mrphs-toolTitleNav__link Mrphs-toolTitleNav__link--directurl">
 		       <img rsf:id="directimage" src="/library/image/transparent.gif"/>
 		   </a>
@@ -199,7 +200,7 @@
                 <li  class="contentButton"><span><a role="menuitem" href="#" rsf:id="help" target="_blank"></a></span></li>
                 <li  class="contentButton">
                     <span rsf:id="title-descrip">
-                    <a role="menuitem" href="#" rsf:id="edit-title" id="edit-title"><span aria-hidden="true" class="fa-button-text fa-cog"></span><span class="skip" rsf:id="edit-title-text"></span></a>
+                    <a role="menuitem" href="#" rsf:id="edit-title" id="edit-title"><span aria-hidden="true" class="fa-button-text fa-cog"></span><span class="offscreen" rsf:id="edit-title-text"></span></a>
                     </span>
                 </li>
 			</ul>                
@@ -214,14 +215,29 @@
 	    if (breadcrumbs.size() > 0) {
 		jQuery(".Mrphs-siteHierarchy").append(jQuery(".breadcrumbs span").slice(1));
 	    }
+	    jQuery(".Mrphs-siteHierarchy").children().wrapAll('<div class="hierarchyWrap" />');
 	    jQuery(".Mrphs-siteHierarchy").append(jQuery("span.nextprev"));
 	    jQuery(".neoPortletTitleWrap").before('<h2 class="genTitle"></h2>');
 	    jQuery(".genTitle").text(title);
+	    // the top is position:fixed. The rest of the page is position static, put below the
+	    // fixed by a magic margin. However if the siteHierarchy is large, the magic margin
+	    // has to be adjusted.
+	    function resizeContent() {
+	      if (window.matchMedia("only screen and (max-width: 800px)").matches) {
+		jQuery("#content").css('margin-top',jQuery(".Mrphs-siteHierarchy").height() + 60);
+	      } else {
+		jQuery("#content").css('margin-top','0px');
+	      }
+	    }
+            resizeContent();
+	    jQuery(window).load(resizeContent);
+	    jQuery(window).resize(resizeContent);
          }
 	 if (jQuery(".navIntraTool").size() > 0)
   	   jQuery(".navIntraTool").append(jQuery(".action"));
 	 else
 	   jQuery(".neoPortletTitleWrap").before(jQuery(".action"));
+
 
 </script>
 
@@ -356,9 +372,9 @@
                       <div rsf:id="contentCol" class="contentCol">
                         <div rsf:id="link-div:" class="link-div">
                           <span rsf:id="item-icon" aria-hidden="true" class="fa-item-text"></span>
-                          <span rsf:id="link-note" class="offscreen"></span><h3 class="link-div-head"><a class="itemlink" href="#" rsf:id="link"><span rsf:id="link-text" class="link-text itemtext"></span></a></h3>
-                          <span><span rsf:id="link-fake-note" class="offscreen"></span><span rsf:id="link-fake" class="link-text itemtext fake-disabled"></span></span>
-                          <span rsf:id="link-button-span" class="navIntraTool" style="background-color:transparent;border:none">
+                          <span rsf:id="link-note" class="offscreen"></span><span class="link-div-head" role="heading" aria-level="3"><a class="itemlink" href="#" rsf:id="link"><span rsf:id="link-text" class="link-text itemtext"></span></a></span>
+                          <span><span rsf:id="link-fake-note" class="offscreen"></span><span rsf:id="link-fake" class="link-text itemtext fake-disabled" role="heading" aria-level="3"></span></span>
+                          <span rsf:id="link-button-span" class="" style="background-color:transparent;border:none">
                             <a href="#" class="usebutton" rsf:id="link-button">
                                 <span rsf:id="link-button-text" class="link-text"></span>
                             </a>
@@ -565,12 +581,12 @@
                               <img src="/library/image/silk/page_white_stack.png" class="item-image student-image"/>
                               <h3 class="studentContentTitle" rsf:id="studentContentTitle" id="studentContentTitle"></h3>
                               <div rsf:id="studentRow:" class="studentRow" role="listitem">
-                                <img src="$context/images/new-page.png" rsf:id="newPageImg" class="imgCell"></img>
-                                <img src="$context/images/transparent16.png" alt="" rsf:id="newPageImgT" class="imgCell"></img>
-                                <img src="$context/images/new-content.png" rsf:id="newContentImg" class="imgCell"></img>
-                                <img src="$context/images/transparent16.png" alt="" rsf:id="newContentImgT" class="imgCell"></img>
-                                <img src="$context/images/new-comments.png" rsf:id="newCommentsImg" class="imgCell"></img>
-                                <img src="$context/images/transparent16.png" alt="" rsf:id="newCommentsImgT" class="imgCell"></img>
+				<span rsf:id="newPageImg" aria-hidden="true" class="fa-file-o fa-fw"></span>
+				<span rsf:id="newPageImgT" aria-hidden="true" class="fa-fw">&nbsp;</span>				
+				<span rsf:id="newContentImg" aria-hidden="true" class="fa-th-list fa-fw"></span>
+				<span rsf:id="newContentImgT" aria-hidden="true" class="fa-fw">&nbsp;</span>				
+				<span rsf:id="newCommentsImg" aria-hidden="true" class="fa-comments fa-fw"></span>
+				<span rsf:id="newCommentsImgT" aria-hidden="true" class="fa-fw">&nbsp;</span>				
                                 <a href="#" rsf:id="studentLink" class="studentLink"></a>
                                 <span rsf:id="studentGradingCell" class="gradingCell"></span>
                                 <div rsf:id="linkCell" class="linkCell">
@@ -1070,7 +1086,7 @@
                             <label id="addLink_label" rsf:id="msg=simplepage.addLink_label_add_or" for="mm-url">URL</label>
                             <input type="text" name="mm-url" rsf:id="mm-url" id="mm-url" style="width:99%" class="edit-multimedia-input" />
                         </p>
-                        <p class="checkbox mm-prerequisite-section">
+                        <p rsf:id="mm-prerequisite-section" class="checkbox mm-prerequisite-section">
                             <input type="checkbox" name="mm-prerequisite" id="mm-prerequisite" rsf:id="mm-prerequisite" />
                             <label for="mm-prerequisite"><span rsf:id="msg=simplepage.prerequisites_label"></span></label>
                         </p>
@@ -1150,7 +1166,7 @@
                         <p id="editgroups-mm" class="edit-group">
                           <a href="#"><span rsf:id="msg=simplepage.edit-group"></span></a>
                         </p>
-                        <p class="checkbox">
+                        <p rsf:id="multi-prerequisite-section" class="checkbox">
                           <input type="checkbox" name="multi-prerequisite" id="multi-prerequisite" rsf:id="multi-prerequisite" />
                           <label for="multi-prerequisite"><span rsf:id="msg=simplepage.prerequisites_label"></span></label>
                         </p>

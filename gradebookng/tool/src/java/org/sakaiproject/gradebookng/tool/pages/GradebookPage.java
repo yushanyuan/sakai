@@ -492,6 +492,11 @@ public class GradebookPage extends BasePage {
 					}
 				};
 			}
+
+			@Override
+			protected IModel<String> getCaptionModel() {
+				return Model.of(getString("gradespage.caption"));
+			}
 		};
 		table.addBottomToolbar(new NavigationToolbar(table) {
 			@Override
@@ -556,7 +561,7 @@ public class GradebookPage extends BasePage {
 				setUiSettings(settings);
 
 				// refresh
-				setResponsePage(new GradebookPage());
+				setResponsePage(GradebookPage.class);
 			}
 
 			@Override
@@ -634,7 +639,7 @@ public class GradebookPage extends BasePage {
 				setUiSettings(settings);
 
 				// refresh
-				setResponsePage(new GradebookPage());
+				setResponsePage(GradebookPage.class);
 			}
 
 		});

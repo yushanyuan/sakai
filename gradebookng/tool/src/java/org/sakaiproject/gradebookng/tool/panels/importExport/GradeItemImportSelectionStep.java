@@ -3,10 +3,13 @@ package org.sakaiproject.gradebookng.tool.panels.importExport;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.basic.Label;
@@ -20,7 +23,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.model.StringResourceModel;
 import org.sakaiproject.gradebookng.business.model.ProcessedGradeItem;
@@ -41,6 +43,11 @@ public class GradeItemImportSelectionStep extends Panel {
 	private final String panelId;
 	private final IModel<ImportWizardModel> model;
 
+	// a count of the items that can be selected
+	private int selectableItems = 0;
+
+	private boolean naHidden = false;
+
 	public GradeItemImportSelectionStep(final String id, final IModel<ImportWizardModel> importWizardModel) {
 		super(id);
 		this.panelId = id;
@@ -53,6 +60,53 @@ public class GradeItemImportSelectionStep extends Panel {
 
 		// unpack model
 		final ImportWizardModel importWizardModel = this.model.getObject();
+
+		// get the count of items that are selectable
+		GradeItemImportSelectionStep.this.selectableItems = importWizardModel.getProcessedGradeItems().stream().filter(item -> item.getStatus().getStatusCode() != ProcessedGradeItemStatus.STATUS_NA).collect(Collectors.toList()).size();
+
+		// label to show if all items are actually hidden
+		final Label allHiddenLabel = new Label("allHiddenLabel", new ResourceModel("importExport.selection.hideitemsallhidden")) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean isVisible() {
+				return GradeItemImportSelectionStep.this.naHidden && (GradeItemImportSelectionStep.this.selectableItems == 0);
+			}
+		};
+		allHiddenLabel.setOutputMarkupPlaceholderTag(true);
+		add(allHiddenLabel);
+
+		// button to hide NA/no changes items
+		final AjaxLink<Void> hideNoChanges = new AjaxLink<Void>("hideNoChanges") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void onClick(final AjaxRequestTarget target) {
+
+				// toggle button state
+				if(GradeItemImportSelectionStep.this.naHidden) {
+					//toggling off
+					GradeItemImportSelectionStep.this.naHidden = false;
+					this.add(AttributeModifier.replace("class", "button"));
+					this.add(AttributeModifier.replace("aria-pressed", "false"));
+				} else {
+					//toggling on
+					GradeItemImportSelectionStep.this.naHidden = true;
+					this.add(AttributeModifier.replace("class", "button on"));
+					this.add(AttributeModifier.replace("aria-pressed", "true"));
+				}
+				target.add(this);
+				target.add(allHiddenLabel);
+
+				// toggle elements
+				target.appendJavaScript("$('.no_changes').toggle();");
+				if(GradeItemImportSelectionStep.this.selectableItems == 0) {
+					target.appendJavaScript("$('.selection_form').toggle();");
+					//TODO show a message
+				}
+			}
+		};
+		add(hideNoChanges);
 
 		final CheckGroup<ProcessedGradeItem> group = new CheckGroup<ProcessedGradeItem>("group", new ArrayList<ProcessedGradeItem>());
 
@@ -140,17 +194,17 @@ public class GradeItemImportSelectionStep extends Panel {
 		group.add(new Button("nextbutton"));
 
 		group.add(new CheckGroupSelector("groupselector"));
-		final ListView<ProcessedGradeItem> gradeList = new ListView<ProcessedGradeItem>("grades",
-				importWizardModel.getProcessedGradeItems()) {
+		final ListView<ProcessedGradeItem> gradeList = new ListView<ProcessedGradeItem>("grades", importWizardModel.getProcessedGradeItems()) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void populateItem(final ListItem<ProcessedGradeItem> item) {
 
+				final ProcessedGradeItem importedItem = item.getModelObject();
+
 				final Check<ProcessedGradeItem> checkbox = new Check<>("checkbox", item.getModel());
-				final Label itemTitle = new Label("itemTitle", new PropertyModel<String>(item.getDefaultModel(), "itemTitle"));
-				final Label itemPointValue = new Label("itemPointValue",
-						new PropertyModel<String>(item.getDefaultModel(), "itemPointValue"));
+				final Label itemTitle = new Label("itemTitle", importedItem.getItemTitle());
+				final Label itemPointValue = new Label("itemPointValue", importedItem.getItemPointValue());
 				final Label itemStatus = new Label("itemStatus");
 
 				item.add(checkbox);
@@ -158,15 +212,12 @@ public class GradeItemImportSelectionStep extends Panel {
 				item.add(itemPointValue);
 				item.add(itemStatus);
 
-				// Use the status code to look up the text representation
-				final PropertyModel<ProcessedGradeItemStatus> statusProp = new PropertyModel<ProcessedGradeItemStatus>(
-						item.getDefaultModel(), "status");
-				final ProcessedGradeItemStatus status = statusProp.getObject();
+				// Determine status label
+				final ProcessedGradeItemStatus status = importedItem.getStatus();
 
 				// For external items, set a different label and disable the control
 				if (status.getStatusCode() == ProcessedGradeItemStatus.STATUS_EXTERNAL) {
-					itemStatus.setDefaultModel(new StringResourceModel("importExport.status." + status.getStatusCode(), statusProp, null,
-							status.getStatusValue()));
+					itemStatus.setDefaultModel(new StringResourceModel("importExport.status." + status.getStatusCode(), Model.of(status), null, status.getStatusValue()));
 					item.setEnabled(false);
 					item.add(new AttributeModifier("class", "external"));
 				} else {
@@ -187,14 +238,7 @@ public class GradeItemImportSelectionStep extends Panel {
 				}
 
 				// add an additional row for the comments for each
-				final PropertyModel<String> commentLabelProp = new PropertyModel<String>(item.getDefaultModel(), "commentLabel");
-				final PropertyModel<ProcessedGradeItemStatus> commentStatusProp = new PropertyModel<ProcessedGradeItemStatus>(
-						item.getDefaultModel(), "commentStatus");
-
-				// not actually used except for an if test
-				// TODO refactor this part
-				final String commentLabel = commentLabelProp.getObject();
-				final ProcessedGradeItemStatus commentStatus = commentStatusProp.getObject();
+				final ProcessedGradeItemStatus commentStatus = importedItem.getCommentStatus();
 
 				item.add(new Behavior() {
 					private static final long serialVersionUID = 1L;
@@ -202,13 +246,12 @@ public class GradeItemImportSelectionStep extends Panel {
 					@Override
 					public void afterRender(final Component component) {
 						super.afterRender(component);
-						if (commentLabel != null) {
+						if (importedItem.getType() == ProcessedGradeItem.Type.COMMENT) {
 							String rowClass = "comment";
 							String statusValue = getString("importExport.status." + commentStatus.getStatusCode());
 							if (commentStatus.getStatusCode() == ProcessedGradeItemStatus.STATUS_EXTERNAL) {
 								rowClass += " external";
-								statusValue = new StringResourceModel("importExport.status." + commentStatus.getStatusCode(),
-										commentStatusProp, null, commentStatus.getStatusValue()).getString();
+								statusValue = new StringResourceModel("importExport.status." + commentStatus.getStatusCode(), Model.of(commentStatus), null, commentStatus.getStatusValue()).getString();
 							}
 							if (commentStatus.getStatusCode() == ProcessedGradeItemStatus.STATUS_NA) {
 								rowClass += " no_changes";

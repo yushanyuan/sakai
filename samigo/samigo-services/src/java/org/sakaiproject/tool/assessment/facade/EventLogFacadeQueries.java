@@ -166,9 +166,9 @@ implements EventLogFacadeQueriesAPI {
 	}
 	
    public List<Object[]> getTitlesFromEventLogBySite(final String siteId) {
-      String query = "select distinct eld.assessmentId, eld.title from EventLogData as eld"
-         + " where eld.siteId = ?"
-         + " order by lower(eld.title) asc";
+	   String query = "select distinct eld.assessmentId, eld.title from EventLogData as eld"
+		         + " where eld.siteId = ?"
+		         + " order by lower(eld.title) asc";
 
       final String hql = query;
       final HibernateCallback hcb = new HibernateCallback() {

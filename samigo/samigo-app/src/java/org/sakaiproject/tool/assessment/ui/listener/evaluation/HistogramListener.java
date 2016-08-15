@@ -92,6 +92,7 @@ public class HistogramListener
   //private static BeanSort bs;
   //private static ContextUtil cu;
   //private static EvaluationListenerUtil util;
+  private GradingService delegate;
 
   /**
    * Standard process action method.
@@ -215,7 +216,7 @@ public class HistogramListener
 		  histogramScores.setItemId(ContextUtil.lookupParam("itemId"));
 		  histogramScores.setHasNav(ContextUtil.lookupParam("hasNav"));
 
-		  GradingService delegate = new GradingService();
+		  delegate = new GradingService();
 		  PublishedAssessmentService pubService = new PublishedAssessmentService();
 		  List<AssessmentGradingData> allscores = delegate.getTotalScores(publishedId, which);
           //set the ItemGradingData manually here. or we cannot
@@ -1837,7 +1838,7 @@ public class HistogramListener
 private void getCalculatedQuestionScores(List<ItemGradingData> scores, HistogramQuestionScoresBean qbean, List labels) {
     final String CORRECT = "Correct";
     final String INCORRECT = "Incorrect";
-    final int COLUMN_MAX_HEIGHT = 600;
+    final int COLUMN_MAX_HEIGHT = 100;
     
     ResourceLoader rb = new ResourceLoader("org.sakaiproject.tool.assessment.bundle.EvaluationMessages");
     ResourceLoader rc = new ResourceLoader("org.sakaiproject.tool.assessment.bundle.CommonMessages");
@@ -2051,12 +2052,18 @@ private void getCalculatedQuestionScores(List<ItemGradingData> scores, Histogram
     HashMap results = new HashMap();
     HashMap numStudentRespondedMap= new HashMap();
     HashMap sequenceMap = new HashMap();
+
+    int distractorCount = 0;
+    
     while (iter.hasNext())
     {
       ItemTextIfc label = (ItemTextIfc) iter.next();
       texts.put(label.getId(), label);
       results.put(label.getId(), Integer.valueOf(0));
       sequenceMap.put(label.getSequence(), label.getId());
+      if ( delegate.isDistractor(label)){
+          distractorCount++;
+      }
     }
     iter = scores.iterator();
 
@@ -2128,42 +2135,35 @@ private void getCalculatedQuestionScores(List<ItemGradingData> scores, Histogram
 
 
     // now calculate correctresponses
-    // correctresponses = # of students who got all answers correct, 
-    
+    // correctresponses = # of students who got all answers correct,
+    int numberOfRealChoices = labels.size() - distractorCount;
     for (Iterator it = numStudentRespondedMap.entrySet().iterator(); it.hasNext();) {
     	Map.Entry entry = (Map.Entry) it.next();
      	ArrayList resultsForOneStudent = (ArrayList) entry.getValue();
-    	boolean hasIncorrect = false;
+    	boolean hasIncorrectMatches = false;
     	Iterator listiter = resultsForOneStudent.iterator();
+    	int correctMatchesCount = 0;
 
-      // numStudentRespondedMap only stores correct answers, so now we need to 
-      // check to see if # of  rows in itemgradingdata_t == labels.size() 
-      // otherwise if a student only answered one correct answer and 
-      // skipped the rest, it would count as a correct response
-
-      while (listiter.hasNext())
-      {
-        ItemGradingData item = (ItemGradingData)listiter.next();
-        if (resultsForOneStudent.size()!= labels.size()){
-          hasIncorrect = true;
-          break;
-        }
-          // now check each answer in Matching 
-          AnswerIfc answer = (AnswerIfc) publishedAnswerHash.get(item.getPublishedAnswerId());
-          if (answer.getIsCorrect() == null || (!answer.getIsCorrect().booleanValue()))
-          {
-            hasIncorrect = true;
-            break;
+      while (listiter.hasNext()){
+          ItemGradingData item = (ItemGradingData)listiter.next();
+          
+          if (!delegate.isDistractor((ItemTextIfc) publishedItemTextHash.get(item.getPublishedItemTextId()))){
+              // now check each answer in Matching 
+              AnswerIfc answer = (AnswerIfc) publishedAnswerHash.get(item.getPublishedAnswerId());
+              if (answer.getIsCorrect() == null || (!answer.getIsCorrect().booleanValue())){
+                  hasIncorrectMatches = true;
+                  break;
+              }else{
+                  correctMatchesCount++;
+              }
           }
       }
-      if (!hasIncorrect) {
+      
+      if (!hasIncorrectMatches && correctMatchesCount ==  numberOfRealChoices) {
         correctresponses = correctresponses + 1;
-
 		qbean.addStudentWithAllCorrect(((ItemGradingData)resultsForOneStudent.get(0)).getAgentId()); 
 	  }
-	  qbean.addStudentResponded(((ItemGradingData)resultsForOneStudent.get(0)).getAgentId()); 
-
-
+	  qbean.addStudentResponded(((ItemGradingData)resultsForOneStudent.get(0)).getAgentId());
     }
 
     //NEW
@@ -3025,6 +3025,13 @@ private void getCalculatedQuestionScores(List<ItemGradingData> scores, Histogram
 	  }
 	  if (typeId == TypeIfc.MATRIX_CHOICES_SURVEY.intValue()) {
 		  return rb.getString("q_matrix_choices_surv");
+	  }
+	  if (typeId == TypeIfc.CALCULATED_QUESTION.intValue()) {
+	      return rb.getString("q_cq");
+	  }
+	  
+	  if (typeId == TypeIfc.IMAGEMAP_QUESTION.intValue()) {
+	      return rb.getString("q_imq");
 	  }
 	  return "";
   }

@@ -292,10 +292,10 @@ public abstract class BaseHibernateManager extends HibernateDaoSupport {
             throw new ConflictingAssignmentNameException("You cannot save an assignment without a name");
         }
         
-        // name cannot start with * or # as they are reserved for special columns in import/export
-        if(StringUtils.startsWithAny(validatedName, new String[]{"*", "#"})) {
+        // name cannot contain these special chars as they are reserved for special columns in import/export
+        if(StringUtils.containsAny(validatedName, GradebookService.INVALID_CHARS_IN_GB_ITEM_NAME)) {
             // TODO InvalidAssignmentNameException plus move all exceptions to their own package
-        	throw new ConflictingAssignmentNameException("Assignment names cannot start with * or # as they are reserved");
+        	throw new ConflictingAssignmentNameException("Assignment names cannot contain *, #, [ or ] as they are reserved");
         }
         
         Assignment asn = new Assignment();
@@ -1611,4 +1611,20 @@ public abstract class BaseHibernateManager extends HibernateDaoSupport {
 			}
 		});
 	}
+	
+	 /**
+     * Get's all course grade overrides for a given gradebook
+     *
+     * @param gradebook The gradebook
+     * @param session The hibernate session
+     * @return A list of {@link CourseGradeRecord} that have overrides
+     *
+     * @throws HibernateException
+     */
+    protected List<CourseGradeRecord> getCourseGradeOverrides(Gradebook gradebook, Session session) throws HibernateException {
+        return session.createQuery(
+        	"from CourseGradeRecord as cgr where cgr.gradableObject.gradebook=? and cgr.enteredGrade is not null")
+        	.setEntity(0, gradebook)
+        	.list();
+    }
 }

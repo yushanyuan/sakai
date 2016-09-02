@@ -1782,6 +1782,21 @@ public class SiteAction extends PagedResourceActionII {
 			context.put("toolsByGroup", (LinkedHashMap<String,List>) state.getAttribute(STATE_TOOL_GROUP_LIST));
 			
 			context.put("toolGroupMultiples", getToolGroupMultiples(state, (List) state.getAttribute(STATE_TOOL_REGISTRATION_LIST)));
+			
+			//get expanded groups
+			List<String> expandedGroups_lst = new ArrayList<>();
+			String[] tokens = ServerConfigurationService.getStrings("sitemanage.tools.groups.expanded");
+			if(tokens != null) {
+				for(String token : tokens) {
+					if(StringUtils.isNotEmpty(token)) {
+						String groupName = getGroupName(token);
+						if(StringUtils.isNotEmpty(groupName)) {
+							expandedGroups_lst.add(groupName);
+						}
+					}
+				}
+			}
+			context.put("expandedGroups", expandedGroups_lst);
 
 			return (String) getContext(data).get("template") + TEMPLATE[4];
 
@@ -2146,7 +2161,7 @@ public class SiteAction extends PagedResourceActionII {
 									"doMenu_edit_site_access"));
 							
 							// hide site duplicate and import
-							if (SiteService.allowAddSite(null) && ServerConfigurationService.getBoolean("site.setup.allowDuplicateSite", true))
+							if (SiteService.allowAddSite(null) && ServerConfigurationService.getBoolean("site.setup.allowDuplicateSite", false))
 							{
 								b.add(new MenuEntry(rb.getString("java.duplicate"),
 										"doMenu_siteInfo_duplicate"));
@@ -4676,7 +4691,7 @@ public class SiteAction extends PagedResourceActionII {
 		// read the search form field into the state object
 		String search = StringUtils.trimToNull(data.getParameters().getString(
 				FORM_SEARCH));
-
+		resetPaging(state);
 		// set the flag to go to the prev page on the next list
 		if (search == null) {
 			state.removeAttribute(STATE_SEARCH);
@@ -14581,10 +14596,10 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 							Section s = cms.getSection(providerSectionId);
 							if (s != null)
 							{
-								String sDescription = StringUtils.trimToNull(s.getDescription());
-								if (sDescription != null && !siteInfo.description.contains(sDescription))
+								// only update the description if its not already present
+								if (!StringUtils.containsIgnoreCase(siteInfo.description,  s.getDescription()))
 								{
-									siteInfo.description = siteInfo.description.concat(sDescription);
+									siteInfo.description = StringUtils.defaultString(siteInfo.description) + StringUtils.defaultString(s.getDescription());
 								}
 							}
 						}

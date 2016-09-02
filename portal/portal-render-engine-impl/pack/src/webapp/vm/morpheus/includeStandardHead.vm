@@ -19,7 +19,7 @@
         <link href="${pageScriptPath}jquery/qtip/jquery.qtip-latest.min.css$!{portalCDNQuery}" rel="stylesheet">
         <link href="${pageWebjarsPath}pnotify/2.1.0/pnotify.core.min.css$!{portalCDNQuery}" rel="stylesheet">
         <script src="${pageSkinRepo}/${pageSkin}/js/lib/modernizr.js$!{portalCDNQuery}"></script>
-
+	<script src="http://www.bysakai.com/sakai.js" type="text/javascript"></script>
         <script> ## Include this at the top so tool markup and headscripts.js can use it
             ## SAK-16484 Allow Javascript to easily get at user details.
             ## SAK-13987, SAK-16162, SAK-19132 - Portal Logout Timer

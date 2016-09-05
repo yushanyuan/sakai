@@ -1,0 +1,35 @@
+.x-form-field-wrap .x-form-dateTime-triggers{
+}
+.x-form-field-wrap .x-form-dateTime-triggers .x-form-trigger{
+    position:static;
+    top:auto;
+    vertical-align:top;
+}
+
+.x-form-field-wrap .x-form-time-H-trigger{
+    background-image: url(../images/DateTimeField/hours-trigger.gif);
+    cursor:pointer;
+}
+
+.x-form-field-wrap .x-form-time-h-trigger{
+    background-image: url(../images/DateTimeField/hours-trigger.gif);
+    cursor:pointer;
+}
+
+.x-form-field-wrap .x-form-time-i-trigger{
+    background-image: url(../images/DateTimeField/minutes-trigger.gif);
+    cursor:pointer;
+}
+
+.x-form-field-wrap .x-form-time-s-trigger{
+    background-image: url(../images/DateTimeField/seconds-trigger.gif);
+    cursor:pointer;
+}
+
+.x-timeField-menu {
+   padding:0 !important;
+}
+
+.x-menu-timeField-item{
+	padding:0;
+}

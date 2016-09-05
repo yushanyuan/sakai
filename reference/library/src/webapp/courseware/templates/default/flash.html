@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link href="css/plugin.css" rel="stylesheet" type="text/css" />
+	<script src="/library/js/jquery-1.7.1.min.js"></script>
+	<script src="/library/courseware/course_plugin.js"></script>
+	<script src="/library/courseware/course_plugin.player.js"></script>
+</head>
+<body topmargin="0" leftmargin="0">
+<script type="text/javascript">
+	$(function () {
+	    //console.log(parent.document)
+		var url = parent.document.getElementById("hd_flashurl").value;
+		var cfg = {
+			title:"",url: url
+		};
+		if($.url().param("width")){
+			cfg.width = $.url().param("width");
+		}
+		if($.url().param("height")){
+			cfg.height = $.url().param("height");
+		}
+
+		$buptnu.cware.createFlash(cfg);
+	})
+</script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+@charset "utf-8";
+	
+/* 左边导航 开始 */
+#frameLeftMenu{
+	
+}
+.frameLeftTitle{color:#501608;text-align:center;}
+#frameLeftMenu ul{
+	padding-left:10px;
+	margin-left:0;
+}
+#frameLeftMenu li{list-style:none;}
+#frameLeftMenu li.icon{
+	padding-left:20px;
+	height:22px;
+	background:white url(../images/frameMenuLevel01_Icon.gif) no-repeat left center;
+}
+#frameLeftMenu li,li a{
+	color:#780700;
+	text-decoration:none;
+}
+.level2Menu{
+	color:#40403E !important;
+	text-decoration:none;
+}
+
+.divCollapse{
+	border-right:1px solid #F0F0F0;
+	padding:0 9px;
+}
+
+#divCurrentUser a{color:#000; text-decoration:none;}
+
+/* 小助手 结束 */
+
+
+/* 小助手 开始 */
+
+
+.div_Helper{
+	width:129px;
+	background:white url(../icons/helper_bg.gif) repeat-y;
+	text-align:center;
+	margin:0 auto;
+	}
+.div_HelperCont{
+	width:127px;
+	text-align:left;
+	padding-left:1px;
+	}
+.clearLine{line-height:0px;}
+
+.helper_list1{}
+.helper_list1 ul{
+	margin:0;padding:0;
+	padding-left:10px;
+}
+.helper_list1 li{
+	border-bottom:1px solid #F0F0F0;
+	list-style-image:none;
+	list-style-position:outside;
+	list-style-type:none;
+	margin-bottom:5px;
+}
+.helper_list1 li a:link,.helper_list1 li a:visited,.helper_list1 li a:hover,.helper_list1 li a:active{
+	text-decoration:none !important;
+}
+.helper_list1 ul ul li{
+	background:white url(../icons/helper_list2_icon.jpg) no-repeat left center;
+	margin-left:5px;
+	padding-left:10px;
+}
+.helper_list1 ul ul {
+	margin-left:0;
+	padding-left:0;
+}
+.helper_list1 ul ul li a:link,.helper_list1 ul ul li a:visited,.helper_list1 ul ul li a:hover,.helper_list1 ul ul li a:active{
+	display:block;
+	text-decoration:none !important;
+	width:84px !important;
+	white-space:nowrap !important; 
+	word-break:keep-all !important;
+	overflow:hidden !important;
+	text-overflow:ellipsis !important;
+}
+.helper_line{padding-top:5px;padding-bottom:5px;padding-left:1px;}
+li.Level01 a {
+	color:#780700 !important;
+	font-size:12px;
+}
+li.Level01 img{
+	margin-right:3px;
+}
+li.Level01CHG a {
+	color:#FF0000 !important;
+	font-size:12px;
+}
+li.Level01CHG img{
+	margin-right:3px;
+}
+.Helplevel2Menu {
+	color:#000000 !important;
+	text-decoration:none;
+}
+.Helplevel2Menu a{
+	color:#000000 !important;
+	text-decoration:none;
+	font-size:12px;
+}
+.Helplevel2MenuCHG a{
+	color:#FF0000 !important;
+	text-decoration:none;
+	font-size:12px;
+}
+.changeColor {
+	color:#FF00FF !important;
+}
+.helper_Process{
+	height:10px;
+	background:white url(../icons/helper_Process_bg.jpg) repeat-x;
+	border:1px solid #D4D4D4;
+	}
+.helper_Process_cur{
+	margin: -1px auto -1px auto;
+	float:left;
+	height:10px;
+	background:white url(../icons/helper_Process_cur_bg.jpg) repeat-x;
+	background-position: center;
+	font-size:10px;
+	line-height:10px;
+	text-align:center;
+}
+.helper_Process_cur_f{
+	margin-bottom: -1px;
+	float:right;
+	height:10px;
+	font-size:10px;
+	line-height:10px;
+	text-align:left;
+}
+.helperSpacer{margin-bottom:8px;}
+
+.helper_list1_Status{
+	color:#780701;
+	font-weight:bold;
+	font-size:12px;
+	text-align:center;
+	}
+
+/* 小助手 结束 */
+
+
+/* 学习情况统计 开始 */
+
+#div_LearnSituationCon a{color:#000;}
+.div_LearnSituation{height:32px;
+width:100%;
+	background:white url(../images/LearnSituation_title_bg.jpg) repeat-x;
+}
+.div_LearnSituation .left{height:32px;
+	width:10px;
+	float:left;
+	background:white url(../images/LearnSituation_title_left.jpg) no-repeat;
+}
+.div_LearnSituation .content{height:32px;
+	float:left;
+	line-height:32px; color:white;
+}
+.div_LearnSituation .right{height:32px;
+	width:10px;
+	background:white url(../images/LearnSituation_title_right.jpg) no-repeat;
+	float:right;
+}
+.clearFloat{clear:both;}
+
+.tableListStyle{
+	margin-left:25px;
+	margin-top:10px;
+	}
+
+.tableListStyleHead{
+	height:28px;
+	background:white url(../images/LearnSituation_List_title_bg.jpg) repeat-x;
+	}
+.tableListStyleHeadText{
+	color:#A8070D;
+	text-align:center;
+	}
+.tableListStyletr
+{
+	height:24px;
+	background:white url(../images/LearnSituation_list_bg01.jpg) repeat-x;
+	
+}
+.tableListStyletr2
+{
+	height:24px;
+	background:white url(../images/LearnSituation_list_bg02.jpg) repeat-x;
+	
+}
+
+
+/* -- Table Main Style -- */
+table.tableLearnStyle{
+	border-collapse:collapse;
+}
+
+table.tableLearnStyle th {
+	background-color:#FEF7F1;
+	border:1px solid #E6DFD5;
+	font-weight:normal;
+	height:30px;
+}
+table.tableLearnStyle td {
+	border:1px solid #E6DFD5;
+	padding:3px;
+}
+.rows1BgColor{background-color:white;}
+.rows2BgColor{background-color:#FFFFF8;}
+
+
+#mainText {
+	white-space:normal;
+	word-break:break-all;
+	overflow:hidden;
+}
+
+#titleTd{
+	height:100px;
+}
+
+/* 学习情况统计 结束 */
+
+

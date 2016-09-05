@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<constant name="struts.action.extension" value="do" />
+	<constant name="struts.objectFactory" value="spring" />
+	<constant name="struts.devMode" value="false" />
+	<constant name="struts.multipart.maxSize" value="314572800" />
+	<constant name="struts.custom.i18n.resources" value="messageResource" />
+	<package name="res" namespace="/" extends="struts-default">
+		<global-results>
+			<!-- 定义全局结果视图 -->
+			<result name="result">/WEB-INF/jsp/common/result.jsp</result>
+			<result name="error">/WEB-INF/jsp/common/action-error.jsp</result>
+		</global-results>
+
+		<global-exception-mappings>
+			<!-- 定义全局异常映射 -->
+			<exception-mapping result="result" exception="java.lang.Exception" />
+		</global-exception-mappings>
+
+		<action name="file" class="fileAction">
+			<interceptor-ref name="defaultStack" />
+		</action>
+
+		<!-- 文件管理相关配置 -->
+		<action name="file_*" class="fileAction" method="{1}">
+			<interceptor-ref name="fileUpload" />
+			<interceptor-ref name="defaultStack" />
+			<result name="teahcer_success">
+				/WEB-INF/jsp/file/file.jsp
+			</result>
+			<result name="student_success">
+				/WEB-INF/jsp/file/fileStudent.jsp
+			</result>
+			<result name="openUrl">/WEB-INF/jsp/file/download.jsp</result>
+		</action>
+		<!-- 课程资源相关配置 -->
+		<action name="coursewareIndex" class="coursewareAction" method="execute">
+			<interceptor-ref name="defaultStack" />
+			<result name="success">/WEB-INF/jsp/courseware/coursewareResource.jsp
+			</result>
+		</action>
+		<action name="courseware_*" class="coursewareAction" method="{1}">
+			<interceptor-ref name="defaultStack" />
+			<interceptor-ref name="fileUpload" />
+		</action>
+		<!-- 课程空间相关配置 -->
+		<action name="courseSpace_*" class="courseSpaceAction" method="{1}">
+			<result name="page">/WEB-INF/jsp/course/courseSpace.jsp</result>
+			<result name="studyManage">studySpace.do</result>
+			<result name="manage">/WEB-INF/jsp/course/courseManage.jsp</result>
+			<result name="check">/WEB-INF/jsp/course/checkWork.jsp</result>
+			<result name="score">/WEB-INF/jsp/course/scoreRecalculate.jsp</result>
+			<result name="impressionScore">/WEB-INF/jsp/course/impressionScore.jsp</result>
+			
+			<result name="modulePage">/WEB-INF/jsp/course/modulePage.jsp</result>
+			<result name="sectionPage">/WEB-INF/jsp/course/sectionPage.jsp</result>
+		</action>
+		<action name="template_*" class="templateAction" method="{1}">
+			<interceptor-ref name="defaultStack" />
+			<result name="list">/WEB-INF/jsp/template/list.jsp</result>	
+			<result name="edit">/WEB-INF/jsp/template/edit.jsp</result>
+			<result name="query">template.do</result>
+		</action>
+		<!-- 学习空间相关配置 -->
+		<action name="studySpace_*" class="studySpaceAction" method="{1}">
+			<!-- 模板-山坡 -->
+			<result name="hill">/WEB-INF/jsp/study/hill.jsp</result>
+			
+			<!-- 通用模板 -->
+			<result name="template">/WEB-INF/jsp/study/template/${templateCommon}/chapter-${templateCommon}.jsp</result>
+			<result name="module">/WEB-INF/jsp/study/template/${templateCommon}/module-${templateCommon}.jsp</result>
+			
+			<!-- 模板-红
+			<result name="kecheng-R">/WEB-INF/jsp/study/template/red/kecheng-R.jsp</result>
+			<result name="index-1R">/WEB-INF/jsp/study/template/red/index-1R.jsp</result> -->
+			<!-- 模板-绿
+			<result name="kecheng-G">/WEB-INF/jsp/study/template/green/kecheng-G.jsp</result>
+			<result name="index-1G">/WEB-INF/jsp/study/template/green/index-1G.jsp</result> -->
+			<!-- 模板-蓝 
+			<result name="kecheng-B">/WEB-INF/jsp/study/template/blue/kecheng-B.jsp</result>
+			<result name="index-1B">/WEB-INF/jsp/study/template/blue/index-1B.jsp</result>-->
+			<!--
+			<result name="studyManage">/WEB-INF/jsp/study/template/default/studyManage.jsp</result>
+			<result name="module">/WEB-INF/jsp/study/template/default/studyModule.jsp</result>
+			-->
+			<!-- 学习页：内容页面 -->
+			<result name="courseware">/WEB-INF/jsp/study/studyCourseware.jsp</result>
+			<result name="cancelStudy">courseSpace.do</result>
+			<result name="testResult">/WEB-INF/jsp/study/testResult.jsp</result>
+			<result name="history">/WEB-INF/jsp/study/history.jsp</result>
+			<!-- 学习页：自动转向上次学习位置 -->
+			<!-- <result name="history" type="redirectAction">
+				<param name="actionName">studySpace_fowardCourseware.do</param>  
+				<param name="node">${node}</param>  
+        		<param name="studyrecordId">${studyrecordId}</param>
+			</result> -->
+			<!-- 学习页：章列表（自动匹配模板） -->
+			<result name="study">/WEB-INF/jsp/study/studyIndex.jsp?url=${templateUrl}</result>
+		</action>
+		<action name="studyPaper_*" class="studyPaperAction" method="{1}">
+			<result name="test">/WEB-INF/jsp/study/test.jsp</result>
+			<result name="testResult">/WEB-INF/jsp/study/testResult.jsp</result>
+			<result name="selftest">/WEB-INF/jsp/study/selftest.jsp</result>
+			<result name="forum">/WEB-INF/jsp/study/forum.jsp</result>
+		</action>
+
+		<!-- 统计分析相关配置 -->
+		<action name="statistics_*" class="statisticsAction" method="{1}">
+			<result name="success">/WEB-INF/jsp/statistics/statistics.jsp</result>
+			<result name="downTimes">/WEB-INF/jsp/statistics/downTimes.jsp</result>
+			<result name="findActivityScore">/WEB-INF/jsp/statistics/findActivityScore.jsp
+			</result>
+			<result name="statActivityAvgTimeAndScore">/WEB-INF/jsp/statistics/statActivityAvgTimeAndScore.jsp
+			</result>
+			<result name="statModelAvgThroughTime">/WEB-INF/jsp/statistics/statModelAvgThroughTime.jsp
+			</result>
+			<result name="statStudent">/WEB-INF/jsp/statistics/statStudent.jsp</result>
+			<result name="studyRecordStat">/WEB-INF/jsp/statistics/viewStudyRecord.jsp
+			</result>
+		</action>
+
+		<!-- 批改作业相关配置 -->
+		<action name="checkwork_*" class="checkWorkAction" method="{1}">
+			<result name="checkpage">/WEB-INF/jsp/course/checkpage.jsp</result>
+		</action>
+		
+		<!-- 平均成绩相关配置 -->
+		<action name="scoreRecalculate_*" class="scoreRecalculateAction" method="{1}">
+			<result name="scoreRecalculate">/WEB-INF/jsp/course/scoreRecalculate.jsp</result>
+		</action>
+
+		<!-- 作业空间相关配置 -->
+		<action name="test_*" class="testAction" method="{1}">
+			<result name="teacher">/WEB-INF/jsp/test/teacherManager.jsp</result>
+			<result name="student">/WEB-INF/jsp/test/studentWrite.jsp</result>
+			<result name="edit">/WEB-INF/jsp/test/testEdit.jsp</result>
+			<result name="check">/WEB-INF/jsp/test/testCheck.jsp</result>
+			<result name="stat">/WEB-INF/jsp/test/testStat.jsp</result>
+			<result name="write">/WEB-INF/jsp/test/testWrite.jsp</result>
+			<result name="checkPage">/WEB-INF/jsp/test/checkPage.jsp</result>
+		</action>
+		
+		<!-- 作业空间（阶段作业） -->
+		<action name="melete_*" class="meleteTestAction" method="{1}">
+			<result name="teacher">/WEB-INF/jsp/test/teacherManager.jsp</result>
+			<result name="student">/WEB-INF/jsp/test/testViewList.jsp</result>
+			<result name="view_testAttemptRecord">/WEB-INF/jsp/test/viewTestAttempList.jsp</result>
+			<result name="viewPaper">/WEB-INF/jsp/test/viewPaper.jsp</result>
+			<result name="viewForum">/WEB-INF/jsp/test/froumViewList.jsp</result>	
+		</action>
+
+	</package>
+	
+	<package name="rest" namespace="/rest" extends="struts-default">
+		 
+		<!-- 视频接口 -->
+		<action name="vedio_*" class="vedioAction" method="{1}">
+		</action>
+		<!-- 作业接口 -->
+		<action name="course_*" class="testAction" method="{1}">
+		</action>
+		
+	</package>
+</struts>

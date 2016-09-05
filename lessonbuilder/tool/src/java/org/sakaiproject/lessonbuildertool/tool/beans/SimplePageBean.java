@@ -27,6 +27,7 @@ package org.sakaiproject.lessonbuildertool.tool.beans;
 import java.text.SimpleDateFormat;
 import java.text.Format;
 import java.math.BigDecimal;
+import java.util.Locale;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.authz.api.AuthzGroup;
@@ -140,9 +141,11 @@ public class SimplePageBean {
 	public static final String FILTERHTML = "lessonbuilder.filterhtml";
 	public static final String LESSONBUILDER_ITEMID = "lessonbuilder.itemid";
 	public static final String LESSONBUILDER_ADDBEFORE = "sakai.addbefore";
+	public static final String LESSONBUILDER_ITEMNAME = "lessonbuilder.itemname";
 	public static final String LESSONBUILDER_PATH = "lessonbuilder.path";
 	public static final String LESSONBUILDER_BACKPATH = "lessonbuilder.backpath";
 	public static final String LESSONBUILDER_ID = "sakai.lessonbuildertool";
+
 
 	private static String PAGE = "simplepage.page";
 	private static String SITE_UPD = "site.upd";
@@ -175,6 +178,8 @@ public class SimplePageBean {
 	public String[] studentSelectedGroups = new String[] {};
 
 	public String selectedQuiz = null;
+
+	public String[] selectedChecklistItems = new String[] {};
 	
 	public long removeId = 0;
 
@@ -229,6 +234,7 @@ public class SimplePageBean {
 
 	private String description;
 	private String name;
+	private String names;
 	private boolean required;
         private boolean replacefile;
 	private boolean subrequirement;
@@ -241,8 +247,13 @@ public class SimplePageBean {
     // but sameWindow should also be set properly, based on the format
 	private String format;
 
+	private boolean nameHidden;
+
 	private String numberOfPages;
 	private boolean copyPage;
+
+	private String indentLevel;
+	private String customCssClass;
 
 	private String alt = null;
 	private String order = null;
@@ -268,6 +279,8 @@ public class SimplePageBean {
 	private String currentSiteId = null;
 
 	public Map<String, MultipartFile> multipartMap;
+
+	private HashMap<Integer, String> checklistItems = new HashMap<>();
 	
 	public String rubricSelections;
 	
@@ -716,6 +729,39 @@ public class SimplePageBean {
 		this.description = description;
 	}
 
+	public void setNameHidden(boolean nameHidden) {
+		this.nameHidden = nameHidden;
+	}
+
+	public String getIndentLevel() {
+		if (itemId != null && itemId != -1) {
+			return findItem(itemId).getAttribute(SimplePageItem.INDENT);
+		} else {
+			// default is zero
+			return "0";
+		}
+	}
+
+	public void setIndentLevel(String indentLevel) {
+		this.indentLevel = indentLevel;
+	}
+
+	public String getCustomCssClass() {
+		return customCssClass;
+	}
+
+	public void setCustomCssClass(String customCssClass) {
+		this.customCssClass = customCssClass;
+	}
+
+	public boolean getNameHidden() {
+		if (itemId != null && itemId != -1) {
+			return Boolean.valueOf(findItem(itemId).getAttribute(SimplePageItem.NAMEHIDDEN));
+		} else {
+			return false;
+		}
+	}
+
 	public void setHidePage(boolean hide) {
 		hidePage = hide;
 	}
@@ -784,6 +830,10 @@ public class SimplePageBean {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setNames(String names) {
+		this.names = names;
 	}
 
 	public void setRequired(boolean required) {
@@ -1096,6 +1146,105 @@ public class SimplePageBean {
 		return rv;
 	}
 
+	// called by the checklist producer
+	// to add or update a checklist (simplepageitem)
+	public String addChecklist() {
+
+		if (!itemOk(itemId)) {
+			setErrMessage(messageLocator.getMessage("simplepage.permissions-general"));
+			return "permission-failed";
+		}
+		if (!checkCsrf())
+		    return "permission-failed";
+		if(!canEditPage()) {
+			setErrMessage(messageLocator.getMessage("simplepage.permissions-general"));
+			return "failure";
+		}
+
+		SimplePageItem item;
+		if (itemId != null && itemId != -1) {
+			item = findItem(itemId);
+		} else {
+			// Adding a checklist to the page
+			item = appendItem("", messageLocator.getMessage("simplepage.checklistName"), SimplePageItem.CHECKLIST);
+		}
+
+		item.setName(name);
+		item.setDescription(description);
+		setItemGroups(item, selectedGroups);
+
+		// Set the indent level for this item
+		item.setAttribute(SimplePageItem.INDENT, indentLevel);
+
+		// Set the custom css class
+		item.setAttribute(SimplePageItem.CUSTOMCSSCLASS, customCssClass);
+
+		// Is the name hidden from students
+		item.setAttribute(SimplePageItem.NAMEHIDDEN, String.valueOf(nameHidden));
+
+		Long max = simplePageToolDao.maxChecklistItem(item);
+
+		// Get existing item ids
+		List<Long> previousIds = new ArrayList<Long>();
+		for(SimpleChecklistItem checklistItem : simplePageToolDao.findChecklistItems(item)) {
+			previousIds.add(checklistItem.getId());
+		}
+
+		simplePageToolDao.clearChecklistItems(item);
+
+		for(int i = 0; checklistItems.get(i) != null; i++) {
+			// get data sent from post operation for this answer
+			String data = checklistItems.get(i);
+			// split the data into the actual fields
+			String[] fields = data.split(":", 2);
+			String itemName = fields[1];
+			// Don't save checklist items with a blank name
+			if(!"".equals(itemName)) {
+				Long checklistItemId;
+				if (fields[0].equals(""))
+					checklistItemId = -1L;
+				else
+					checklistItemId = Long.valueOf(fields[0]);
+				if (checklistItemId <= 0L)
+					checklistItemId = ++max;
+				// Remove checklistItemId from list of those to be cleaned up
+				previousIds.remove(checklistItemId);
+				Long id = simplePageToolDao.addChecklistItem(item, checklistItemId, itemName);
+			}
+		}
+
+		// Delete all checklist item statuses for checklist items that no longer exist.
+		if(!previousIds.isEmpty()) {
+			for(Long checklistItemIdToDelete : previousIds) {
+				simplePageToolDao.deleteAllSavedStatusesForChecklistItem(item.getId(), checklistItemIdToDelete);
+			}
+		}
+
+		update(item);
+
+		return "success";
+	}
+
+	public void setAddChecklistItemData(String data) {
+		if(data == null || data.equals("")) {
+			return;
+		}
+
+		int separator = data.indexOf(":");
+		String indexString = data.substring(0, separator);
+		Integer index = Integer.valueOf(indexString);
+		data = data.substring(separator+1);
+
+		if(checklistItems == null) {
+			checklistItems = new HashMap<Integer, String>();
+			log.debug("setAddChecklistItemData: it was null");
+		}
+
+		// We store with the index so that we can maintain the order
+		// in which the instructor inputted the checklist items
+		checklistItems.put(index, data);
+	}
+
 	public String cancel() {
 		return "cancel";
 	}
@@ -1169,8 +1318,10 @@ public class SimplePageBean {
 		ToolSession toolSession = sessionManager.getCurrentToolSession();
 		Long itemId = (Long)toolSession.getAttribute(LESSONBUILDER_ITEMID);
 		addBefore = (String)toolSession.getAttribute(LESSONBUILDER_ADDBEFORE);
+		name = (String)toolSession.getAttribute(LESSONBUILDER_ITEMNAME);
 		toolSession.removeAttribute(LESSONBUILDER_ITEMID);
 		toolSession.removeAttribute(LESSONBUILDER_ADDBEFORE);
+		toolSession.removeAttribute(LESSONBUILDER_ITEMNAME);
 
 		if (!itemOk(itemId))
 		    return "permission-failed";
@@ -1193,6 +1344,7 @@ public class SimplePageBean {
 			else {
 			    for(Reference reference : refs){
 				returnMesssage = processSingleResource(reference, type, isWebSite, isCaption, itemId);
+				name = null;  // only use name for first
 			    }
 			}
 			toolSession.removeAttribute(FilePickerHelper.FILE_PICKER_ATTACHMENTS);
@@ -1213,7 +1365,9 @@ public class SimplePageBean {
 		ToolSession toolSession = sessionManager.getCurrentToolSession();
 		String id  = reference.getId();
 		String description = reference.getProperties().getProperty(ResourceProperties.PROP_DESCRIPTION);
-		String name = reference.getProperties().getProperty("DAV:displayname");
+		String name = this.name; // user specified name overrides file name
+		if (name == null || name.equals(""))
+		    name = reference.getProperties().getProperty("DAV:displayname");
 
 		// URLs are complex. There are two issues:
 		// 1) The stupid helper treats a URL as a file upload. Have to make it a URL type.
@@ -1461,6 +1615,7 @@ public class SimplePageBean {
 	 *
 	 **/
 
+        // There's a copy in LessonsAccess for use by services. Keep them in sync
 	public boolean isPageOwner(SimplePage page) {
 	    String owner = page.getOwner();
 	    String group = page.getGroup();
@@ -1495,6 +1650,7 @@ public class SimplePageBean {
 	 * Returns 2 otherwise
 	 * @return
 	 */
+        // There's a copy of canEditPage in LessonsAccess for use by services. Keep them in sync
 	public int getEditPrivs() {
 		if(editPrivs != null) {
 			return editPrivs;
@@ -1659,8 +1815,12 @@ public class SimplePageBean {
 		if(i.getAltGradebook() != null) {
 			gradebookIfc.removeExternalAssessment(getCurrentSiteId(), i.getAltGradebook());
 		}
-		
-		
+
+		// If SimplePageItem is a checklist delete all of the saved statuses
+		if(i.getType() == SimplePageItem.CHECKLIST) {
+			simplePageToolDao.deleteAllSavedStatusesForChecklist(i);
+		}
+
 		b = simplePageToolDao.deleteItem(i);
 		
 		if (b) {
@@ -1869,26 +2029,10 @@ public class SimplePageBean {
 	    		// if the user has passed.
 	    		if (!isItemAvailable(nextItem, nextItem.getPageId()))
 	    			view.setRecheck("true");
-			String URL = nextItem.getItemURL(getCurrentSiteId(), getCurrentPage().getOwner());
-			if (lessonBuilderAccessService.needsCopyright(nextItem.getSakaiId()))
-			    URL = "/access/require?ref=" + URLEncoder.encode("/content" + nextItem.getSakaiId()) + "&url=" + URLEncoder.encode(URL.substring(7));
-	    		view.setSource(URL);
 	    		view.viewID = ShowItemProducer.VIEW_ID;
 	    	} else {
 	    		view.setSendingPage(Long.valueOf(item.getPageId()));
-	    		LessonEntity lessonEntity = null;
-	    		switch (nextItem.getType()) {
-	    			case SimplePageItem.ASSIGNMENT:
-	    				lessonEntity = assignmentEntity.getEntity(nextItem.getSakaiId()); break;
-	    			case SimplePageItem.ASSESSMENT:
-	    				view.setClearAttr("LESSONBUILDER_RETURNURL_SAMIGO");
-	    				lessonEntity = quizEntity.getEntity(nextItem.getSakaiId(),this); break;
-	    			case SimplePageItem.FORUM:
-	    				lessonEntity = forumEntity.getEntity(nextItem.getSakaiId()); break;
-	    			case SimplePageItem.BLTI:
-				        if (bltiEntity != null)
-					    lessonEntity = bltiEntity.getEntity(nextItem.getSakaiId()); break;
-	    		}
+
 	    		// normally we won't send someone to an item that
 	    		// isn't available. But if the current item is a test, etc, we can't
 	    		// know whether the user will pass it, so we have to ask ShowItem to
@@ -1896,7 +2040,6 @@ public class SimplePageBean {
 	    		// if the user has passed.
 	    		if (!isItemAvailable(nextItem, nextItem.getPageId()))
 	    			view.setRecheck("true");
-	    			view.setSource((lessonEntity==null)?"dummy":lessonEntity.getUrl());
 	    			if (item.getType() == SimplePageItem.PAGE)
 	    				view.setPath("pop");  // now on a have, have to pop it off
 	    			view.viewID = ShowItemProducer.VIEW_ID;
@@ -1917,7 +2060,6 @@ public class SimplePageBean {
 	public void addPrevLink(UIContainer tofill, SimplePageItem item) {
 		List<PathEntry> backPath = (List<PathEntry>)sessionManager.getCurrentToolSession().getAttribute(LESSONBUILDER_BACKPATH);
 		List<PathEntry> path = (List<PathEntry>)sessionManager.getCurrentToolSession().getAttribute(LESSONBUILDER_PATH);
-
 		// current item is last on path, so need one before that
 		if (backPath == null || backPath.size() < 2)
 			return;
@@ -1948,12 +2090,6 @@ public class SimplePageBean {
 				view.setPath("push");  // item to page, have to push the page
 		} else if (itemType == SimplePageItem.RESOURCE) { // must be a samepage resource
 			view.setSendingPage(Long.valueOf(item.getPageId()));
-			String URL = prevItem.getItemURL(getCurrentSiteId(),getCurrentPage().getOwner());
-			// this is unlikely but possible. If you don't accept the copyright, go on and
-			// then go back, this will trigger
-			if (lessonBuilderAccessService.needsCopyright(prevItem.getSakaiId()))
-			    URL = "/access/require?ref=" + URLEncoder.encode("/content" + prevItem.getSakaiId()) + "&url=" + URLEncoder.encode(URL.substring(7));
-			view.setSource(URL);
 			view.viewID = ShowItemProducer.VIEW_ID;
 		}else if(itemType == SimplePageItem.STUDENT_CONTENT) {
 			view.setSendingPage(prevEntry.pageId);
@@ -1967,20 +2103,6 @@ public class SimplePageBean {
 			}
 		} else {
 			view.setSendingPage(Long.valueOf(item.getPageId()));
-			LessonEntity lessonEntity = null;
-			switch (prevItem.getType()) {
-			case SimplePageItem.ASSIGNMENT:
-				lessonEntity = assignmentEntity.getEntity(prevItem.getSakaiId()); break;
-			case SimplePageItem.ASSESSMENT:
-				view.setClearAttr("LESSONBUILDER_RETURNURL_SAMIGO");
-				lessonEntity = quizEntity.getEntity(prevItem.getSakaiId(),this); break;
-			case SimplePageItem.FORUM:
-				lessonEntity = forumEntity.getEntity(prevItem.getSakaiId()); break;
-			case SimplePageItem.BLTI:
-				if (bltiEntity != null)
-				    lessonEntity = bltiEntity.getEntity(prevItem.getSakaiId()); break;
-			}
-			view.setSource((lessonEntity==null)?"dummy":lessonEntity.getUrl());
 			if (item.getType() == SimplePageItem.PAGE)
 				view.setPath("pop");  // now on a page, have to pop it off
 			view.viewID = ShowItemProducer.VIEW_ID;
@@ -2506,13 +2628,17 @@ public class SimplePageBean {
 		return "success";
 	}
 
-
+	//This will be called from the UI
 	public String deleteOrphanPages() {
 	    if (getEditPrivs() != 0)
 	    	return "permission-failed";
 	    if (!checkCsrf())
-		return "permission-failed";
+	    	return "permission-failed";
+	    return deleteOrphanPagesInternal();
+	}
 
+	//This is an internal call that expects you will check permissions before calling it
+	public String deleteOrphanPagesInternal() {
 	    // code is mostly from PagePickerProducer
 	    // list we're going to display
 	    List<PagePickerProducer.PageEntry> entries = new ArrayList<PagePickerProducer.PageEntry> ();
@@ -2522,6 +2648,9 @@ public class SimplePageBean {
 
 	    // all pages
 	    List<SimplePage> pages = simplePageToolDao.getSitePages(getCurrentSiteId());
+	    if (pages==null) {
+	    	return "no-pages-in-site";
+	    }
 	    for (SimplePage p: pages)
 		pageMap.put(p.getPageId(), p);
 
@@ -2560,7 +2689,7 @@ public class SimplePageBean {
 		return "permission-failed";
 
 	    String siteId = getCurrentSiteId();
-
+	    log.debug("Found "+ selectedEntities.length + " pages to delete");
 	    for (int i = 0; i < selectedEntities.length; i++) {
 		deletePage(siteId, Long.valueOf(selectedEntities[i]));
 		if ((i % 10) == 0) {
@@ -2704,6 +2833,12 @@ public class SimplePageBean {
 				i.setRequirementText(dropDown);
 			}
 
+			// Set the indent level for this item
+			i.setAttribute(SimplePageItem.INDENT, indentLevel);
+
+			// Set the custom css class
+			i.setAttribute(SimplePageItem.CUSTOMCSSCLASS, customCssClass);
+
 			// currently we only display HTML in the same page
 			if (i.getType() == SimplePageItem.RESOURCE)
 			    i.setSameWindow(!newWindow);
@@ -2730,6 +2865,10 @@ public class SimplePageBean {
 				SimplePage page = getPage(Long.valueOf(i.getSakaiId()));
 				if (page != null) {
 					page.setTitle(name);
+					if (hasReleaseDate)
+						page.setReleaseDate(releaseDate);
+					else
+						page.setReleaseDate(null);
 					update(page);
 				}
 			} else {
@@ -3212,15 +3351,20 @@ public class SimplePageBean {
 	    return ret;
 	}
 
-         public String getReleaseString(SimplePageItem i) {
+	public String getReleaseString(SimplePageItem i, Locale locale) {
 	     if (i.getType() == SimplePageItem.PAGE) {
 		 SimplePage page = getPage(Long.valueOf(i.getSakaiId()));
 		 if (page == null)
 		     return null;
 		 if (page.isHidden())
 		     return messageLocator.getMessage("simplepage.hiddenpage");
-		 if (page.getReleaseDate() != null && page.getReleaseDate().after(new Date()))
-		     return messageLocator.getMessage("simplepage.pagenotreleased");
+		 if (page.getReleaseDate() != null && page.getReleaseDate().after(new Date())) {
+		     DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, locale);
+		     TimeZone tz = TimeService.getLocalTimeZone();
+		     df.setTimeZone(tz);
+		     String releaseDate = df.format(page.getReleaseDate());
+		     return messageLocator.getMessage("simplepage.pagenotreleased").replace("{}", releaseDate);
+		 }
 	     }
 	     return null;
 	 }
@@ -3238,6 +3382,7 @@ public class SimplePageBean {
 
 	    if (!nocache && i.getType() != SimplePageItem.PAGE 
 		         && i.getType() != SimplePageItem.TEXT
+		         && i.getType() != SimplePageItem.CHECKLIST
 		         && i.getType() != SimplePageItem.BLTI
 		         && i.getType() != SimplePageItem.COMMENTS
 		         && i.getType() != SimplePageItem.QUESTION
@@ -3277,6 +3422,7 @@ public class SimplePageBean {
 		   // fall through: groups controlled by LB
 	       // for the following items we don't have non-LB items so don't need itemunused
 	       case SimplePageItem.TEXT:
+	       case SimplePageItem.CHECKLIST:
 	       case SimplePageItem.PAGE:
 	       case SimplePageItem.COMMENTS:
 	       case SimplePageItem.QUESTION:
@@ -3461,6 +3607,7 @@ public class SimplePageBean {
 		   return setLBItemGroups(i, groups);
 	       return setResourceGroups (i, groups);
 	   case SimplePageItem.TEXT:
+	   case SimplePageItem.CHECKLIST:
 	   case SimplePageItem.PAGE:
 	   case SimplePageItem.BLTI:
 	   case SimplePageItem.COMMENTS:
@@ -4904,6 +5051,10 @@ public class SimplePageBean {
 			boolean result = peerEval ==null? true:false;
 				completeCache.put(itemId, result);
 				return result;
+		} else if (item.getType() == SimplePageItem.CHECKLIST) {
+			// Simply viewing will complete at this time
+			completeCache.put(itemId, true);
+			return true;
 		}
 		else {
 			completeCache.put(itemId, false);
@@ -5724,11 +5875,22 @@ public class SimplePageBean {
 			if (multipartMap.size() > 0) {
 				// 	user specified a file, create it
 				boolean first = true;
+				String[] fnames = new String[0];
+				// names always gets sent. Only use it if there is something there
+				if (names.length() > 0)
+				    fnames = names.split("\n");
+				int fileindex = 0;
 				for(MultipartFile file : multipartMap.values()){
 					if (file.isEmpty())
 						file = null;
-					addMultimediaFile(file, first);
+					// for file uploads only, name is in names rather than name
+					String fname = name;
+					if (fnames.length > fileindex)
+					    fname = fnames[fileindex].trim();
+					name = null;  // don't reuse name
+					addMultimediaFile(file, first, fname);
 					first = false;
+					fileindex++;
 				}
 			}
 		} catch (Exception exception) {
@@ -5739,7 +5901,7 @@ public class SimplePageBean {
 		
 	}
 
-	public void addMultimediaFile(MultipartFile file, boolean first){
+	public void addMultimediaFile(MultipartFile file, boolean first, String name){
 		try{
 			
 			String sakaiId = null;
@@ -5822,7 +5984,7 @@ public class SimplePageBean {
 				// if user supplied name use it, else the filename
 				// if multiple files, the user supplied name is for first only, or we'd
 				// have several links with the same name
-				if (!first || name == null || name.trim().equals(""))
+				if (name == null || name.trim().equals(""))
 				    name = fname;
 			} else if (mmUrl != null && !mmUrl.trim().equals("") && multimediaDisplayType != 1 && multimediaDisplayType != 3) {
 				// 	user specified a URL, create the item
@@ -6826,7 +6988,9 @@ public class SimplePageBean {
 				pointsInt = Integer.valueOf(maxPoints);
 			}catch(Exception ex) {
 				setErrMessage(messageLocator.getMessage("simplepage.integer-expected"));
-				return "failure";
+				// can't fail, because it will leave an inconsistent items. So create one with default point value
+				// check in UI to make sure it can't happen
+				// return "failure";
 			}
 		}
 		

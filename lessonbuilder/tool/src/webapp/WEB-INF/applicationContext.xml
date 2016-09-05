@@ -41,6 +41,8 @@ simplePageBean.addAssignment,
 simplePageBean.addBefore,
 simplePageBean.addBlti,
 simplePageBean.handleFileItem,
+simplePageBean.addChecklist,
+simplePageBean.addChecklistItemData,
 simplePageBean.addComment,
 simplePageBean.addForum,
 simplePageBean.addMultimedia,
@@ -57,6 +59,7 @@ simplePageBean.contents,
 simplePageBean.copyPage,
 simplePageBean.createSubpage,
 simplePageBean.csrfToken,
+simplePageBean.customCssClass,
 simplePageBean.deleteItem,
 simplePageBean.deleteOrphanPages,
 simplePageBean.deletePages,
@@ -88,6 +91,7 @@ simplePageBean.height,
 simplePageBean.hidePage,
 simplePageBean.importCc,
 simplePageBean.importtop,
+simplePageBean.indentLevel,
 simplePageBean.isCaption,
 simplePageBean.isMultimedia,
 simplePageBean.isWebsite,
@@ -98,6 +102,8 @@ simplePageBean.mmUrl,
 simplePageBean.multimediaDisplayType,
 simplePageBean.multimediaMimeType,
 simplePageBean.name,
+simplePageBean.names,
+simplePageBean.nameHidden,
 simplePageBean.newPageTitle,
 simplePageBean.newWindow,
 simplePageBean.nodownloads,
@@ -122,12 +128,14 @@ simplePageBean.rubricRow,
 simplePageBean.rubricPeerGrade,
 simplePageBean.rubricSubmissionStatus,
 simplePageBean.rubricTitle,
+simplePageBean.saveChecklist,
 simplePageBean.savePeerEvalResult,
 simplePageBean.seeOnlyOwn,
 simplePageBean.sGraded,
 simplePageBean.sMaxPoints,
 simplePageBean.selectedAssignment,
 simplePageBean.selectedBlti,
+simplePageBean.selectedChecklistItems,
 simplePageBean.selectedEntities,
 simplePageBean.selectedEntity,
 simplePageBean.selectedGroups,
@@ -160,6 +168,10 @@ simplePageBean.peerEvalAllowSelfGrade
    
    	<bean parent="requestAddressibleParent">
 		<property name="value" value="gradingBean" />
+	</bean>
+
+	<bean parent="requestAddressibleParent">
+		<property name="value" value="checklistBean" />
 	</bean>
 
   <bean id="ignoreFossilizedValues" class="uk.org.ponder.springutil.BooleanFactory">
@@ -424,6 +436,7 @@ simplePageBean.peerEvalAllowSelfGrade
       <property name="siteService" ref="org.sakaiproject.site.api.SiteService" />
       <property name="authzGroupService" ref="org.sakaiproject.authz.api.AuthzGroupService" />
       <property name="simplePageToolDao" ref="org.sakaiproject.lessonbuildertool.model.SimplePageToolDao" />
+      <property name="lessonsAccess" ref="org.sakaiproject.lessonbuildertool.service.LessonsAccess" />
     </bean>
 
  </beans>

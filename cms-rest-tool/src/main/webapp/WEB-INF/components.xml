@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+ 
+ 	<!-- configLogic -->
+	<bean id="org.sakaiproject.cmsrest.logic.ConfigLogic" class="org.sakaiproject.cmsrest.logic.impl.ConfigLogicImpl"
+		init-method="init">
+		<property name="account" value="admin" />
+	</bean>
+	
+	<!-- sakai站点操作类  -->
+	<bean id="org.sakaiproject.cmsrest.logic.AutoNewCourseSite" class="org.sakaiproject.cmsrest.logic.impl.AutoNewCourseSiteImpl"
+		init-method="init">
+    	<property name="userDirectoryService" ref="org.sakaiproject.user.api.UserDirectoryService" />
+    	<property name="siteService" ref="org.sakaiproject.site.api.SiteService" />
+    	<property name="authzGroupService" ref="org.sakaiproject.authz.api.AuthzGroupService" />
+    	<property name="m_contentHostingService" ref="org.sakaiproject.content.api.ContentHostingService" />
+    	<property name="idManager" ref="org.sakaiproject.id.api.IdManager" />
+    	<property name="toolManager" ref="org.sakaiproject.tool.api.ToolManager" />
+    	<property name="sectionFieldProvider" ref="org.sakaiproject.sitemanage.api.SectionFieldProvider" />
+    	<property name="groupProvider" ref="org.sakaiproject.authz.api.GroupProvider" />
+    	<property name="entityManager" ref="org.sakaiproject.entity.api.EntityManager" />
+    	<property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
+    	<property name="cmService" ref="org.sakaiproject.coursemanagement.api.CourseManagementService" />
+    </bean>
+    
+   	<bean id="org.sakaiproject.cmsrest.logic.CmDao" class="org.sakaiproject.cmsrest.logic.impl.CmDaoImpl"
+		init-method="init">
+    	<property name="sqlService" ref="org.sakaiproject.db.api.SqlService" />
+    </bean>
+    
+    <bean id="org.sakaiproject.cmsrest.logic.SiteManage" class="org.sakaiproject.cmsrest.logic.impl.SiteManageImpl"
+		init-method="init">
+		<property name="userDirectoryService" ref="org.sakaiproject.user.api.UserDirectoryService" />
+    	<property name="siteService" ref="org.sakaiproject.site.api.SiteService" />
+    	<property name="authzGroupService" ref="org.sakaiproject.authz.api.AuthzGroupService" />
+	</bean>
+	
+</beans>

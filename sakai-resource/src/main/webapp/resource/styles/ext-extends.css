@@ -1,0 +1,293 @@
+/****new theme***/
+.btn-home {
+	background-image: url("../icons/house_go.png") !important;
+}
+.btn-module {
+	background-image: url("../icons/module.gif") !important;
+}
+.btn-section {
+	background-image: url("../icons/section.gif") !important;
+}
+.btn-test {
+	background-image: url("../icons/test.gif") !important;
+}
+.btn-selftest {
+	background-image: url("../icons/selftest.gif") !important;
+}
+.btn-forum {
+	background-image: url("../icons/forum.gif") !important;
+}
+.btn-questionbank {
+	background-image: url("../icons/folder_go.png") !important;
+}
+
+/****ext*********/
+.x-tab-panel-header, .x-tab-panel-footer{
+	border:none;
+	background-color:#fff;
+}
+ul.x-tab-strip-top {
+	border: none;
+	background: none;
+	padding: 10px 0 0 0px;
+}
+ul.x-tab-strip-top li{
+	/**height:30px;line-height: 30px;*/
+}
+.x-tab-strip-top .x-tab-right, .x-tab-strip-top .x-tab-left, .x-tab-strip-top .x-tab-strip-inner {
+	background-image: url(../images/default/tabs/tabs-sprite.gif);
+}
+.x-toolbar {
+	border-color: #a9bfd3;
+	background-color: #d0def0;
+	background-image: none;
+	/**background-image: url(../images/default/toolbar/bg.gif);*/
+}
+#treepanel .x-panel-header {
+	display:none;
+	font-weight: bold;
+	font-size: 11px;
+	font-family: tahoma,arial,verdana,sans-serif;
+}
+.x-tab-panel-body{
+	width:100%;
+	border:none;
+}
+#toolpanel .x-panel,#treepanel .x-panel, #treepanel .x-panel-body{border: none}
+
+.x-fieldset {
+	border: none;
+	border-top: solid 1px;
+}
+/*******************/
+.np-create {
+	background-image: url("../icons/application_form_add.png")
+		!important;
+	background-repeat: no-repeat;
+}
+
+.np-create-folder {
+	background-image: url("../icons/folder_add.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-update {
+	background-image: url("../icons/application_form_edit.png")
+		!important;
+	background-repeat: no-repeat;
+}
+
+.np-update-folder {
+	background-image: url("../icons/folder_edit.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-delete {
+	background-image: url("../icons/application_form_delete.png")
+		!important;
+	background-repeat: no-repeat;
+}
+.np-delete-32 {
+	background-image: url("../icons/delete-32.png")
+		!important;
+	background-repeat: no-repeat;
+}
+
+.np-delete-folder {
+	background-image: url("../icons/folder_delete.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-copy {
+	background-image: url("../icons/page_copy.png") !important;
+	background-repeat: no-repeat;
+}
+.np-preview {
+	background-image: url("../icons/zoom.png") !important;
+	background-repeat: no-repeat;
+}
+.np-accept {
+	background-image: url("../icons/accept.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-accept-32 {
+	background-image: url("../icons/accept-32.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-reject {
+	background-image: url("../icons/cancel.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-reject-32 {
+	background-image: url("../icons/reject-32.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-text {
+	background-image: url("../icons/folder_table.png") !important;
+	background-repeat: no-repeat;
+}
+
+
+.np-folder {
+	background-image: url("../icons/folder_key.png") !important;
+	background-repeat: no-repeat;
+}
+
+
+.np-lock {
+	background-image: url("../icons/lock.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-hide {
+	background-image: url("../icons/lightbulb_off.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-nopublish {
+	background-image: url("../icons/lightbulb.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-common {
+	background-image: url("../icons/flag_yellow.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-header {
+	background-image: url("../icons/flag_red.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-ppt {
+	background-image: url("../icons/flag_green.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-recommend {
+	background-image: url("../icons/thumb_up.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-unrecommend {
+	background-image: url("../icons/thumb_down.png") !important;
+	background-repeat: no-repeat;
+}
+
+.width16 {
+	padding-left: 16px;
+}
+
+.np-tops {
+	background-image: url("../icons/ruby_get.png") !important;
+	background-repeat: no-repeat;
+}
+.np-top {
+	background-image: url("../icons/ruby.png") !important;
+	background-repeat: no-repeat;
+}
+.np-untop {
+	background-image: url("../icons/ruby_delete.png") !important;
+	background-repeat: no-repeat;
+}
+.np-thumbnail {
+	background-image: url("../icons/images.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-column-file {
+	background-image: url("../icons/style.png") !important;
+	background-repeat: no-repeat;
+}
+
+.np-column-folder {
+	background-image: url("../icons/style_add.png") !important;
+	background-repeat: no-repeat;
+}
+
+.create-txt-file {
+	background-image: url("../icons/application_form_edit.png") !important;
+	background-repeat: no-repeat;
+}
+
+.create-html-file {
+	background-image: url("../icons/page_code.png") !important;
+	background-repeat: no-repeat;
+}
+
+.upload-file {
+	background-image: url("../icons/application_form_add.png") !important;
+	background-repeat: no-repeat;
+}
+
+.modify-file {
+	background-image: url("../icons/application_form_edit.png") !important;
+	background-repeat: no-repeat;
+}
+
+.folder-empty {
+	background-image: url("../icons/folder_empty.png") !important;
+	background-repeat: no-repeat;
+}
+.folder-not-empty {
+	background-image: url("../icons/folder_not_empty.png") !important;
+	background-repeat: no-repeat;
+}
+.x-grid3-row-alt {
+	background-color: #ddffbb !important;
+}
+
+.login {
+	background-image: url("../icons/accept-32.png") !important;
+	background-repeat: no-repeat;
+}
+
+.reset {
+	background-image: url("../icons/reset-32.png") !important;
+	background-repeat: no-repeat;
+}
+
+
+.arrow_in {
+	background-image: url("../icons/arrow_in.png") !important;
+	background-repeat: no-repeat;
+}
+
+.arrow_undo {
+	background-image: url("../icons/arrow_undo.png") !important;
+	background-repeat: no-repeat;
+}
+
+.bin_closed {
+	background-image: url("../icons/bin_closed.png") !important;
+	background-repeat: no-repeat;
+}
+
+.bin_empty {
+	background-image: url("../icons/bin_empty.png") !important;
+	background-repeat: no-repeat;
+}
+
+.bin_closed {
+	background-image: url("../icons/bin_closed.png") !important;
+	background-repeat: no-repeat;
+}
+
+.bin {
+	background-image: url("../icons/bin.png") !important;
+	background-repeat: no-repeat;
+}
+
+.folder_find {
+	background-image: url("../icons/folder_find.png") !important;
+	background-repeat: no-repeat;
+}
+
+.ext-el-mask-msg div,.loading-indicator,.x-tab-strip span.x-tab-strip-text,.x-form-invalid-msg,.x-small-editor .x-form-field,.x-fieldset legend,.x-btn,.x-btn button,.x-toolbar td,.x-toolbar span,.x-toolbar input,.x-toolbar div,.x-toolbar select,.x-toolbar label,.x-grid3-hd-row td,.x-grid3-row td,.x-grid3-summary-row td,.x-grid3-topbar,.x-grid3-bottombar,.x-grid-group-hd div,.x-grid-empty,.x-dd-drag-ghost,.x-tree-node,.x-date-middle,.x-date-left,.x-date-right,.x-date-inner a,.x-date-mp td,.x-date-mp-btns button,.x-tip .x-tip-mc,.x-tip .x-tip-header-text,.x-tip .x-tip-body,.x-menu-list-item,#x-debug-browser .x-tree .x-tree-node a span,.x-combo-list-hd,.x-combo-list-small .x-combo-list-item,.x-panel-header,.x-panel-tl .x-panel-header,.x-panel-mc,.x-window-tl .x-window-header,.x-window-mc,.x-progress-text,.x-date-inner th,.x-date-mmenu .x-menu-item
+	{
+	font-size: 12px
+}

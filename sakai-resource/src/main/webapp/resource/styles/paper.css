@@ -1,0 +1,782 @@
+@charset "utf-8";
+/* this section sets the body properties */
+body 				{
+					width: 100%;
+					padding: 0;
+					font-family: Arial,'宋体',Verdana,Geneva,Helvetica,sans-serif;
+					font-size:12px;
+					color: #000;
+					margin: 0;
+					background: #FFFFFF;
+}
+
+/* this group sets the font size for paragraphs */
+p, td 				{font-family: Arial,'宋体',Verdana,Geneva,Helvetica,sans-serif;
+					font-size:12px;}
+td.menu 			{}
+.formtext			{}
+
+/* this group sets the normal link colors */
+a:link 				{color : #3355BB;
+					text-decoration: underline;}
+					
+a:visited 			{color : #3355BB;
+					text-decoration : underline;}
+					
+a:hover 			{color : #666666;
+					text-decoration : underline;}
+a:active 			{color : #000080;
+					text-decoration : underline;}
+
+a1:link 				{color : #3355BB;}
+a1:visited 			{color : #3355BB;}
+a1:hover 			{color : #666666;}
+a1:active 			{color : #000080;}
+
+/* this group sets the style for H1-H6*/
+.h1 					{font-size : 20px;
+					font-weight : bold;
+					color : #1C472C;}
+.h2 					{font-size : 18px;
+					font-weight : bold;
+					color : #1C472C;}
+.h3 					{font-size : 16px;
+					font-weight : bold;
+					color : #1C472C;}
+.h4 					{font-size : 14px;
+					font-weight : bold;
+					color : #1C472C;
+					background-color: #DDE3EB;}
+.h5 					{font-size : 10px;
+					font-weight : bold;
+					color : #1C472C;}
+.h6 					{font-size : 10px;
+					font-weight : bold;
+					color : #afb3c3;}
+				
+ul					{list-style-image : url('images/bullet.gif');}
+
+/* this group defines Main Table properties*/
+/*Defines properties for the Top Table Area*/
+.table1				{background-image: url('images/splash.jpg'); 
+					border-collapse: collapse;} 
+
+/*Defines properties for the 2nd Table/Black Bar Area*/
+.toptable2 			{background: #000000;
+					color : #FFFFFF;
+					text-align: left;}
+					
+/* Defines properties for the Left Navigation Table Area*/	
+.table3				{border-color: #111111; 
+					border-collapse: collapse;}  
+
+/* Defines properties for Outermost and the 2nd Outermost Table in Main Area*/					
+.table4				{border-color: #EAEAEA; 
+					border-collapse: collapse;}
+
+/* Sets  border color to grey and background color to l.grey for Table in Main Area*/
+.table5				{border-color: #999999; 
+					 background-color: #CCCCCC;}
+
+.toptable 			{text-align: left;
+					color: #FFFFFF;
+					background: #afb3c3;
+					line-height: normal;}
+
+.tableheader 		{background: #EAEAEA;
+					font-size : 12px;
+					font-weight : bold;
+					color : #000000;
+					text-align:left;
+					height:20;}
+
+.tableheader3 		{background: #EAEAEA;
+					font-size : 10px;
+					color : #000000;
+					text-align: left;
+					height:20;}
+
+.tableheader2 	{background: #EAEAEA;
+					font-size : 12px;
+					font-weight : bold;
+					color : #000000;
+					text-align: left;
+					height:20;}
+
+
+/*Sets <th> to align:left*/
+.leftheader 		{background: #EAEAEA;
+					font-size : 12px;
+					font-weight : bold;
+					color : #000000;
+					text-align: left;}
+
+
+.copyrighttable 	{background: #000000;
+					font-size: 10px;
+					color : #FFFFFF;
+					text-align: center;}
+
+/* this group defines the comment, date, button, and navigation bar properties */
+.comment 			{background: #FFFFFF;
+					font-size: 10px;
+					color : #000000;
+					text-align: left;}
+
+.date 				{background: #FFFFFF;
+					font-size: 10px;
+					color : #000000;
+					text-align: center;}
+
+.date2 				{background: #FFFFFF;
+					font-size: 10px;
+					color : #000000;
+					text-align: center;}
+.hiddenClass       {width:45px;
+					overflow: hidden;
+					word-break:keep-all;
+					word-wrap: normal;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+					display:block;
+					cursor : pointer;}
+.hiddenClass1      {width:200px;
+					overflow: hidden;
+					word-break:keep-all;
+					word-wrap: normal;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+					display:block;
+					cursor : pointer;}
+.hiddenClass2      {width:120px;
+					overflow: hidden;
+					word-break:keep-all;
+					word-wrap: normal;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+					display:block;
+					cursor : pointer;}
+.hiddenClass3      {width:75px;
+					overflow: hidden;
+					word-break:keep-all;
+					word-wrap: normal;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+					display:block;
+					cursor : pointer;}
+.hiddenClass4      {width:60px;
+					overflow: hidden;
+					word-break:keep-all;
+					word-wrap: normal;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+					display:block;
+					cursor : pointer;}
+.hiddenClass5      {width:140px;
+					overflow: hidden;
+					word-break:keep-all;
+					word-wrap: normal;
+					white-space: nowrap;
+					text-overflow: ellipsis;
+					display:block;
+					cursor : pointer;}
+.leftside 			{padding:5px; 
+					background: #FFFFFF;
+					line-height: normal;}
+
+.leftnav 			{padding:5px; 
+					border-right: 1px dotted #6e7592;
+					background: #FFFFFF;
+					line-height: normal;}
+
+.special 			{border-right: 1px dotted #6e7592;
+					border-left: 1px dotted #6e7592;
+					border-bottom: 1px dotted #6e7592;
+					padding: 5px;}
+
+.rightside 			{
+					text-align: justify;
+					background: #FFFFFF;
+					line-height: 20px; /* sets the spacing between lines */
+					border-left: 1px dotted #6e7592;
+					padding-left: 20px;
+					padding-right: 30px;
+					padding-top: 10px;
+					padding-bottom: 10px;}
+
+.buttonarea 		{background: #FFFFFF;
+					border-left: 1px dotted #6e7592;
+					border-bottom: 1px dotted #6e7592;
+					padding: 4px;}
+
+.button:link 		{text-decoration: none; 
+					font-size: 12px; 
+					color: #1C472C; 
+					background-color: #FFFFFF; 
+					letter-spacing: 3px; 
+					padding-top: 2px; 
+					padding-right: 2px; 
+					padding-bottom: 2px; 
+					padding-left: 2px; } 
+					
+				
+.button:visited 	{text-decoration: none; 
+					font-size: 12px; 
+					color: #3355BB; 
+					background-color: #FFFFFF; 
+					letter-spacing: 3px; 
+					padding-top: 2px; 
+					padding-right: 2px; 
+					padding-bottom: 2px; 
+					padding-left: 2px; }
+					
+				 
+.button:hover 		{text-decoration: none; 
+					font-size: 12px; 
+					color: #7BA59A; 
+					background-color: #FFFFFF; 
+					letter-spacing: 3px; 
+					padding-top: 2px; 
+					padding-right: 2px; 
+					padding-bottom: 2px; 
+					padding-left: 2px; }
+ 
+.button:active 		{text-decoration: none; 
+					font-size: 12px; 
+					color: #1C472C; 
+					background-color: #FFFFFF; 
+					letter-spacing: 3px; 
+					padding-top: 2px; 
+					padding-right: 2px; 
+					padding-bottom: 2px; 
+					padding-left: 2px; } 
+
+.menutable 			{
+					font-size: 12px;
+					color: #000080;
+					text-align: left;}
+				
+.menutable:link 	{color: #3355BB; text-decoration: underline }  /* normal link color */
+ .menutable:visited 	{color: #3355BB; text-decoration: underline }  /* visited link */
+.menutable:hover 	{color: #000080; text-decoration: none }  /* hover color */
+.menutable:active 	{color: #000080; text-decoration: underline }  /* active link */
+
+
+.copyrighttable:link 	{color: #FFFFFF; text-decoration: underline }  /* normal link color */
+.copyrighttable:visited {color: #FFffff; text-decoration: underline }  /* visited link */
+.copyrighttable:hover 	{color: #FFFFFF; text-decoration: none }  /* hover color */
+.copyrighttable:active 	{color: #FFFFFF; text-decoration: underline }  /* active link */
+
+.toptable2:link 	{color: #FFFFFF; text-decoration: underline }  /* normal link color */
+.toptable2:visited 	{color: #3355BB; text-decoration: none }  /* visited link */
+.toptable2:hover 	{color: #FFFFFF; text-decoration: none }  /* hover color */
+.toptable2:active 	{color: #FFFFFF; text-decoration: none }  /* active link */
+
+.top:link 			{color: #6e7592; text-decoration: underline }  /* normal link color */
+.top:visited 		{color: #FFFFFF; text-decoration: none }  /* visited link */
+.top:hover 			{color: #FFFFFF; text-decoration: underline overline }  /* hover color */
+.top:active 		{color: #FFFFFF; text-decoration: none }  /* active link */
+
+.authortabs:link  	{color: #ffffff; 
+					font-size: 10pt; 
+					text-decoration: underline; 
+					background-color: #ffffff } 
+					
+.authortabs:visited {color: #ffffff; 
+					font-size: 10pt; 
+					text-decoration: underline; 
+					background-color: #ffffff }
+					
+.authortabs:hover  {color: #666666; 
+					font-size: 10pt; 
+					text-decoration: underline; 
+					background-color: #ffffff }
+.authortabs:active {color: #ffffff; 
+					font-size: 10pt; 
+					text-decoration: underline; 
+					background-color: #ffffff } 
+
+/* Sets border color to light grey in Main Text tables */ 
+.maintabledata1 	{border-color: #E2E4E8; } 
+
+/* Sets border & background color to light grey in Main Text tables */  
+.maintabledata2 	{border-color:#E2E4E8;  background-color:#E2E4E8; }   
+
+/* Sets border & background color to white in Main Text tables */ 
+.maintabledata3 	{border-color:#FFFFFF; background-color:#FFFFFF; }
+
+/* Sets background color to  in Main Text tables */  
+.maintabledata4 	{background-color: #C4D3AA; }  
+
+/* Sets background color to dull grey in Main Text tables */ 
+.maintabledata5 	{background-color: #EAEAEA; } 
+
+/* Sets background color to white in Main Text tables */   
+.maintabledata6 	{background-color: #FFFFFF; } 
+
+/* Sets border color to light grey & background color to white in Main Text tables */  
+.maintabledata7 	{border-color:#E2E4E8;  background-color:#FFFFFF; } 
+
+/* Sets border color to light grey & background color to dull grey in Main Text tables */ 
+.maintabledata8 	{border-color:#E2E4E8;  background-color:#EAEAEA; } 
+
+/* Sets border color to white in Main Text tables */ 
+.maintabledata9 	{border-color:#FFFFFF; } 
+
+/* Sets border & background color to dull grey in Main Text tables */ 
+.maintabledata10 	{border-color:#EAEAEA;  background-color:#EAEAEA; } 
+
+/* Sets border color to dull grey in Main Text tables */ 
+.maintabledata11 	{border-color:#EAEAEA; } 
+
+/* Sets border color to  in Main Text tables */ 
+.maintabledata12 	{border-color:#EDEDED; } 
+
+/* Sets background color to faded grey in Main Text tables */ 
+.maintabledata13 	{background-color:#F0F0F0; } 
+
+/* Sets border color to dull green in Main Text tables */ 
+.maintabledata14 	{border-color:#CCCCCC; } 
+
+.style1 			{color: #FFFFFF; }    /* Course + Instructor name in Header */
+.style2 			{color: #51698D; font-weight: bold;}  /*  */
+.style3 			{font-size: 10pt; }    /* "back to Top" and other such text buttons */
+.style4 			{font-size: 12px; }	  /*  */
+.style5 			{font-size: 8.5pt; }    /* Small Table data text */
+.orange 			{color: #C48C68; }    /* Highlighting text in Orange color */
+.italics			{font-style: italic; } /* For italicizing text */
+.bold				{font-weight: bold; }  /* For making text bold */
+.center				{text-align: center; } /* For center alignment */
+.left				{text-align: left; } /* For left alignment*/
+.right				{text-align: right; } /* For right alignment */
+/*For setting properties of left-side of <td> */
+.lefttd				{border-left-color:#999999; border-left-style:groove;} 
+.red				{color: #990000; }  /* For error messages */
+.required			{color: #990000; font-weight:800; font-size:10px;} /* For required fields */
+.blue				{color: #0066CC; }  /* For warning messages */
+.styleblk                       {color: #000000; } /*Black*/
+
+/*Styles put in by developers*/
+.underlineClass {text-decoration: underline;}
+.style6 			{font-size: 12px;}	  /*  */
+.style7 			{}	  /*  */
+.style8			{font-size: 10pt;}	  /*  */
+.TitleClass {
+	font-size: 12px;
+	vertical-align: top;
+	align: center;
+	width: 300px;
+ }
+.IdClass {
+	font-size: 12px;
+	color: #000000;
+	vertical-align: top;
+	align: center;
+}
+.DateClass 			
+{
+	font-size: 12px;
+	color: #000000;
+	background: #FFFFFF;
+	text-align: left; 
+	vertical-align: top;
+	width: 200px
+}
+
+.SectionClass 	{font-size: 12px; white-space:nowrap;height:18px; text-align: left } 
+.SectionClass2	{font-size: 12px; white-space:nowrap;height:18px; text-align: left }
+.SectionTableClass {vertical-align: top;}
+
+.RedClass {
+	color: #FF0000;
+}
+.BlueClass {
+	color: #0000FF;
+}
+
+.DatePickerClass{
+	width: 16;  
+	height: 16;
+	border: 0;
+	align:center;
+	vertical-align: bottom;
+}
+
+.ExpClass			{ border: 0;}
+
+.ExtraPaddingClass {padding:8px;}
+
+.ViewSectionTableClass {padding:8px;
+hspace:5;
+valign:top}
+
+.AuthImgClass{
+	width: 16;
+	height: 16;
+	border: 0;
+	align: absbottom;
+	margin-right:2px;
+	margin-bottom:-3px;
+}
+.TopNavImgClass{
+	height: 22;
+	width: 92;
+	hspace: 0;
+	border: 0;
+}
+.HeaderHeight		{	height: 25;}
+
+.AddImgClass{
+	height: 16;
+	width: 16;
+	border: 0;
+	hspace:10;
+}
+
+.PrereqClass {
+     vertical-align: top;
+     text-align: center;
+}
+.NextstepsClass {
+	vertical-align: top;
+	text-align: center;
+}
+     
+.MainTableClass		{ border-color: #E2E4E8;border:1}
+
+.CmdImgClass		{ hspace: 7; 
+border: 0; }
+
+ .DatePickerImgClass{
+  align: center;
+  vertical-align: top;
+  }
+.HeaderHeightClass {
+  height: 20;
+  }
+  .searchlinkstyle 	{border-color:#E2E4E8; background-color:#FFFFFF; }
+ 
+
+.ImgSpace			{  hspace: 3;   
+border: 0;}
+
+.BottomImgSpace		{  hspace: 7;  
+ border: 0; align:center;}
+ .UpLink
+ {
+ width: 1px;
+ hspace: 0;
+ }
+ .SecLink
+ {
+ width:85px;
+ }
+ .TitleWid
+  {
+  hspace:5;
+ 	padding:12px;
+  	width:auto;
+ 	align:left;
+ 	vertical-align:top;
+ 	text-align:left;
+ }
+ .TitleWid2
+   {
+   width:45%;
+ }
+.TitleWid3 {   width:75%; }
+.ActionWid {width:25%;}
+
+.TitleWid4 {   width:65%; }
+.ActionWid2 {width:35%;
+white-space:nowrap;}
+
+ .DateWid1
+    {
+    width:27%;
+    vertical-align: top;
+ }
+ .DateWid2
+    {
+    width:28%;
+    vertical-align: top;
+ }
+ .PrWid
+   {
+   width:35px;
+   align: absmiddle;
+	valign:top;
+ }
+ .StWid
+    {
+    width:234px;
+ }
+ .EndWid
+     {
+     width:185px;
+ }
+ .row1 			{ background-color:#FFFFFF}
+ .row2			{background-color:#F7F7F7}
+ .secrow0       {text-indent:0px}
+ .secrow1       {text-indent:20px}
+ .secrow2       {text-indent:40px}
+ .secrow3       {text-indent:60px}
+ .secrow4       {text-indent:80px}
+ .secrow5       {text-indent:100px}
+ .secrow6       {text-indent:120px}
+ .secrow7       {text-indent:140px}
+ .secrow8       {text-indent:160px}
+ .secrow9       {text-indent:180px}
+.justHeight 	{height:20;}
+.ModCheckClass {
+	vertical-align: top;
+	align:center;
+}
+.LicHelpImgClass {
+   border: 0;
+   align: absmiddle;
+}
+
+.NavListImgClass	{  
+border:0; 
+align:bottom;
+}
+ 
+.meletePortletToolBarMessage{
+background-color:#FFFFFF;
+display:block;
+color:#51698D;
+margin:0;
+padding:2px;
+text-align:left;
+width:auto;
+}
+
+.meleteHtmlAreaButtonClass{
+background-color:#ffffff;
+border:0px;
+color:#646464;
+font-weight : bold;
+padding:1px 1px 1px 1px
+}
+
+.meleteLicenseMsg{
+background-color:#DDDFE4;
+color: #5A6D95;
+}
+
+.copyrightColumn1{
+   width:50%;
+}
+
+.copyrightColumn2{
+   width:50%;
+	align:right;
+}
+
+.placeCenter{
+	align:center;
+}
+
+.placeRight{
+	align:right;
+}
+
+.sortIconMsg{
+		color : #000080;
+		text-decoration: underline;
+}
+
+.chefToolBarWrap, .chefToolBarWrapForm{
+	background-color:#eef1f6;
+	padding:5px;
+	text-align:center;
+	line-height:1.2em}
+
+.chefToolBarWrap a:link, .chefToolBarWrap a, .chefToolBarWrapForm a, .chefToolBarWrapForm a:link  {
+	border-bottom: 1px dashed #90A1C6;
+	background: #DDDFE4;
+	padding: 0px 2px 0px 3px;
+	color: #000;
+	font-size: 12px;
+	text-decoration:none;
+	margin-right:1em}
+.chefToolBarWrap a:hover, .chefToolBarWrapForm a:hover {
+	border:none;
+	text-decoration: none !important;
+	color: #084A87 !important;
+	font-size: 12px;
+	padding: 0px 2px 0px 3px;
+	border-bottom: 1px solid #FFF !important; 
+	 }
+	 
+.chefToolBarWrap a:visited, .chefToolBarWrapForm a:visited  {
+	border-bottom: 1px dashed #90A1C6;
+	background: #DDDFE4;
+	padding: 0px 2px 0px 3px;
+	font-size: 12px;
+	color: #000;
+	text-decoration:none;
+}
+
+/* taken from sakai tools.css and modified background */
+ul.navIntraTool{
+    padding-left:0;
+    margin-left:0;
+}
+
+ul.navIntraTool ul{
+    padding-left:0;
+    margin-left:0;
+}
+
+.navIntraTool a, .navIntraTool a:link{
+	font-weight : normal !important;
+	line-height:12px !important;
+	text-decoration: none !important;
+	color: #000000 !important;
+    padding: 5px 0 3px 18px !important;
+    margin: 0!important;
+    background-position : center left !important;
+    background-repeat : no-repeat !important;
+	white-space: nowrap;
+}
+
+
+.navIntraTool a:hover{
+	text-decoration: underline !important;
+	color: #2a7fcf !important;
+}
+
+
+.navIntraTool li{
+	list-style: none;
+	display: inline;
+	margin:0 !important;
+	padding:0 !important;
+	color: #777
+}
+
+.navIntraTool li span a{
+	margin:0 !important;
+	padding:0 !important;
+}
+/*for tool bar items that have icons*/
+.navIntraTool li span a img{
+	vertical-align: bottom;
+}
+.navIntraTool li span, .navIntraTool li span.current, .navIntraTool li span.inactive{
+	border-left:0 solid #ccc;
+	margin:0;
+	padding:0 0 0 0;
+}
+/*special style for the first item, namely no border-left*/
+.navIntraTool li.firstToolBarItem span{
+	border:none;
+	margin:0;
+	padding: 0 5px 0 8px;
+}
+/*some toolbars have input type=text, and the next item (fieldSibling) is a submit link*/
+.navIntraTool li span.formItem,.navIntraTool li span.fieldSibling  {
+	margin:0;
+	border:none;
+	padding:0;
+}
+.navIntraTool li span.fieldSibling {
+	padding: 0 5px 0 0;
+}
+/*style for item that would be a link if you were not at the page already*/
+.navIntraTool li span.current{
+	color:#777;
+}
+
+.navIntraTool li span.inactive{
+	color:#777;
+}
+
+.viewItem, .viewItem:link{
+	background-image: url(images/viewItem.gif) !important;
+}
+
+.viewItem:hover{
+	background-image: url(images/viewItem-h.gif) !important;
+}
+
+.caleCourseScore, .caleCourseScore:link{
+	background-image: url(images/caleCourseScore.png) !important;
+}
+
+.caleCourseScore:hover{
+	background-image: url(images/caleCourseScore_h.png) !important;
+}
+
+.caleCoursePassStat, .caleCoursePassStat:link{
+	background-image: url(images/caleCoursePassStat.gif) !important;
+}
+
+.caleCoursePassStat:hover{
+	background-image: url(images/caleCoursePassStat_h.gif) !important;
+}
+
+.authorItem, .authorItem:link{
+	background-image: url(images/authorItem.gif) !important;
+}
+
+.authorItem:hover{
+	background-image: url(images/authorItem-h.gif) !important;
+}
+
+.manageItem, .manageItem:link{
+	background-image: url(images/manageItem.gif) !important;
+}
+
+.manageItem:hover{
+	background-image: url(images/manageItem-h.gif) !important;
+}
+
+.prefItem, .prefItem:link{
+	background-image: url(images/prefItem.gif) !important;
+}
+
+.prefItem:hover{
+	background-image: url(images/prefItem-h.gif) !important;
+}
+
+.statItem, .statItem:link{
+	background-image: url(images/statItem.gif) !important;
+}
+
+.statItem:hover{
+	background-image: url(images/statItem-h.gif) !important;
+}
+
+.queryItem, .queryItem:link{
+	background-image: url(images/queryItem.gif) !important;
+}
+
+.queryItem:hover{
+	background-image: url(images/queryItem-h.gif) !important;
+}
+
+.checkItem, .checkItem:link{
+	background-image: url(images/checkItem.gif) !important;
+}
+
+.checkItem:hover{
+	background-image: url(images/checkItem-h.gif) !important;
+}
+
+.separator{
+	margin:0 8px -4px 8px;
+	/*
+    background-position : top left;
+    background-repeat : no-repeat;
+	background-image: url(images/separator.gif);
+	*/
+}
+
+.homeClass{ white-space:nowrap;height:18px; text-align: left;}
+.homeT{font-size: 12px;color: #FF0000;cursor:pointer;}
+.QuestionAnalyze {
+	border: 1px solid #990066;
+}

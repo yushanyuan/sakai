@@ -1,0 +1,346 @@
+@charset "utf-8";
+body {
+	margin: 0 auto;
+	text-align: center;
+	font-size: 12px;
+	background: #fff;
+}
+#wrap {
+	width: 100%;
+	text-align: left;
+}  
+#content {
+	margin: 0px 0px;
+}
+#sy {
+	width: 100%;
+	text-align: center;
+	position: relative;
+	padding-top: 5px;
+	background: url(../images/hill/bg.gif) no-repeat 60px 5px;
+	height: 449px;
+	min-width: 706px;
+}
+
+#sl {
+	border: 1px solid #B4B4B4;
+	width: 60px;
+	padding: 1px;
+	position: absolute;
+	top: 23px;
+	right: 1px;
+}
+
+#sl div {
+	border: 1px solid #B4B4B4;
+	text-align: center;
+	padding-left: 3px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+#sl div span {
+	display: block;
+	height: 20px;
+	padding-left: 15px;
+	text-align: left;
+	line-height: 20px;
+}
+#pass {
+	background: url(../images/hill/pass-gre.gif) no-repeat center left;
+}
+
+#nopas {
+	background: url(../images/hill/pass-red.gif) no-repeat center left;
+}
+
+#open {
+	background: url(../images/hill/open.gif) no-repeat center left;
+	color: #4d4d4d;
+}
+
+#close {
+	background: url(../images/hill/close.gif) no-repeat center left;
+}
+
+#sy a {
+	display: block;
+	height: 21px;
+	color: #000;
+	font-size: 13px;
+	font-weight: bold;
+	width: 220px;
+	text-align: left;
+	text-decoration: none;
+}
+
+#sy a:hover {
+	color: #780701;
+	background: url(../images/hill/sircle-g.gif) no-repeat;
+}
+/*主题布局*/
+#zhuti1 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	color: #780701;
+	position: absolute;
+	left: 78px;
+	top: 365px;
+}
+
+#zhuti2 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 350px;
+	left: 76px;
+}
+
+#zhuti3 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 335px;
+	left: 63px;
+}
+
+#zhuti4 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 320px;
+	left: 62px;
+}
+
+#zhuti5 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 305px;
+	left: 62px;
+}
+
+#zhuti6 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 290px;
+	left: 61px;
+}
+
+#zhuti7 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 275px;
+	left: 63px;
+}
+
+#zhuti8 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 260px;
+	left: 68px;
+}
+
+#zhuti9 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 245px;
+	left: 82px;
+}
+
+#zhuti10 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 230px;
+	left: 98px;
+}
+#zhuti11 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 215px;
+	left: 113px;
+}
+#zhuti12 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 200px;
+	left: 127px;
+}
+#zhuti13 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 185px;
+	left: 187px;
+}
+#zhuti14 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 170px;
+	left: 200px;
+}
+#zhuti15 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 155px;
+	left: 215px;
+}
+#zhuti16 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 140px;
+	left: 245px;
+}
+#zhuti17 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 125px;
+	left: 255px;
+}
+#zhuti18 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 110px;
+	left: 262px;
+}
+#zhuti19 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 95px;
+	left: 290px;
+}
+#zhuti20 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 80px;
+	left: 340px;
+}
+#zhuti21 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 65px;
+	left: 380px;
+}
+#zhuti22 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 50px;
+	left: 388px;
+}
+#zhuti23 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 35px;
+	left: 395px;
+}
+#zhuti24 {
+	background: url(../images/hill/sircle.gif) no-repeat 0 3px;
+	padding-left: 20px;
+	position: absolute;
+	top: 20px;
+	left: 408px;
+}
+
+
+/*图表*/
+#zhuti {
+	width: 308px;
+	position: absolute;
+	top: 188px;
+	right: 1px;
+}
+#xxztbg0 {
+	border-left: 1px solid #484848;
+	border-bottom: 1px solid #484848;
+	border-right: 1px solid #484848;
+	background: url(../images/hill/sy-tbbg.gif) no-repeat;
+	width: 247px;
+	padding-top: 5px;
+	margin-top: 10px;
+}
+
+#xxztbg0 td {
+	text-align: right;
+}
+
+#xxztbg0 span {
+	display: block;
+	height: 15px;
+	float: right;
+}
+#jd1,#jd2,#jd3 {
+	border-top: 1px solid #3A3714;
+	border-left: 1px solid #3A3714;
+	border-bottom: 1px solid #3A3714;
+	margin-left: 5px;
+	margin-bottom: 5px;
+}
+
+#jd1 {
+	background: #e4d833;
+	width: 100px;
+}
+
+#jd2 {
+	background: #fe00fe;
+	width: 120px;
+}
+
+#jd3 {
+	background: #9999fe;
+	width: 70px;
+}
+#zt a {
+	display: inline;
+	text-decoration: none;
+	color: #000;
+	background: none;
+	font-size: 12px;
+	font-weight: normal;
+}
+
+#zt a:hover {
+	text-decoration: underline;
+	color: #780701;
+	background: none;
+	font-size: 12px;
+	font-weight: normal;
+}
+div.layer {
+	visibility: hidden;
+	z-index: 99;
+}
+
+#Layer1 {
+	visibility: visible;
+	z-index: 99;
+}
+
+
+img {
+	border: 0;
+}
+
+table {
+	border-collapse: collapse;
+	border: 0;
+	text-align: left;
+	font-size: 12px;
+}

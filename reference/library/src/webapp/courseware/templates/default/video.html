@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link href="css/plugin.css" rel="stylesheet" type="text/css" />
+	<script src="/library/js/jquery-1.7.1.min.js"></script>
+	<script src="/library/courseware/course_plugin.js"></script>
+	<script src="/library/courseware/course_plugin.player.js"></script>
+</head>
+<body style="margin:0 auto;">
+	<div id="jp_container_1" class="jp-video"></div>
+<script type="text/javascript">
+	$(function () {
+		var p1 = $.url().param("onlyGiven");
+		if(!p1 || p1 =="false"){
+			p1 = false;
+		}else{
+			p1 =true;
+		}
+		//新添  zhangtianci
+	    var id=$.url().param("id");
+	    var cuepointData = null;
+	    if(id && parent.$buptnu.cware.jpvideoData){
+	    	 var vdata = $.grep(parent.$buptnu.cware.jpvideoData,function(v){return v.id == id;});
+			 if(vdata.length>0){
+				cuepointData = vdata[0].cuepoints;
+			}
+	    }
+		
+		var url = parent.document.getElementById("hd_videourl").value;
+		var cfg = {
+			id:"jp_container_1",title:"",video: url, autoplay: true,onlyGiven:p1
+		};
+		if(cuepointData){
+			cfg.cuepoints=cuepointData;
+		}
+		if($.url().param("width")){
+			cfg.size = {width:$.url().param("width")};
+		}
+		if($.url().param("height")){
+			cfg.size.height = $.url().param("height");
+		}
+		if($.url().param("cssClass")){
+			cfg.size.cssClass = $.url().param("cssClass");
+		}
+		cfg.fullScreenCall = function(isFull){
+			var toplevel = null;
+			if(!top)
+				toplevel = window;
+			else
+				toplevel = top;
+			var fbox = $($(toplevel.document).find('.fancybox-wrap')[0]);
+			var fbox_inner = $(fbox.find('.fancybox-inner')[0]);
+			if(isFull){				
+				fbox.data('width', fbox.width());
+				fbox.data('top', fbox.css("top"));
+				fbox.data('left', fbox.css("left"));
+
+				fbox.css("top","20px");
+				fbox.css("left","10px");
+				fbox.width($(toplevel).width()-60);
+								
+				fbox_inner.data('width', fbox_inner.width());
+				fbox_inner.data('height', fbox_inner.height());
+
+				fbox_inner.width($(toplevel).width()-60);
+				fbox_inner.height($(toplevel).height()-40)
+			}else{	
+				fbox_inner.width(fbox_inner.data('width'));
+				fbox_inner.height(fbox_inner.data('height'));
+
+				fbox.width(fbox.data('width'));
+				fbox.css("top",fbox.data('top'));
+				fbox.css("left",fbox.data('top'));					
+			}
+		}
+
+		$buptnu.cware.playVideo(cfg);
+	})
+</script>
+</body>
+</html>

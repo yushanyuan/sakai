@@ -119,6 +119,7 @@
                 <module>webservices</module>
 				<module>cms-rest-tool</module>
                 <module>bigbluebutton-sakai</module>
+				<module>sakai-resource</module>
 				<module>mooc-tool</module>
             </modules>
         </profile>

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<registration>
+	<tool id="sakai.cms-rest" 
+		title="教务集成工具" 
+		description="远程调用API工具，提供教务系统与sakai课程集成相关操作的远程调用接口，">
+
+		 
+		<configuration name="functions.require" /> 
+		<category name="sakai.admin" /> 
+    </tool>
+</registration>
+

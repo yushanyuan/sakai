@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+	http://www.springframework.org/schema/util
+	http://www.springframework.org/schema/util/spring-util-2.5.xsd"
+	xmlns:util="http://www.springframework.org/schema/util">
+	
+	<bean id="courseSpaceAction" scope="prototype"
+		class="org.sakaiproject.resource.tool.course.action.CourseSpaceAction">
+		<property name="courseService" ref="courseService"></property>
+		<property name="studyService" ref="studyService"></property>
+		<property name="fileService" ref="fileService"></property>
+		<property name="templateService" ref="templateService"></property>
+		<!-- <property name="forumService" ref="forumService"></property> -->
+	</bean>
+	<bean id="courseService"
+		class="org.sakaiproject.resource.impl.course.service.CourseServiceImpl" parent="dao">
+	</bean>
+	
+	<bean id="checkWorkAction" class="org.sakaiproject.resource.tool.course.action.CheckWorkAction" scope="prototype">
+		<property name="courseService" ref="courseService"></property>
+		<property name="studyService" ref="studyService"></property>
+	</bean>
+	<bean id="scoreRecalculateAction" class="org.sakaiproject.resource.tool.course.action.ScoreRecalculateAction" scope="prototype">
+		<property name="courseService" ref="courseService"></property>
+		<property name="studyService" ref="studyService"></property>
+	</bean>
+</beans>

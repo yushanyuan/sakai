@@ -267,6 +267,19 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
 	text-decoration: none !important;
 	background-color: #eee;
 }
+.mm-file-input {
+	display:inline;
+}
+.mm-file-input-name {
+        margin-right: 0.5em;
+}
+.mm-file-input-delete {
+        color: red;
+	cursor: pointer;
+}
+.mm-file-input-itemname {
+	margin-left: 1.0em;
+}
 #edit-title {
 	margin-left: 1em
 }
@@ -526,7 +539,7 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
     margin-top: 10px;
     margin-bottom: 0px;
 }
-.mainList li.textType, .mainList li.multimediaType {
+.mainList li.textType, .mainList li.multimediaType, .mainList li.checklistType {
     margin-top: 10px;
     margin-bottom: 10px;
 } 
@@ -561,7 +574,7 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
     vertical-align: top
 }
 
-.statusCol, .contentCol {
+.statusCol, .contentCol, .checklistDiv {
  display: inline-block;
 }
 .link-div h3.link-div-head {
@@ -730,6 +743,9 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
 .afterheader {
 	margin-top: 1em
 }
+.returnmsg span {
+        text-align: left
+}
 /* also uses nextprev. this is specific for ShowItem */
 .returnheader a:link, .returnheader a:visited {
 	background-color: #fee !important;
@@ -851,7 +867,7 @@ a.peer-eval-stats {
         font-size:110%;			 
 }
 .noDisplay {
-	display: none
+	display: none !important;
 }
 .imgCell {
 }
@@ -1103,7 +1119,7 @@ input[type="submit"].question-submit,.addStudentContent {
    position: static;
 }
 
-.questionDiv .contentCol {
+.questionDiv .contentCol, .checklistDiv {
  margin-top:5px;
  padding: 15px;
  padding-right: 30px;
@@ -1112,7 +1128,9 @@ input[type="submit"].question-submit,.addStudentContent {
  -moz-border-radius: 10px;
  border-radius: 10px;
 }
-
+.checklistDiv {
+ padding-right: 15px;
+}
 .questionDivControl {
  margin-top: 5px;
  margin-bottom: 10px;
@@ -1197,7 +1215,7 @@ div[role="dialog"] {
   float:right !important;
 }
 .action {
-  margin-top:5px;
+  margin-top: 5px;
 }			      
 .Mrphs-siteHierarchy {
     height: auto !important;
@@ -1348,6 +1366,67 @@ padding:1px;
 color: #666;
 }
 
+.sectionHeader {
+    padding: .5em;
+}
+
+.sectionHeader .collapseIcon {
+    font-family: FontAwesome;
+    float:right;
+}
+
+.sectionCollapsedIcon {
+    font-family: FontAwesome;
+    margin-left: 1em;
+}
+#expandCollapseButtons {
+    width: 100%;
+    text-align: right;
+}
+
+.defaultClosed {
+    display:none;
+}
+
+.collapsibleSectionHeader {
+    position: relative;
+}
+
+.toggleCollapse, .collapseIcon {
+    display: none;
+}
+.collapsibleSectionHeader .collapseIcon {
+    display: block;
+}
+.collapsibleSectionHeader .toggleCollapse {
+    display: block;
+    position: absolute;
+    opacity: 0;
+    z-index: 1000000;
+    webkit-transition: 0.3s ease;
+    moz-transition: 0.3s ease;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+    top: 100%;
+    left: 50%;
+    margin: -2px 0 0 -10px;
+}
+
+.collapsibleSectionHeader:hover {
+    cursor: pointer;
+    background-color: #eee;
+}
+
+.collapsibleSectionHeader:hover .toggleCollapse {
+    opacity: 1;
+    margin-top: 6px;
+}
+
 /* position relative with no args does nothing, but editsection's position absolute needs it as a refernce */
 .column {
    position:relative;
@@ -1471,7 +1550,10 @@ font-size: 90%;
 .genTitle {
   display:none;
 }
-
+/* if 11.1 uses the markup from 12, this will have to change */
+div.portletBody[sakaiversion="12"] {
+  margin-top:0px;
+}
 /* student mode only */
 .genTitle ~ .action {
   margin-top:-5px;
@@ -1762,4 +1844,39 @@ nav.Mrphs-container--toolTitleNav {
 /* actual portal chat */
 .Mrphs-portalChat {
         z-index: 100004 !important;
+}
+.hiddenTitle {
+    font-style: italic;
+    font-size: 100%;
+    font-weight: normal;
+    color: #000;
+}
+.checklistDiv h3 {
+    margin-top: 0px;
+    font-size: 100%;
+}
+.checklistSaveMessage {
+    font-family:Arial, Helvetica, sans-serif;
+    font-size:13px;
+    margin: 0 0 0 1em;
+    padding:4px 4px 4px 24px;
+    background-repeat: no-repeat;
+    background-position: 4px center;
+}
+.saveChecklistSuccess {
+    color: #4F8A10;
+    background-image:url('../images/success.png');
+}
+.saveChecklistError {
+    color: #D8000C;
+    background-image: url('../images/failed.png');
+}
+.saveChecklistSaving {
+    margin-left: 2em;
+}
+
+.stylingstuff {
+    padding: .5em;
+    margin: .5em 0;
+    border: 1px solid #ccc;
 }

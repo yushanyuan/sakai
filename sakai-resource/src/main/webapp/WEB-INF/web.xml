@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+	<display-name>sakai-resource</display-name>
+	<description>Sakai教学系统</description>
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>
+			org.sakaiproject.resource.util.CharsetEncodingFilter
+		</filter-class>
+		<init-param>
+			<param-name>charset</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<!-- Sakai的请求过滤器，用于处理url、session、上传等等-->
+	<filter>
+		<filter-name>sakai.request</filter-name>
+		<filter-class>org.sakaiproject.util.RequestFilter</filter-class>
+		<!-- If you need to do uploads you will need this -->
+		<init-param>
+			<param-name>upload.enabled</param-name>
+			<param-value>false</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>sakai.request</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>INCLUDE</dispatcher>
+	</filter-mapping>
+	<filter>
+		<filter-name>FileUploadFilter</filter-name>
+		<filter-class>com.ckfinder.connector.FileUploadFilter</filter-class>
+		<init-param>
+			<param-name>sessionCookieName</param-name>
+			<param-value>JSESSIONID</param-value>
+		</init-param>
+		<init-param>
+			<param-name>sessionParameterName</param-name>
+			<param-value>jsessionid</param-value>
+		</init-param>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>FileUploadFilter</filter-name>
+		<url-pattern>/resource/scripts/ckfinder/core/connector/java/connector.java</url-pattern>
+	</filter-mapping>
+
+	<!-- struts2配置-->
+	<filter>
+		<filter-name>struts2</filter-name>
+		<filter-class>
+			org.sakaiproject.resource.util.CKFinderFilter
+		</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>struts2</filter-name>
+		<url-pattern>*.do</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+	</filter-mapping>
+
+	<!-- Sakai 课程空间工具的servlet处理器，用于显示课程空间的首页-->
+	<servlet>
+		<servlet-name>sakai.course</servlet-name>
+		<servlet-class>
+			org.sakaiproject.resource.util.StrutsTool
+		</servlet-class>
+		<init-param>
+			<param-name>default</param-name>
+			<param-value>courseSpace.do</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	<!-- Sakai 课程空间工具的servlet处理器，用于显示课程模板管理的首页-->
+	<servlet>
+		<servlet-name>sakai.coursetemplate</servlet-name>
+		<servlet-class>
+			org.sakaiproject.resource.util.StrutsTool
+		</servlet-class>
+		<init-param>
+			<param-name>default</param-name>
+			<param-value>template.do</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	<!-- Sakai 课件资源工具的servlet处理器，用于显示课件资源的首页-->
+	<servlet>
+		<servlet-name>sakai.courseware</servlet-name>
+		<servlet-class>
+			org.sakaiproject.resource.util.StrutsTool
+		</servlet-class>
+		<init-param>
+			<param-name>default</param-name>
+			<param-value>coursewareIndex.do</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+
+	<!-- Sakai 文件管理工具的servlet处理器，用于显示文件管理的首页-->
+	<servlet>
+		<servlet-name>sakai.file</servlet-name>
+		<servlet-class>
+			org.sakaiproject.resource.util.StrutsTool
+		</servlet-class>
+		<init-param>
+			<param-name>default</param-name>
+			<param-value>file_lookUpRes.do</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	
+	<!-- 作业空间 -->
+	<servlet>
+		<servlet-name>sakai.test</servlet-name>
+		<servlet-class>
+			org.sakaiproject.resource.util.StrutsTool
+		</servlet-class>
+		<init-param>
+			<param-name>default</param-name>
+			<param-value>melete.do</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	
+	<servlet>
+	    <servlet-name>ConnectorServlet</servlet-name>
+	    <servlet-class>com.ckfinder.connector.ConnectorServlet</servlet-class>
+	    <init-param>
+	        <param-name>XMLConfig</param-name>
+	        <param-value>/resource/scripts/ckfinder/config.xml</param-value>
+	    </init-param>
+	    <init-param>
+	        <param-name>debug</param-name>
+	        <param-value>false</param-value>
+	    </init-param>
+	    <load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>ConnectorServlet</servlet-name>
+		<url-pattern>/resource/scripts/ckfinder/core/connector/java/connector.java</url-pattern>
+	</servlet-mapping>
+
+	<!-- Sakai 学习空间工具的servlet处理器，用于显示学习空间的首页-->
+	<!--  servlet>
+		<servlet-name>sakai.study</servlet-name>
+		<servlet-class> 
+			org.sakaiproject.resource.util.StrutsTool
+		</servlet-class>
+		<init-param>
+			<param-name>default</param-name>
+			<param-value>studySpace.do</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet--> 
+
+	<!-- Sakai 工具监听器 --> 
+	<listener>
+		<listener-class>
+			org.sakaiproject.util.ToolListener
+		</listener-class>
+	</listener>
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
+	<context-param> 
+		<param-name>log4jConfigLocation</param-name> 
+		<param-value>/WEB-INF/classes/log4j.properties</param-value> 
+	</context-param> 
+	<context-param> 
+		<param-name>webAppRootKey</param-name> 
+		<param-value>sakairesourse.root </param-value> 
+	</context-param> 
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/components.xml</param-value>
+	</context-param>
+
+	<!-- Sakai Spring监听器 -->
+	<listener>
+		<!-- <listener-class>
+			org.springframework.web.context.ContextLoaderListener
+		</listener-class> -->
+		<listener-class>org.sakaiproject.util.SakaiContextLoaderListener</listener-class>
+	</listener>
+	
+</web-app>

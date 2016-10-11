@@ -990,6 +990,31 @@ public class SimplePageBean {
 		return saveItem(i, true);
 	}
 	
+	public boolean saveOrUpdate(Object i) {
+		String err = null;
+		List<String>elist = new ArrayList<String>();
+		
+		try {
+			simplePageToolDao.saveOrUpdate(i,  elist, messageLocator.getMessage("simplepage.nowrite"), true);
+		} catch (Throwable t) {	
+			// this is probably a bogus error, but find its root cause
+			while (t.getCause() != null) {
+				t = t.getCause();
+			}
+			err = t.toString();
+		}
+		
+		// if we got an error from saveItem use it instead
+		if (elist.size() > 0)
+			err = elist.get(0);
+		if (err != null) {
+			setErrMessage(messageLocator.getMessage("simplepage.savefailed") + err);
+			return false;
+		}
+		
+		return true;
+	}
+
 	public boolean update(Object i) {
 		return update(i, true);
 	}
@@ -1150,11 +1175,11 @@ public class SimplePageBean {
 				item.setHtml(html);
 				item.setPrerequisite(this.prerequisite);
 				setItemGroups(item, selectedGroups);
-				update(item);
+				saveItem(item);
 			} else {
 				rv = "cancel";
 			}
-			placement.save();
+			// placement.save();
 
 			String errString = error.toString();
 			if (errString != null && errString.length() > 0)
@@ -1241,7 +1266,7 @@ public class SimplePageBean {
 			}
 		}
 
-		update(item);
+		saveOrUpdate(item);
 
 		return "success";
 	}
@@ -1512,7 +1537,7 @@ public class SimplePageBean {
 		}
 		
 		i.setAttribute("addedby", getCurrentUserId());
-		update(i);
+		saveOrUpdate(i);
 
 		return "importing";
 	}
@@ -1564,6 +1589,9 @@ public class SimplePageBean {
     // main code for adding a new item to a page
 	private SimplePageItem appendItem(String id, String name, int type)   {
 	    // add at the end of the page
+	        // minimize race conditions for sequence numbers by making sure we fetch items
+	        // we're going to update directly from the database
+		simplePageToolDao.setRefreshMode();
 	        List<SimplePageItem> items = getItemsOnPage(getCurrentPageId());
 		// ideally the following should be the same, but there can be odd cases. So be safe
 		long before = 0;
@@ -1622,7 +1650,6 @@ public class SimplePageBean {
 		// image, leave it blank, since browser will then use the native size
 		clearImageSize(i);
 
-		saveItem(i);
 		ToolSession toolSession = sessionManager.getCurrentToolSession();
 		toolSession.setAttribute("lessonbuilder.newitem", ""+i.getId()); 
 
@@ -1845,6 +1872,8 @@ public class SimplePageBean {
 		b = simplePageToolDao.deleteItem(i);
 		
 		if (b) {
+			// minimize opening for race conditions on sequence number by forcing new fetches
+			simplePageToolDao.setRefreshMode();
 			List<SimplePageItem> list = getItemsOnPage(getCurrentPageId());
 			for (SimplePageItem item : list) {
 				if (item.getSequence() > seq) {
@@ -2629,7 +2658,7 @@ public class SimplePageBean {
 		    i.setName(subpage.getTitle());
 		}
 
-		update(i);
+		saveOrUpdate(i);
 
 		if (makeNewPage) {
 		    // if creating new entry, go to it
@@ -2853,8 +2882,6 @@ public class SimplePageBean {
 			    i.setHeight(height);
 			}
 
-			update(i);
-
 			if (i.getType() == SimplePageItem.PAGE) {
 				SimplePage page = getPage(Long.valueOf(i.getSakaiId()));
 				if (page != null) {
@@ -2870,6 +2897,7 @@ public class SimplePageBean {
 			}
 
 			setItemGroups(i, selectedGroups);
+			update(i);
 
 			return "successEdit"; // Shouldn't reload page
 		}
@@ -3095,7 +3123,7 @@ public class SimplePageBean {
 				// no, add new item
 				i = appendItem(selectedEntity, selectedObject.getTitle(), SimplePageItem.FORUM);
 				i.setDescription("");
-				update(i);
+				saveItem(i);
 			    }
 			    return "success";
 			} catch (Exception ex) {
@@ -3172,7 +3200,7 @@ public class SimplePageBean {
 				//  i.setDescription("(" + messageLocator.getMessage("simplepage.due") + " " + df.format(selectedObject.getDueDate()) + ")");
 				//else
 				i.setDescription(null);
-				update(i);
+				saveItem(i);
 			    }
 			    return "success";
 			} catch (Exception ex) {
@@ -3249,7 +3277,7 @@ public class SimplePageBean {
 				    else
 					i.setFormat(format);
 				}
-				update(i);
+				saveItem(i);
 			    }
 			    return "success";
 			} catch (Exception ex) {
@@ -3733,7 +3761,6 @@ public class SimplePageBean {
 	       }
 	   }
 	   i.setGroups(groupString);
-	   update(i);
 
 	   return ret; // old value
        }
@@ -3832,8 +3859,10 @@ public class SimplePageBean {
 
 				    update(i);
 				}
-			    } else  // no, add new item
-				appendItem(selectedQuiz, selectedObject.getTitle(), SimplePageItem.ASSESSMENT);
+			    } else { // no, add new item
+				i = appendItem(selectedQuiz, selectedObject.getTitle(), SimplePageItem.ASSESSMENT);
+				saveItem(i);
+			    }
 			    return "success";
 			} catch (Exception ex) {
 			    ex.printStackTrace();
@@ -3886,7 +3915,8 @@ public class SimplePageBean {
 		String url = linkUrl;
 		url = normUrl(url);
 
-		appendItem(url, url, SimplePageItem.URL);
+		SimplePageItem i = appendItem(url, url, SimplePageItem.URL);
+		saveItem(i);
 
 		return "success";
 	}
@@ -3947,8 +3977,8 @@ public class SimplePageBean {
 			i.setDescription(description);
 			i.setHtml(mimetype);
 			i.setPrerequisite(this.prerequisite);
-			update(i);
 			setItemGroups(i, selectedGroups);
+			update(i);
 			return "success";
 		} else {
 			log.warn("editMultimedia Could not find multimedia object: " + itemId);
@@ -4050,7 +4080,15 @@ public class SimplePageBean {
 				}
 				
 				sitePage.setTitle(pageTitle);
-				siteService.save(site);
+				try {
+				    siteService.save(site);
+				} catch (Exception e) {
+				    // there's no actual error for title too long. I end up with a generic
+				    // Runtimeexception. For that reason we can only guess that this it the cause. I don't want to
+				    // check for 99 characters, because the kernel could change.
+				    setErrMessage(messageLocator.getMessage("simplepage.title_too_long"));
+				    return("failed");
+				}
 				page.setTitle(pageTitle);
 				page.setHidden(hidePage);
 				if (hasReleaseDate)
@@ -4193,23 +4231,10 @@ public class SimplePageBean {
 			if (name == null || name.length() == 0)
 				name = file.getName();
 			
-			int i = name.lastIndexOf("/");
-			if (i >= 0)
-				name = name.substring(i+1);
-			String base = name;
-			String extension = "";
-			i = name.lastIndexOf(".");
-			if (i > 0) {
-				base = name.substring(0, i);
-				extension = name.substring(i+1);
-			}
-			
 			mimeType = file.getContentType();
 			try {
-				ContentResourceEdit res = contentHostingService.addResource(collectionId, 
-						        fixFileName(collectionId, Validator.escapeResourceName(base), Validator.escapeResourceName(extension)),
-							"",
-						  	MAXIMUM_ATTEMPTS_FOR_UNIQUENESS);
+				String[] names = fixFileName(collectionId, name);
+				ContentResourceEdit res = contentHostingService.addResource(collectionId, names[0], names[1], MAXIMUM_ATTEMPTS_FOR_UNIQUENESS);
 				res.setContentType(mimeType);
 				res.setContent(file.getInputStream());
 				try {
@@ -4455,6 +4480,8 @@ public class SimplePageBean {
 			return "cancel";
 		}
 		
+		simplePageToolDao.setRefreshMode();
+
 		fixorder(); // order has to be contiguous or things will break
 
 		order = order.trim();
@@ -4635,7 +4662,7 @@ public class SimplePageBean {
 				entry.setPath(path);
 				entry.setToolId(toolId);
 				SimplePageItem i = findItem(itemId);
-				EventTrackingService.post(EventTrackingService.newEvent("lessonbuilder.read", "/lessonbuilder/page/" + i.getSakaiId(), complete));
+				EventTrackingService.post(EventTrackingService.newEvent("lessonbuilder.read", "/lessonbuilder/item/" + i.getSakaiId(), complete));
 				trackComplete(i, complete);
 				studentPageId = -1L;
 			}else if(path != null) {
@@ -4657,7 +4684,7 @@ public class SimplePageBean {
 				entry.setToolId(toolId);
 				entry.setDummy(false);
 				SimplePageItem i = findItem(itemId);
-				EventTrackingService.post(EventTrackingService.newEvent("lessonbuilder.read", "/lessonbuilder/page/" + i.getSakaiId(), complete));
+				EventTrackingService.post(EventTrackingService.newEvent("lessonbuilder.read", "/lessonbuilder/item/" + i.getSakaiId(), complete));
 				if (complete != wasComplete)
 				    trackComplete(i, complete);
 				studentPageId = -1L;
@@ -5612,21 +5639,79 @@ public class SimplePageBean {
 		this.multipartMap = multipartMap;
 	}
 
-	public String fixFileName(String collectionId, String name, String extension) {
-	    if(extension.equals("") || extension.startsWith(".")) {
-		// do nothing                                                                                               
-	    } else {
-		extension = "." + extension;
-	    }
-	    name = Validator.escapeResourceName(name.trim()) + Validator.escapeResourceName(extension);
-	    // allow for possible addition of -NN for uniqueness
-	    int maxname = 250 - collectionId.length() - 3;
-	    if (name.length() > maxname)
-		name = org.apache.commons.lang.StringUtils.abbreviateMiddle(name, "_", maxname);
-	    return name;
+        public String[] fixFileName(String collectionId, String name) {
+		String[] ret = new String[2];
+		ret[0] = "";
+		ret[1] = "";
+
+		if (name == null || name.equals(""))
+		    return ret;
+
+		int i = name.lastIndexOf("/");
+		if (i >= 0)
+		    name = name.substring(i+1);
+		String base = name;
+		String extension = "";
+		i = name.lastIndexOf(".");
+		if (i > 0) {
+		    base = name.substring(0, i);
+		    extension = name.substring(i+1);
+		}
+
+		base = Validator.escapeResourceName(base);
+		extension = Validator.escapeResourceName(extension);
+		ret[0] = base;
+		ret[1] = extension;
+
+		// that was easy. But now have to deal with names that are too long
+
+		// the longest identifier content service will actually take is 247. Note sure why
+		// from that subtract 1 for the period, and 4 for _xxx if we have duplicates
+		// that would give 242. Actually use 240, just for safety.
+		int maxname = 240 - collectionId.length();
+
+		if (maxname < 1) {
+		    return ret;  // nothing we can do. let other layers return error
+		}
+
+		int namelen = name.length();
+		
+		if (namelen <= maxname)
+		    return ret;  // easy case, no problem
+
+		int overage = namelen - maxname; // amount to cut
+
+		// doesn't seem to make sense to use ellipses for less than length of 8. better just to truncate
+		// if possible, truncate the base
+		if (base.length() > (overage + 8)) {
+		    ret[0] = org.apache.commons.lang.StringUtils.abbreviateMiddle(name, "_", maxname - extension.length());
+		    return ret;
+		}
+
+		// but what about b.eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, or more likely, .xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+		if (extension.length() > (overage + 8)) {
+		    ret[1] = org.apache.commons.lang.StringUtils.abbreviateMiddle(extension, "_", maxname - base.length());
+		    return ret;
+		}
+
+		// not enough for both name and extension. just use name
+		ret[1] = "";
+		    
+		if (base.length() <= maxname)
+		    return ret;
+
+		// base has to be larger than maxname, so final length will be maxname
+		if (maxname > 8) {
+		    ret[0] = org.apache.commons.lang.StringUtils.abbreviateMiddle(base, "_", maxname);
+		    return ret;
+		}
+
+		ret[0] = base.substring(0, maxname);  // string is longer than maxname by test above
+		ret[1] = "";
+
+		return ret;
+
 	}
-
-
 
 
 // for group-owned student pages, put it in the worksite of the current user
@@ -5914,17 +5999,7 @@ public class SimplePageBean {
 				String fname = file.getOriginalFilename();
 				if (fname == null || fname.length() == 0)
 					fname = file.getName();
-				int i = fname.lastIndexOf("/");
-				if (i >= 0)
-					fname = fname.substring(i+1);
-				String base = fname;
-				String extension = "";
-				i = fname.lastIndexOf(".");
-				if (i > 0) {
-					base = fname.substring(0, i);
-					extension = fname.substring(i+1);
-				}
-				
+
 				mimeType = file.getContentType();
 				try {
 					ContentResourceEdit res = null;
@@ -5935,18 +6010,21 @@ public class SimplePageBean {
 					    res = contentHostingService.editResource(resId);
 					} else {
 					    // otherwise create a new file
-					    res = contentHostingService.addResource(collectionId, 
-						                fixFileName(collectionId, Validator.escapeResourceName(base), Validator.escapeResourceName(extension)),
-								"",
-							  	MAXIMUM_ATTEMPTS_FOR_UNIQUENESS);
+					    String[] names = fixFileName(collectionId, fname);
+					    res = contentHostingService.addResource(collectionId, names[0], names[1], MAXIMUM_ATTEMPTS_FOR_UNIQUENESS);
 					}
 					if (isCaption)
 					    res.setContentType("text/vtt");
-					else
+					// octet-stream is probably bogus. let content hosting try to guess
+					else if (!"application/octet-stream".equals(mimeType))
 					    res.setContentType(mimeType);
 					res.setContent(file.getInputStream());
 					try {
 						contentHostingService.commitResource(res,  NotificationService.NOTI_NONE);
+						// reset mime type. kernel may have improved it if it was null
+						String newMimeType = res.getContentType();
+						if (newMimeType != null && !newMimeType.equals(""))
+						    mimeType = newMimeType;
 						// 	there's a bug in the kernel that can cause
 						// 	a null pointer if it can't determine the encoding
 						// 	type. Since we want this code to work on old
@@ -6101,7 +6179,7 @@ public class SimplePageBean {
 			    //		if (itemId == -1)
 			    //		saveItem(item);
 			    //		  else
-					update(item);
+					saveOrUpdate(item);
 			} catch (Exception e) {
 			    log.info("save error " + e);
 				// 	saveItem and update produce the errors
@@ -6346,9 +6424,8 @@ public class SimplePageBean {
 		item.setDescription(description);
 		item.setPrerequisite(this.prerequisite);
 
-		update(item);
-
 		setItemGroups(item, selectedGroups);
+		update(item);
 
 	}
 
@@ -6424,9 +6501,9 @@ public class SimplePageBean {
 		item.setDescription(description);
 		item.setPrerequisite(prerequisite);
 		item.setHtml(mimetype);
-		update(item);
 
 		setItemGroups(item, selectedGroups);
+		update(item);
 
 	}
 	
@@ -6435,7 +6512,7 @@ public class SimplePageBean {
 		if(canEditPage()) {
 			SimplePageItem item = appendItem("", messageLocator.getMessage("simplepage.comments-section"), SimplePageItem.COMMENTS);
 			item.setDescription(messageLocator.getMessage("simplepage.comments-section"));
-			update(item);
+			saveItem(item);
 			
 			// Must clear the cache so that the new item appears on the page
 			itemsCache.remove(getCurrentPage().getPageId());
@@ -6697,7 +6774,7 @@ public class SimplePageBean {
 		if(getCurrentPage().getOwner() == null && canEditPage()) {
 			SimplePageItem item = appendItem("", messageLocator.getMessage("simplepage.student-content"), SimplePageItem.STUDENT_CONTENT);
 			item.setDescription(messageLocator.getMessage("simplepage.student-content"));
-			update(item);
+			saveItem(item);
 			
 			// Must clear the cache so that the new item appears on the page
 			itemsCache.remove(getCurrentPage().getPageId());
@@ -7031,9 +7108,9 @@ public class SimplePageBean {
 		    item.setGradebookPoints(null);
 		item.setPrerequisite(prerequisite);
 		
-		update(item);
-		
 		setItemGroups(item, selectedGroups);
+
+		saveOrUpdate(item);
 
 		regradeAllQuestionResponses(item.getId());
 		
@@ -7772,7 +7849,7 @@ public class SimplePageBean {
 			String text = fields[1];
 			simplePageToolDao.addPeerEvalRow(item, rowId, text);
 		}
-		update(item);
+		saveOrUpdate(item);
 		return "success";
 	}
 
@@ -7800,7 +7877,7 @@ public class SimplePageBean {
 			item.setAttribute("numberOfAnnouncements", announcementsDropdown);
 			item.setPrerequisite(this.prerequisite);
 			setItemGroups(item, selectedGroups);
-			update(item);
+			saveOrUpdate(item);
 		}else{
 			status = "cancel";
 		}
@@ -8075,7 +8152,7 @@ public class SimplePageBean {
 			item.setAttribute("numberOfConversations", forumSummaryDropDown);
 			item.setPrerequisite(this.prerequisite);
 			setItemGroups(item, selectedGroups);
-			update(item);
+			saveOrUpdate(item);
 		} else {
 			status = "cancel";
 		}

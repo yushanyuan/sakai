@@ -21,10 +21,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
-import org.apache.wicket.util.convert.ConversionException;
-import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
-import org.apache.wicket.validation.IValidator;
 import org.sakaiproject.gradebookng.business.GbCategoryType;
 import org.sakaiproject.gradebookng.business.GbGradingType;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
@@ -81,7 +78,7 @@ public class AddOrEditGradeItemPanelContent extends Panel {
 			}
 
 			@Override
-			public void error(IValidationError error) {
+			public void error(final IValidationError error) {
 				// Use our fancy error message for all validation errors
 				error(getString("error.addgradeitem.title"));
 			}
@@ -111,7 +108,7 @@ public class AddOrEditGradeItemPanelContent extends Panel {
 			}
 
 			@Override
-			public void error(IValidationError error) {
+			public void error(final IValidationError error) {
 				// Use our fancy error message for all validation errors
 				error(getString("error.addgradeitem.points"));
 			}
@@ -121,7 +118,7 @@ public class AddOrEditGradeItemPanelContent extends Panel {
 		// due date
 		// TODO date format needs to come from i18n
 		final DateTextField dueDate = new DateTextField("duedate", new PropertyModel<Date>(assignmentModel, "dueDate"),
-				"MM/dd/yyyy") {
+				getString("format.date")) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -169,17 +166,17 @@ public class AddOrEditGradeItemPanelContent extends Panel {
 					public String getIdValue(final Long object, final int index) {
 						return object.toString();
 					}
+				}) {
+			private static final long serialVersionUID = 1L;
 
-				});
+			@Override
+			protected String getNullValidDisplayValue() {
+				return getString("gradebookpage.uncategorised");
+			}
+		};
 
-		// if we don't have a category assigned we want the 'Choose One'
-		// message. setNullValid = false
-		// if we have a category we want to be able to clear it. setNullValid =
-		// true
-		categoryDropDown.setNullValid(false);
-		if (assignment.getCategoryId() != null) {
-			categoryDropDown.setNullValid(true);
-		}
+		// always allow an assignment to be set as uncategorized
+		categoryDropDown.setNullValid(true);
 		categoryDropDown.setVisible(!categories.isEmpty());
 		categoryWrap.add(categoryDropDown);
 

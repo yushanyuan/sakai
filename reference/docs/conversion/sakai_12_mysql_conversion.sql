@@ -154,6 +154,13 @@ END;
 
 update SAKAI_SITE_PAGE set title = 'Overview' where title = 'Home';
 
+-- SAK-31136 some old Sakai MySQL databases have shorter data limits 
+ALTER TABLE MFR_MESSAGE_T MODIFY BODY LONGTEXT;
+ALTER TABLE MFR_TOPIC_T MODIFY EXTENDED_DESCRIPTION LONGTEXT;
+ALTER TABLE MFR_OPEN_FORUM_T MODIFY EXTENDED_DESCRIPTION LONGTEXT;
+ALTER TABLE MFR_PRIVATE_FORUM_T MODIFY EXTENDED_DESCRIPTION LONGTEXT;
+-- END SAK-31136
+
 --
 -- SAK-31563
 --
@@ -196,5 +203,8 @@ ALTER TABLE pasystem_popup_assign DROP COLUMN user_eid;
 ALTER TABLE pasystem_popup_dismissed DROP COLUMN user_eid;
 ALTER TABLE pasystem_banner_dismissed DROP COLUMN user_eid;
 
--- #3258 Drop this unused column
-ALTER TABLE gb_grade_record_t DROP COLUMN user_entered_grade;
+--
+-- SAK-31840 drop defaults as its now managed in the POJO
+--
+alter table GB_GRADABLE_OBJECT_T alter column IS_EXTRA_CREDIT drop default;
+alter table GB_GRADABLE_OBJECT_T alter column HIDE_IN_ALL_GRADES_TABLE drop default;

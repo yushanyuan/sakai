@@ -3,6 +3,7 @@ package org.sakaiproject.gradebookng.business.model;
 import java.io.Serializable;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,7 +29,7 @@ public class ImportedColumn implements Serializable {
 
 	@Getter
 	@Setter
-	private Type type = Type.GB_ITEM_WITHOUT_POINTS;
+	private Type type;
 
 	public enum Type {
 		GB_ITEM_WITH_POINTS,
@@ -51,6 +52,28 @@ public class ImportedColumn implements Serializable {
 	}
 
 	/**
+	 * Helper to determine if the type of column is a gradeItem
+	 * @return
+	 */
+	public boolean isGradeItem() {
+		if(this.type == Type.GB_ITEM_WITH_POINTS || this.type == Type.GB_ITEM_WITHOUT_POINTS) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Helper to determine if the type of column is a comment column - purely for convenience
+	 * @return
+	 */
+	public boolean isComment() {
+		if(this.type == Type.COMMENTS) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Column titles are the only thing we care about for comparisons so that we can filter out duplicates.
 	 * Must also match type and exclude IGNORE
 	 */
@@ -67,6 +90,14 @@ public class ImportedColumn implements Serializable {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder()
+				.append(this.columnTitle)
+				.append(this.type)
+				.toHashCode();
 	}
 
 }

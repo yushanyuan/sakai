@@ -1,5 +1,8 @@
 package org.sakaiproject.gradebookng.business;
 
+import java.math.RoundingMode;
+import java.text.Format;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,7 +29,6 @@ import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
-import org.sakaiproject.gradebookng.business.dto.AssignmentOrder;
 import org.sakaiproject.gradebookng.business.exception.GbException;
 import org.sakaiproject.gradebookng.business.model.GbCourseGrade;
 import org.sakaiproject.gradebookng.business.model.GbGradeCell;
@@ -489,13 +491,20 @@ public class GradebookNgBusinessService {
 			// the passed in grades represents a percentage so the number needs to be adjusted back to points
 			final Double newGradePercentage = NumberUtils.toDouble(newGrade);
 			final Double newGradePointsFromPercentage = (newGradePercentage / 100) * maxPoints;
-			newGradeAdjusted = FormatHelper.formatDoubleToTwoDecimalPlaces(newGradePointsFromPercentage);
+			newGradeAdjusted = FormatHelper.formatDoubleToDecimal(newGradePointsFromPercentage);
 
 			// only convert if we had a previous value otherwise it will be out of sync
 			if (StringUtils.isNotBlank(oldGradeAdjusted)) {
+				// To check if our data is out of date, we first compare what we think
+				// is the latest saved score against score stored in the database. As the score
+				// is stored as points, we must convert this to a percentage. To be sure we're
+				// comparing apples with apples, we first determine the number of decimal places
+				// on the score, so the converted points-as-percentage is in the expected format.
+
 				final Double oldGradePercentage = NumberUtils.toDouble(oldGrade);
 				final Double oldGradePointsFromPercentage = (oldGradePercentage / 100) * maxPoints;
-				oldGradeAdjusted = FormatHelper.formatDoubleToTwoDecimalPlaces(oldGradePointsFromPercentage);
+
+				oldGradeAdjusted = FormatHelper.formatDoubleToMatch(oldGradePointsFromPercentage, storedGradeAdjusted);
 			}
 
 			// we dont need processing of the stored grade as the service does that when persisting.
@@ -1910,28 +1919,7 @@ public class GradebookNgBusinessService {
 		return false;
 	}
 
-	/**
-	 * Comparator class for sorting a list of AssignmentOrders
-	 */
-	class AssignmentOrderComparator implements Comparator<AssignmentOrder> {
-		@Override
-		public int compare(final AssignmentOrder ao1, final AssignmentOrder ao2) {
-			// Deal with uncategorized assignments (nulls!)
-			if (ao1.getCategory() == null && ao2.getCategory() == null) {
-				return ((Integer) ao1.getOrder()).compareTo(ao2.getOrder());
-			} else if (ao1.getCategory() == null) {
-				return 1;
-			} else if (ao2.getCategory() == null) {
-				return -1;
-			}
-			// Deal with friendly categorized assignments
-			if (ao1.getCategory().equals(ao2.getCategory())) {
-				return ((Integer) ao1.getOrder()).compareTo(ao2.getOrder());
-			} else {
-				return ao1.getCategory().compareTo(ao2.getCategory());
-			}
-		}
-	}
+
 
 	/**
 	 * Comparator class for sorting an assignment by the grades.
@@ -2021,8 +2009,8 @@ public class GradebookNgBusinessService {
 			final int gradeIndex1 = this.ascendingGrades.indexOf(letterGrade1);
 			final int gradeIndex2 = this.ascendingGrades.indexOf(letterGrade2);
 
-			final Double calculatedGrade1 = Double.valueOf(cg1.getCalculatedGrade());
-			final Double calculatedGrade2 = Double.valueOf(cg2.getCalculatedGrade());
+			final Double calculatedGrade1 = cg1.getCalculatedGrade() == null ? null : Double.valueOf(cg1.getCalculatedGrade());
+			final Double calculatedGrade2 = cg2.getCalculatedGrade() == null ? null : Double.valueOf(cg2.getCalculatedGrade());
 
 			return new CompareToBuilder()
 					.append(gradeIndex1, gradeIndex2)

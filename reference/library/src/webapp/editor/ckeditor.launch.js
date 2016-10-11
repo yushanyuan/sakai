@@ -28,6 +28,7 @@ sakai.editor.editors.ckeditor = sakai.editor.editors.ckeditor || {} ;
 
 //get path of directory ckeditor 
 var basePath = "/library/editor/ckextraplugins/"; 
+var webJars = "/library/webjars/"
 
 // Please note that no more parameters should be added to this signature.
 // The config object allows for name-based config options to be passed.
@@ -167,6 +168,23 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         pasteFromWordRemoveFontStyles : false,
         pasteFromWordRemoveStyles : false,
         autosave_saveDetectionSelectors : "form input[type='button'],form input[type='submit']",
+        //Delay for autosave
+        autosave_delay: 300,
+        //autosave_messageType can be "no" or "notification"
+        autosave_messageType : "statusbar", 
+
+        //wordcount Plugin see https://github.com/w8tcha/CKEditor-WordCount-Plugin for more config options
+        //This value should match the one in antisamy (kernel/kernel-impl/src/main/resources/antisamy/low-security-policy.xml)
+        wordcount : {
+            "maxCharCount" : 1000000,
+            //Previous behavior
+            "countSpacesAsCharsHTML" : true,
+            "countHTML" : true,
+            "showParagraphs" : false,
+            "showWordCount" : true,
+            "showCharCount" : true,
+        },
+
         //SAK-29598 - Add more templates to CK Editor
         templates_files: [basePath+"templates/default.js"],
         templates: 'customtemplates'
@@ -187,12 +205,12 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
             CKEDITOR.plugins.addExternal('widget',basePath+'widget/', 'plugin.js');
             CKEDITOR.plugins.addExternal('iframedialog',basePath+'iframedialog/', 'plugin.js');
             CKEDITOR.plugins.addExternal('movieplayer',basePath+'movieplayer/', 'plugin.js');
-            CKEDITOR.plugins.addExternal('wordcount',basePath+'wordcount/', 'plugin.js');
             CKEDITOR.plugins.addExternal('fmath_formula',basePath+'fmath_formula/', 'plugin.js');
             CKEDITOR.plugins.addExternal('audiorecorder',basePath+'audiorecorder/', 'plugin.js');
             CKEDITOR.plugins.addExternal('image2',basePath+'image2/', 'plugin.js');
             //Autosave has a dependency on notification
-            CKEDITOR.plugins.addExternal('autosave',basePath+'autosave/', 'plugin.js');
+            CKEDITOR.plugins.addExternal('autosave',webJars+'autosave/8541f541d9985cfd0859c7d8eb6be404afe95a2d/', 'plugin.js');
+            CKEDITOR.plugins.addExternal('wordcount',webJars+'wordcount/4897cb23a9f2ca7fb6b792add4350fb9e2a1722c/', 'plugin.js');
             CKEDITOR.plugins.addExternal('notification',basePath+'notification/', 'plugin.js');
             CKEDITOR.plugins.addExternal('fontawesome',basePath+'fontawesome/', 'plugin.js');
             /*
@@ -209,12 +227,16 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
              */
             //ckconfig.atd_rpc='//localhost/proxy/spellcheck';
             //ckconfig.extraPlugins+="atd-ckeditor,";
-            //ckconfig.contentsCss = basePath+'/atd-ckeditor/atd.css';
+            //ckconfig.contentsCss = [basePath+'atd-ckeditor/atd.css'];
 
             ckconfig.extraPlugins+="image2,audiorecorder,movieplayer,wordcount,fmath_formula,autosave,fontawesome,notification";
 
             //SAK-29648
-            ckconfig.contentsCss = basePath+'/fontawesome/font-awesome/css/font-awesome.min.css';
+            ckconfig.contentsCss = [basePath+'/fontawesome/font-awesome/css/font-awesome.min.css'];
+            //If the siteskin is defined, add the print.css
+            if (sakai.editor.sitePrintSkin) {
+                ckconfig.contentsCss.push(sakai.editor.sitePrintSkin);
+            } 
             CKEDITOR.dtd.$removeEmpty.span = false;
             CKEDITOR.dtd.$removeEmpty['i'] = false;
         }

@@ -76,7 +76,9 @@ import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
 import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
 import org.sakaiproject.lessonbuildertool.SimplePage;
 import org.sakaiproject.lessonbuildertool.SimplePageItem;
+import org.sakaiproject.lessonbuildertool.SimplePageLogEntry;
 import org.sakaiproject.lessonbuildertool.service.LessonsAccess;
+import org.sakaiproject.lessonbuildertool.service.LessonBuilderAccessService;
 
 /**
  * <p>
@@ -104,6 +106,7 @@ public class AjaxServer extends HttpServlet
    private static AuthzGroupService authzGroupService;
    private static SimplePageToolDao simplePageToolDao;
    private static LessonsAccess lessonsAccess;
+   private static LessonBuilderAccessService lessonBuilderAccessService;
 
    public void setSimplePageToolDao(Object dao) {
        log.info("setdao " + dao);
@@ -479,6 +482,8 @@ public class AjaxServer extends HttpServlet
 	    return null;
 	}
 	
+	simplePageToolDao.setRefreshMode();
+
 	boolean below = false;
 	itemId = itemId.trim();
 	if (itemId.startsWith("-")) {
@@ -611,6 +616,8 @@ public class AjaxServer extends HttpServlet
 	    return null;
 	}
 
+	simplePageToolDao.setRefreshMode();
+
 	itemId = itemId.trim();
 	// we don't actually use the integers. Just for syntax checking
 	int widthi = 0;
@@ -683,6 +690,8 @@ public class AjaxServer extends HttpServlet
 			log.error("Ajax setSectionCollapsible passed null argument");
 			return null;
 		}
+
+		simplePageToolDao.setRefreshMode();
 
 		itemId = itemId.trim();
 		// we don't actually use the integers. Just for syntax checking
@@ -772,6 +781,8 @@ public class AjaxServer extends HttpServlet
 	    return null;
 	}
 
+	simplePageToolDao.setRefreshMode();
+
 	itemId = itemId.trim();
 
 	// currently this is only needed by the instructor
@@ -816,6 +827,51 @@ public class AjaxServer extends HttpServlet
 	simplePageToolDao.quickDelete(item);
 
 	return "ok";
+
+    }
+
+    public static String isLogged(String itemId) {
+	if (itemId == null) {
+	    log.error("Ajax isLogged passed null itemid");
+	    return null;
+	}
+
+	itemId = itemId.trim();
+
+	// maybe this isn't needed. Just trying to verify that user
+	// is actually in the site
+	SimplePageItem item = null;
+	SimplePage page = null;
+	String siteId = null;
+	try {
+	    item = simplePageToolDao.findItem(Long.parseLong(itemId));
+	    page = simplePageToolDao.getPage(item.getPageId());
+	    siteId = page.getSiteId();
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    log.error("Ajax track passed invalid data " + e);
+	    return null;
+	}
+	// user can pass any item id they want. It doesnt' make sense to protect against this, since doing that is
+	// more work than just looking at the link. But only allow it for actual links.
+	if (siteId == null || item.getType() != SimplePageItem.RESOURCE) {
+	    log.error("Ajax isLogged passed bad item " + itemId);
+	    return null;
+	}
+
+	String ref = "/site/" + siteId;
+	if (!SecurityService.unlock(SimplePage.PERMISSION_LESSONBUILDER_READ, ref)) {
+	    // user doesn't have permission in site
+	    // not worth testing whether they have access to the page
+	    return null;
+	}
+
+	// there should be no required items on student pages, so we just pass -1
+	SimplePageLogEntry entry = simplePageToolDao.getLogEntry(SessionManager.getCurrentSessionUserId(), item.getId(), -1L);
+	if (entry != null)
+	    return "ok";
+	else
+	    return "fail";
 
     }
 
@@ -891,6 +947,9 @@ public class AjaxServer extends HttpServlet
 	  String itemId = req.getParameter("itemid");
 	  String csrfToken = req.getParameter("csrf");
 	  out.println(deleteItem(itemId, csrfToken));
+      } else if (op.equals("islogged")) {
+	  String itemId = req.getParameter("itemid");
+	  out.println(isLogged(itemId));
       }
 
    }
@@ -909,6 +968,10 @@ public class AjaxServer extends HttpServlet
 
     public void setLessonsAccess(LessonsAccess s) {
         lessonsAccess = s;
+    }
+
+    public void setLessonBuilderAccessService(LessonBuilderAccessService s) {
+        lessonBuilderAccessService = s;
     }
 
 }

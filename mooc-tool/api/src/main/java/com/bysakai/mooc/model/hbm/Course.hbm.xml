@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping
+    PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.bysakai.mooc.model">
+
+	<class name="Course" table="MOOC_COURSE">
+	    
+	    <id name="id" column="ID" length="36"  type="string">
+	    	<generator class="org.sakaiproject.id.hbm.IdGenerator"/>
+	    </id>
+	     
+ 		<property name="name" column="NAME"  type="string" length="99"  not-null="true" />
+ 		<property name="desc" column="DESCRIPTION"  type="string"  length="4000" />
+		<property name="syllabus" column="SYLLABUS"  type="string"  length="4000" />
+		<property name="siteId" column="SITE_ID"  type="string"  length="88" />
+		<property name="sakaiSiteUrl" column="SITE_URL"  type="string"  length="2000" />
+		<property name="qas" column="QAS"  type="string"  length="4000" />
+		<property name="image" column="IMAGE" type="string" length="2000" />
+		<property name="video" column="VIDEO" type="string" length="2000" />
+		<property name="createDate" column="CREATEDATE" type="timestamp" />
+		<property name="startDate" column="START_DATE" type="timestamp" />
+		<property name="endDate" column="END_DATE" type="timestamp" />
+		<property name="assistant" column="ASSISTANT" type="string" length="200" />
+		<property name="certification" column="CERTIFICATION" type="string" length="200" />
+		<property name="studyTime" column="STUDY_TIME" type="string" length="200" />
+		<property name="studyNum" column="STUDY_NUM" type="integer" />
+	
+		<many-to-one name="teacher" column="TEACHER_ID" />
+		
+		<many-to-one name="category"  column="CATEGORY_ID" />
+		
+		<bag name="relatedCourse" table="MOOC_RELATED_COURSE" cascade="all">
+			<key column="COURSE_ID"></key>
+			<many-to-many column="RELATED_COURSE_ID" class="Course" />
+		</bag> 
+  	</class>
+  
+	<!-- get a count of all unread messages for a given user -->
+	<query name="findByCategoryId">
+    	<![CDATA[from Course c WHERE c.category.id =:categoryId order by c.name ]]>
+	</query>
+	 
+	
+</hibernate-mapping>

@@ -1,0 +1,1062 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>开放课程平台</title>
+    <link rel="stylesheet" href="inc/css/reset.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="inc/css/m.css" type="text/css" media="screen" />
+    <script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+	<script type="text/javascript">
+	    var code = '';
+		$(document).ready(function(){
+			var url = window.location.href;
+			var c_code = url.split("zclass");
+			if(c_code.length<2){
+				c_code = ["","="];
+			}
+			code = c_code[1].split("=")[1];
+			if(code==""){
+				code = 'all';
+			}
+			ajax_spelist(code);
+			
+			var q = getUrlParam("q");
+			if(q!=null && q!=""){
+				q = unescape(q);
+				$("#queryText").val(q);
+			}
+			var status = getUrlParam("status");
+			if(status!=null && status!=""){
+				$("input[name='status']:checkbox[value='"+status+"']").attr('checked','true');
+			}
+			ajxe(code,q,status,getUrlParam("pages"));
+			$('input[type=checkbox]').click(function(){
+			 	//$(this).attr('checked','checked').siblings().removeAttr('checked');
+			 	if($(this).is(':checked')){ 
+			 		$(this).attr('checked',true).siblings().attr('checked',false);
+			 	}else{
+			 		$(this).attr('checked',false).siblings().attr('checked',false);
+			 	}
+			 	queryCourseByStatus();
+			});
+		});
+		function getUrlParam(name){  
+		    //构造一个含有目标参数的正则表达式对象  
+		    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");  
+		    //匹配目标参数  
+		    var r = window.location.search.substr(1).match(reg);  
+		    //返回参数值  
+		    if (r!=null) return unescape(r[2]);  
+		    return null;  
+		} 
+		  
+		//获取专业列表
+		function ajax_spelist(c){
+			 $.ajax({
+					type: 'GET',
+					url:'../category/json/list.htm',
+					success: function(data){
+						if(!data){
+							return;
+						}
+						data = data.data;
+						var html = "";
+						for(var i=0; i<data.length; i++){
+							try{
+								html = html +"<dd class='node' value='"+data[i].id+"'><a href='javascript:void(0);'><i class='doc'></i>"+data[i].name+"<i class='hover'></i></a></dd>";
+							}catch(e){
+							}
+						}
+						$("#speListId").after(html);
+						$('.class-list>.fl>dl .node').removeClass('fire');
+						$("dd[value='"+c+"']").addClass('fire');
+						$('.class-list>.fl>dl .node').click(function(){
+				            $('.class-list>.fl>dl .node').removeClass('fire');
+				            $(this).addClass('fire');
+				            $('.class-list>.fr .box').removeClass('box-fire').eq($(this).index('.class-list>.fl>dl .node')).addClass('box-fire');
+				            setCode($(this).attr("value"));
+							ajxe(code,'','','');
+				        })
+					}
+			  });
+		}
+		
+		function setCode(c){
+			code = c;
+		}
+		//根据专业请求课程
+		function ajxe(code,q,status,pages){
+			if(pages==null || pages==""){
+				pages = 1;
+				$("#pages").val(pages);
+			}
+			$.ajax({
+ 				type: 'POST',
+	   			url:'../course/json/list/'+code+'.htm',
+	   			data:{q:q,status:status,pages:pages},
+			    success: function(data){
+			         try{ 
+			        	//data = JSON.parse(data);
+						if(!data){
+							return;
+						}
+						data = data.data;
+						var html ="";
+						var load = "<li class=\"more\" id=\"more\"><a href=\"javascript:queryCourseByPages()\">显示更多</a></li>";
+						for(var i=0; i<data.length; i++){
+							try{
+								html = html + "<li class='clear'>";
+								html = html + "<a href='content.html?code="+data[i].id+"'><img src='"+data[i].image+"' class='fl cover'></a>";
+								html = html + "<div class='info fl'>";
+								html = html + "<span>学校：</span>北京邮电大学<br>";
+								html = html + "<span>教师：</span>"+data[i].teacher.name;
+								html = html + "</div><div class='info2 f'>";
+								//html = html + "开课时间："+new Date(data[i].startDate).toLocaleDateString()+"-"+new Date(data[i].endDate).toLocaleDateString();
+								html = html + "开课时间："+new Date(data[i].startDate).toLocaleDateString();
+								if(data[i].certification!=null && data[i].certification!=""){
+									html = html + "<br>认证："+data[i].certification;
+								}else{
+									html = html + "<br>";
+								}
+								if(data[i].assistant!=null && data[i].assistant!=""){
+									html = html + "<br>助教："+data[i].assistant;
+								}else{
+									html = html + "<br>";
+								}
+								html = html + "</div>";
+								html = html + "<a href='content.html?code="+data[i].id+"' class='btn'>课程名称："+data[i].name+"</a>";
+								html = html + "</li>";
+							}catch(e){
+							}
+							
+						}
+						//html = html + " <li class='more'><a href='#'>显示更多</a></li>";
+						//$("#content").html(html);
+						if(pages==null || pages == "" || pages <= 1){
+							$("#content li").remove();
+						}
+						$("#content li").remove("li[id=more]");
+						$("#content").append(html);
+						$("#content").append(load);
+ 						 $('.box li').on("mouseenter",function(){
+							$(this).addClass('hover');
+						 });
+						$('.box li').on("mouseleave",function(){
+							$(this).removeClass('hover');
+						 });
+
+						if(data.length==0){
+							$("#more").hide();
+						}
+		 			    }catch(ex){
+				     }	
+				  }
+		   	 });
+			
+		}
+		function queryCourse(){
+			var q = $("#queryText").val();
+			window.location.href = "list.html?q="+escape(q);
+		}
+		function queryCourseByStatus(){
+			var q = $("#queryText").val();
+			var status = "";
+            $("input[name='status']:checkbox").each(function(){ 
+                if($(this).attr("checked")){
+                	status = $(this).val();
+                }
+            });
+			window.location.href = "list.html?q="+escape(q)+"&status="+status;
+		}
+		
+		function queryCourseByPages(){
+			var q = $("#queryText").val();
+			var status = "";
+            $("input[name='status']:checkbox").each(function(){ 
+                if($(this).attr("checked")){
+                	status = $(this).val();
+                }
+            });
+            
+            var pages = $("#pages").val();
+            $("#pages").val(parseInt(pages)+1);
+            ajxe(code,q,status,parseInt(pages)+1);
+		}
+	</script>
+</head>
+<body>
+
+<div class="header">
+    <div class="main-div clear">
+        <a href="main.html" class="logo fl"><img src="inc/img/logo.png"></a>
+        <ul class="nav fl">
+            <li><a class="fire" href="#">课程<i></i></a></li>
+            <li><a href="main.html#school">合作伙伴<i></i></a></li>
+        </ul>
+        <div class="search fl">
+            <input type="text" id="queryText" placeholder="搜索想要了解的课程">
+            <a href="javascript:queryCourse();"></a>
+        </div>
+        <ul class="fr right">
+            <li><a href="../user/regist.htm">注册</a></li>
+            <li><a href="login.html">登录</a></li>
+            <li><a href="#"><img src="inc/img/login-qq.png" ></a></li>
+            <li><a href="#"><img src="inc/img/login-weibo.png" ></a></li>
+        </ul>
+    </div>
+</div>
+<div class="main-div class-list clear">
+    <div class="fl">
+        <div class="title">课程列表</div>
+        <dl>
+             
+            <dt><i class="dir"></i>专业课程</dt>
+            <dd class="line" id="speListId"></dd>
+            <!--  
+            <dd class="node" value="z_txgc"><a href="javascript:void(0);"><i class="doc"></i>通信工程<i class="hover"></i></a></dd>
+            <dd class="node" value="z_zdh"><a href="javascript:void(0);"><i class="doc"></i>自动化<i class="hover"></i></a></dd>
+            <dd class="node" value="z_wlgc"><a href="javascript:void(0);"><i class="doc"></i>物流工程<i class="hover"></i></a></dd>
+            <dd class="node" value="z_scyx"><a href="javascript:void(0);"><i class="doc"></i>市场营销<i class="hover"></i></a></dd>
+			-->
+
+        </dl>
+    </div>
+    <div class="fr">
+        <div class="filter clear">
+            <!-- <div class="search fl">
+               <input type="text" placeholder="搜索一门课程">
+                <a href="javascript:void(0);" class="btn"></a>
+                <ul class="drop">
+                    <li><a href="#">下拉内容</a></li>
+                    <li><a href="#">下拉内容</a></li>
+                    <li><a href="#">下拉内容</a></li>
+                    <li><a href="#">下拉内容</a></li>
+                    <li><a href="#">下拉内容</a></li>
+                    <li><a href="#">下拉内容</a></li>
+                </ul> 
+            </div>--> 
+            <div class="fr">
+                仅显示：
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <label><input type="checkbox" name="status" value="1" >已开课 
+                &nbsp;&nbsp;&nbsp;&nbsp;
+               <input type="checkbox" name="status" value="2" >未开课</label>
+                <input id="pages" type="hidden" value="1"/>
+            </div>
+        </div>
+        <ul id="content" class="box box-fire">
+            <!-- <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>
+                    <br>
+                    <span>教师：</span>
+                </div>
+                <div class="info2 f">
+                  
+                    <br>认证：
+                    <br>
+                </div>
+                <a href="#" class="btn">课程名称：</a>
+            </li>-->
+        </ul>
+         
+<!--
+        <ul class="box">
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="more"><a href="#">显示更多</a></li>
+        </ul>
+
+        <ul class="box">
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="more"><a href="#">显示更多</a></li>
+        </ul>
+
+        <ul class="box">
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="more"><a href="#">显示更多</a></li>
+        </ul>
+
+        <ul class="box">
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="more"><a href="#">显示更多</a></li>
+        </ul>
+
+        <ul class="box">
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="more"><a href="#">显示更多</a></li>
+        </ul>
+
+        <ul class="box">
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="more"><a href="#">显示更多</a></li>
+        </ul>
+
+
+        <ul class="box">
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="more"><a href="#">显示更多</a></li>
+        </ul>
+
+        <ul class="box">
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="more"><a href="#">显示更多</a></li>
+        </ul>
+
+        <ul class="box">
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="more"><a href="#">显示更多</a></li>
+        </ul>
+
+        <ul class="box">
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="clear">
+                <a href="#"><img src="inc/img/tmp3.png" class="fl cover"></a>
+                <div class="info fl">
+                    <span>学校：</span>清华大学
+                    <br>
+                    <span>教师：</span>周杰伦
+                </div>
+                <div class="info2 f">
+                    开课时间：2015年7月26日－2015年9月28日
+                    <br>认证：由EDX联盟高校认证
+                    <br>助教：张杰
+                </div>
+                <a href="#" class="btn">课程名称：电子科学</a>
+            </li>
+            <li class="more"><a href="#">显示更多</a></li>
+        </ul>
+-->
+
+    </div>
+
+</div>
+
+<div class="footer">
+    <div class="main-div">
+        <div class="l"></div>
+        <div class="r"><span>联系我们</span>010-82056326<br>82056440 82056438</div>
+        <div class="l1">
+            <a href="#">关于我们</a>
+            |
+            <a href="#">发现课程</a>
+            |
+            <a href="#">关注我们</a>
+            |
+            <a href="#">帮助中心</a>
+        </div>
+        <div class="l2">
+            相关链接：
+            <a href="#">北京学习中心</a>
+            -
+            <a href="#">网络统考网</a>
+            -
+            <a href="#">学信网学历认证</a>
+            -
+            <a href="#">北邮主页</a>
+            -
+            <a href="#">北邮研究生院</a>
+            -
+            <a href="#">志愿者网</a>
+            -
+            <a href="#">管理入口</a>
+            <br>
+            Copyright@bysakai.com, All Rights Reserved.  
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
+<script>
+    $(function(){
+        $(".search .btn").click(function(){
+            $(".search .drop").stop().fadeIn();
+        })
+		/*
+        $('.box li').hover(function(){
+            $(this).addClass('hover');
+        },function(){
+            $(this).removeClass('hover');
+        })*/
+		
+        
+    })
+</script>

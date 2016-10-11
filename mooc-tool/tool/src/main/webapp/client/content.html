@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>开放课程平台</title>
+    <link rel="stylesheet" href="inc/css/reset.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="inc/css/m.css" type="text/css" media="screen" />
+    <script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+    <script src="//api.html5media.info/1.1.8/html5media.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var url = window.location.href;
+			var c_code = url.split("code");
+			if(c_code.length<2){
+				return
+			}
+			var code = c_code[1].split("=")[1];		
+			
+			$.ajax({
+ 				type: 'GET',
+	   			url:'../course/json/one/'+code+'.htm',
+			    success: function(data){
+			         try{ 
+			        	//data = JSON.parse(data);
+						if(!data){
+							return;
+						}
+						data = data.data;
+						$("#c_name").html(data.name+"<i></i>");
+						$("#c_desc").html(data.desc.length>200?data.desc.substring(0,200)+"...":data.desc);
+						$("#c_url_hidden_id").val(data.sakaiSiteUrl);
+						//$("#c_url").attr("href",data.url);
+						$("#c_teacher").html("<span>教课教师</span>"+data.teacher.name);
+						$("#c_teacher_desc").html("<span>"+data.teacher.name+"</span>"+data.teacher.profile);
+						$("#t_img").attr("src",data.teacher.image);
+						$("#vedio").attr("src",data.video);
+						$("#c_chapter").html(data.syllabus);
+						$("#c_studyNum").html("<span>报名人数</span>"+data.studyNum+"人");
+						$("#c_studyTime").html("<span>学时</span>"+data.studyTime);
+						$("#c_certification").html("<span>认证证书</span>"+data.certification);
+						//$("#c_time").html("<span>开课时间</span>"+new Date(data.startDate).toLocaleDateString()+"-"+new Date(data.endDate).toLocaleDateString());
+						$("#c_time").html("<span>开课时间</span>"+new Date(data.startDate).toLocaleDateString());
+						$("#qa").html(data.qas);
+						
+						$("#relate li").remove();
+						if(data.relatedCourse!=null && data.relatedCourse.length>0){
+							$.each(data.relatedCourse, function (n, value) {  
+								$("#relate").append("<li><a href=\"content.html?code="+value.id+"\"><img src=\""+value.image+"\"><span>"+value.name+"</span></a></li>");
+					        }); 
+							$('#relate li').hover(function(){
+					            $(this).find('span').stop().fadeIn();
+					        },function(){
+					            $(this).find('span').stop().fadeOut();
+					        })
+						}else{
+							$("#relateCourse").css("display","none");
+						}
+		 			    }catch(ex){
+				     }	
+				  }
+		   	 });
+			
+			
+			$("#c_url").click(function(){
+				 
+				var curl = $("#c_url_hidden_id").val();
+				if(!curl){
+					curl = "/portal";
+				}
+				window.location.href = "login.html?cc="+curl;
+			});
+		
+		});
+		function queryCourse(){
+			var q = $("#queryText").val(); 
+			window.location.href = "list.html?q="+escape(q);
+		}
+	</script>
+</head>
+<body>
+
+<div class="header">
+    <div class="main-div clear">
+        <a href="main.html" class="logo fl"><img src="inc/img/logo.png"></a>
+        <ul class="nav fl">
+            <li><a class="fire" href="list.html">课程<i></i></a></li> 
+            <li><a href="main.html#school">合作伙伴<i></i></a></li>
+        </ul>
+        <div class="search fl">
+            <input type="text" id="queryText" placeholder="搜索想要了解的课程">
+            <a href="javascript:queryCourse();"></a>
+        </div>
+        <ul class="fr right">
+            <li><a href="../user/regist.htm">注册</a></li>
+            <li><a href="login.html">登录</a></li>
+            <li><a href="#"><img src="inc/img/login-qq.png" ></a></li>
+            <li><a href="#"><img src="inc/img/login-weibo.png" ></a></li>
+        </ul>
+    </div>
+</div>
+<div class="main-div class-detail clear">
+    <div class="title"><span>课程详细</span></div>
+    <div class="clear box1">
+        <div class="fl">
+            <i class="line"></i>
+            <div id="c_name" class="title"><i></i></div>
+            <div id="c_desc" class="desc">
+               
+            </div>
+            <a id="c_url" class="btn" href="#">加入课程</a>
+            <input type="hidden" name="c_url_hidden" id="c_url_hidden_id" />
+        </div>
+        <div class="fr"><video id="vedio" src="video/工业网络技术/c_0.mp4" width="477" height="307" controls ></video></div>
+    </div>
+
+    <div class="box2 clear" >
+        <div class="fl">
+            <i class="line"></i>
+            <div class="title">课程章节</div>
+            <div id="c_chapter" class="desc">
+
+            </div>
+            <a href="javascript:$('.class-detail .box2>.fl .desc').scrollTop($('.class-detail .box2>.fl .desc').scrollTop()+50);void(0);" class="down"></a>
+        </div>
+        <div class="fr"> 
+            <ul class="box3"> 
+                <li id="c_studyNum"><span>报名人数</span>0人</li>
+                <li id="c_studyTime"><span>学时</span>0</li>
+                <li id="c_certification"><span>认证证书</span></li>
+                <li id="c_teacher"><span>教课教师</span></li>
+                <li id="c_time"><span>开课时间</span></li>
+                <li class="no-border-bottom"><span>分享</span><a href="#">新浪微博</a> <a href="#">腾讯微博</a></li>
+            </ul>
+
+            <div class="box4">
+                <div class="title"><img src="inc/img/icon-x1.png">教师简介<img id="t_img" src="inc/img/avatar.png" class="avatar"></div>
+                <div id="c_teacher_desc" class="desc">
+                    <span></span>
+                    
+                </div>
+            </div>
+            <div class="box4">
+                <div class="title"><img src="inc/img/icon-x2.png">常见问题</div>
+                <div class="desc" id="qa">
+                    <p class="q"></p>
+                    <p class="a"><b>A</b>
+</p>
+                    <p class="q"></p>
+                    <p class="a"><b>A</b>
+</p>
+                    <p class="q"></p>
+                    <p class="a last"><b>A</b>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="box5" id="relateCourse">
+        <i class="line"></i>
+        <div class="title">相关课程</div>
+        <ul class="clear" id="relate">
+            <li>
+                <a href="content.html?code=k_ydtx">
+                    <img src="icons/k_ydtx.JPG">
+                    <span>移动通信</span>
+                </a>
+            </li>
+            <li>
+                <a href="content.html?code=k_zdkzll">
+                    <img src="icons/k_zdkzll.JPG">
+                    <span>自动控制理论</span>
+                </a>
+            </li>
+            <li>
+                <a href="content.html?code=k_xdtxw">
+                    <img src="icons/k_xdtxw.JPG">
+                    <span>现代通信网</span>
+                </a>
+            </li>
+            <li>
+                <a href="content.html?code=k_gywljsjc">
+                    <img src="icons/k_gywljsjc.JPG">
+                    <span>工业网络技术基础</span>
+                </a>
+            </li>
+            <li>
+                <a href="content.html?code=k_jsjwhjc">
+                    <img src="icons/k_jsjwhjc.JPG">
+                    <span>计算机文化基础</span>
+                </a>
+            </li>
+            <li>
+                <a href="content.html?code=k_gywljs">
+                    <img src="icons/k_gywljs.JPG">
+                    <span>工业网络技术</span>
+                </a>
+            </li>
+            <li>
+                <a href="content.html?code=k_cbkjx">
+                    <img src="icons/k_cbkjx.JPG">
+                    <span>成本会计学</span>
+                </a>
+            </li>
+            <li>
+                <a href="content.html?code=k_dzswyjr">
+                    <img src="icons/k_dzswyjr.JPG">
+                    <span>电子商务与金融</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="main-div">
+        <div class="l"></div>
+        <div class="r"><span>联系我们</span>010-82056326<br>82056440 82056438</div>
+        <div class="l1">
+            <a href="#">关于我们</a>
+            |
+            <a href="#">发现课程</a>
+            |
+            <a href="#">关注我们</a>
+            |
+            <a href="#">帮助中心</a>
+        </div>
+        <div class="l2">
+            相关链接：
+            <a href="#">北京学习中心</a>
+            -
+            <a href="#">网络统考网</a>
+            -
+            <a href="#">学信网学历认证</a>
+            -
+            <a href="#">北邮主页</a>
+            -
+            <a href="#">北邮研究生院</a>
+            -
+            <a href="#">志愿者网</a>
+            -
+            <a href="#">管理入口</a>
+            <br>
+            Copyright@bysakai.com, All Rights Reserved.
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

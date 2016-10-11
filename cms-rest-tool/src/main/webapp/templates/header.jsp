@@ -6,6 +6,7 @@
     <link media="all" href="/library/skin/neo-default/tool.css" rel="stylesheet" type="text/css" />
     <script src="/library/js/headscripts.js" language="JavaScript" type="text/javascript"></script>
     <title>Sakai-Spring</title>
+	<%= request.getAttribute("sakai.html.head") %>
 </head>
 <body onload="<%=request.getAttribute("sakai.html.body.onload")%>">
 <div class="portletBody">

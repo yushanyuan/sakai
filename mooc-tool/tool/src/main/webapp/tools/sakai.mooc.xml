@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<registration>
+	<tool id="sakai.mooc" 
+		title="mooc管理" 
+		description="提供mooc管理页面">
+
+		 
+		<category name="myworkspace" />
+		<configuration name="functions.require" /> 
+		<configuration name="sakai:menuClass" value="icon-sakai-syllabus"/>
+    </tool>
+</registration>
+

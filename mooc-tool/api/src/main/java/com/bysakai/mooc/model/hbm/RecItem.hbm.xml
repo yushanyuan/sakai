@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping
+    PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.bysakai.mooc.model">
+
+	<class name="RecItem" table="MOOC_RECLIST">
+	    
+	   	<id name="id" column="ID" length="36"  type="string">
+	    	<generator class="org.sakaiproject.id.hbm.IdGenerator"/>
+	    </id>
+
+	    <property name="recValue" column="NAME" type="int" length="4" />
+ 		<many-to-one name="course" column="COURSE_ID" />
+		
+  	</class>
+  	
+  
+	<!-- get a count of all unread messages for a given user -->
+	 
+	 
+	
+</hibernate-mapping>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping
+    PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.bysakai.mooc.model">
+
+	<class name="Teacher" table="MOOC_TEACHER">
+	    
+	    <id name="id" column="ID" length="36"  type="string">
+	    	<generator class="org.sakaiproject.id.hbm.IdGenerator"/>
+	    </id>
+
+	    <property name="name" column="NAME" type="string" length="99" not-null="true" />
+		<property name="image" column="IMAGE" type="string" length="2000" />
+		<property name="profile" column="PROFILE" type="string" length="4000" />
+		
+  	</class>
+  	
+	<!-- get a count of all unread messages for a given user -->
+</hibernate-mapping>

@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>开放课程平台</title>
+    <link rel="stylesheet" href="inc/css/reset.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="inc/css/m.css" type="text/css" media="screen" />
+    <script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+
+			$.ajax({
+					type: 'GET',
+					url:'../course/json/hotlist.htm',
+					success: function(data){
+						 try{ 
+							//data = JSON.parse(data);
+							if(!data){
+								return;
+							}
+							data = data.data;
+							for(var i=0; i<8; i++){
+								try{
+									var j = i+1;
+									$("#list_"+j+" a").empty();
+									if(i<data.length){
+										$("#list_"+j+" a").attr("href","content.html?code="+data[i].id);
+										$("#list_"+j+" a").append("<img src='"+data[i].image+"' class='cover'> <div class='pop'>"+data[i].name+"<br>"+data[i].teacher.name+"</div><span class='title'>"+data[i].name+"</span>");
+									}
+								
+								}catch(e){
+								}
+							}//end for
+							 
+		
+							}catch(ex){
+						 }	
+					  },
+					  complete: function(){
+						  $.ajax({
+								type: 'GET',
+								url:'../category/json/list.htm',
+								success: function(data){
+									if(!data){
+										return;
+									}
+									data = data.data;
+									for(var i=0;  i<4; i++){
+										try{
+											$("#spec_"+i+" a").empty();
+											if(i<data.length){
+												$("#spec_"+i+" a").attr("href","list.html?zclass="+data[i].id);
+												$("#spec_"+i+" a").append("<img src='"+data[i].icon+"'>"+data[i].name);
+											}
+											if(i == 0){
+												$("#allCategoryHref").attr("href","list.html?zclass="+data[i].id);
+												$("#allCourseHref").attr("href","list.html?zclass="+data[i].id);
+											}
+										}catch(e){
+										}
+										
+										 
+									}
+								}
+						  });
+						  
+					  }
+				 });//end hotlist ajax	
+			
+
+			$(".home-tab a").click(function(){
+				$(".home-tab a").removeClass('fire');
+				$(this).addClass('fire');
+				var listId = $(this).attr("id");
+				findList(listId);
+			});//end click
+
+			
+
+			function findList(listId){
+			
+				$.ajax({
+					type: 'GET',
+					url:'../course/json/'+listId+'.htm',
+					success: function(data){
+						 try{ 
+							//data = JSON.parse(data);
+							if(!data){
+								return;
+							}
+							data = data.data;
+							for(var i=0; i<8; i++){
+								try{
+									var j = i+1;
+									$("#list_"+j+" a").empty();
+									if(i<data.length){
+										$("#list_"+j+" a").attr("href","content.html?code="+data[i].id);
+										$("#list_"+j+" a").append("<img src='"+data[i].image+"' class='cover'> <div class='pop'>"+data[i].name+"<br>"+data[i].teacher.name+"</div><span class='title'>"+data[i].name+"</span>");
+									}
+								
+								}catch(e){
+								}
+							}//end for
+							 
+		
+							}catch(ex){
+						 }	
+					  }
+				 });			
+			}//end findList
+		});
+		function queryCourse(){
+			var q = $("#queryText").val();
+			window.location.href = "list.html?q="+escape(q);
+		}
+	</script>
+</head>
+<body>
+
+<div class="header">
+    <div class="main-div clear">
+        <a href="main.html" class="logo fl"><img src="inc/img/logo.png"></a>
+        <ul class="nav fl">
+            <li><a class="fire" href="list.html">课程<i></i></a></li>
+            <li><a href="#school">合作伙伴<i></i></a></li>
+        </ul>
+        <div class="search fl">
+            <input type="text" id="queryText" placeholder="搜索想要了解的课程">
+            <a href="javascript:queryCourse();"></a>
+        </div>
+        <ul class="fr right">
+            <li><a href="../user/regist.htm">注册</a></li>
+            <li><a href="login.html">登录</a></li>
+            <li><a href="#"><img src="inc/img/login-qq.png" ></a></li>
+            <li><a href="#"><img src="inc/img/login-weibo.png" ></a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="banner">
+    <ul>
+        <li style="background-image: url(inc/img/banner.jpg)"></li>
+        <li style="background-image: url(inc/img/banner2.jpg)"></li>
+        <li style="background-image: url(inc/img/banner3.jpg)"></li>
+    </ul>
+    <div class="main-div">
+    <a class="l" href="javascript:bannerL();void(0);"></a>
+    <a class="r" href="javascript:bannerR();void(0);"></a>
+    </div>
+</div>
+
+
+<div class="main-div">
+    <div class="home-tab clear" id="home-tab-id">
+        <a href="#home-tab-id" id="hotlist" class="fl fire"><i class="icon1"></i>热门课程</a>
+        <a href="#home-tab-id" id="newlist" class="fl"><i class="icon2"></i>最新课程</a>
+        <a href="#home-tab-id" id="reclist" class="fr"><i class="icon3"></i>推荐课程</a>
+    </div>
+
+    <div id="list" class="home-box clear mb12">
+        <div class="more-line"><a href="list.html" id="allCourseHref" class="more">查看所有课程>></a></div>
+        <div class="xbox-wp clear">
+        
+            <div class="xbox" id="list_1">
+                <a href="#">
+                </a>
+            </div>
+           
+            <div class="xbox" id="list_2">
+                <a href="#">
+                </a>
+            </div>
+            <div class="xbox" id="list_3">
+                <a href="#">
+                </a>
+            </div>
+            <div class="xbox" id="list_4">
+                <a href="#">
+                <!-- 
+                    <img src="#" class="cover">
+                    <div class="pop"><br></div> -->
+                </a>
+            </div>
+             
+        </div>
+    </div>
+    <div class="home-box">
+        <div class="xbox-wp clear">
+         
+            <div class="xbox" id="list_5">
+                <a href="#">
+                 <!-- 
+                    <img src="#" class="cover">
+                    <div class="pop"><br></div> -->
+                </a>
+            </div>
+            <div class="xbox" id="list_6">
+                <a href="#">
+                   
+                </a>
+            </div>
+            <div class="xbox" id="list_7">
+                <a href="#">
+                     
+                </a>
+            </div>
+            <div class="xbox xbox-last" id="list_8">
+                <a href="#">
+                    
+                </a>
+            </div>
+             
+        </div>
+    </div>
+    <div class="more-line2">推荐专业<a href="list.html" id="allCategoryHref">查看所有专业>></a></div>
+    <div class="home-box2">
+        <div  class="xbox2-wp clear">
+            <div id="spec_0" class="xbox2">
+                <a href="#">
+                </a>
+            </div>
+            <div id="spec_1" class="xbox2">
+                <a href="#">
+                </a>
+            </div>
+            <div id="spec_2" class="xbox2">
+                <a href="#">
+                </a>
+            </div>
+            <div id="spec_3" class="xbox2 xbox2-last">
+                <a href="#">
+                <!-- 
+                    <img src="#"></img> -->
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="more-line2">合作伙伴<a name="school" id="school" >&nbsp;</a></div>
+    <dl class="friend clear">
+        <dt style="background-image:url(inc/img/by.png)"><a href="http://www.bupt.edu.cn/">北京邮电大学</a></dt>
+        <dd class="x" style="background-image:url(inc/img/njyd.png)"><a href="http://www.njupt.edu.cn">南京邮电大学</a></dd>
+        <dd class="x" style="background-image:url(inc/img/cqyddx.jpg)"><a href="http://www.cqupt.edu.cn">重庆邮电大学</a></dd>
+        <dd class="x" style="background-image:url(inc/img/xayddx.png)"><a href="http://www.xiyou.edu.cn">西安邮电大学</a></dd>
+        <dd class="x" style="background-image:url(inc/img/bjdzkjzyxy.png)"><a href="http://www.5aaa.com">北京电子科技职业学院</a></dd>
+        <dd class="x" style="background-image:url(inc/img/sjzzyjs.jpg)"><a href="http://www.sjzpc.edu.cn">石家庄邮电职业技术学院</a></dd>
+        <dd style="background-image:url(inc/img/hnyd.jpg)"><a href="http://www.worlduc.com/e/default.aspx?eid=5368">湖南邮电职业技术学院</a></dd>
+        <dd style="background-image:url(inc/img/scyd.png)"><a href="http://www.sptpc.com">四川邮电职业技术学院</a></dd>
+        <dd style="background-image:url(inc/img/gdyd.jpg)"><a href="http://www.gupt.net">广东邮电职业技术学院</a></dd>
+        
+        <dd style="background-image:url(inc/img/friend-t10.png)"><a href="#">更多院校</a></dd>
+		<dd style="background-image:url()"><a href="#"></a></dd>
+    </dl>
+    <div class="home-2015"></div>
+</div>
+
+<div class="footer">
+    <div class="main-div">
+        <div class="l"></div>
+        <div class="r"><span>联系我们</span>010-8205xxxx<br>8205xxxx 8205xxxx</div>
+        <div class="l1">
+            <a href="#">关于我们</a>
+            |
+            <a href="#">发现课程</a>
+            |
+            <a href="#">关注我们</a>
+            |
+            <a href="#">帮助中心</a>
+        </div>
+        <div class="l2">
+            相关链接：
+            <a href="#">北京学习中心</a>
+            -
+            <a href="#">网络统考网</a>
+            -
+            <a href="#">学信网学历认证</a>
+            -
+            <a href="#">北邮主页</a>
+            -
+            <a href="#">北邮研究生院</a>
+            -
+            <a href="#">志愿者网</a>
+            -
+            <a href="#">管理入口</a>
+            <br>
+            Copyright@bysakai.com, All Rights Reserved.
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function NSBanner(obj){
+        this.obj=obj;
+        this.lastIndex=0;
+        this.liCount=this.obj.find('li').length;
+
+        var that=this;
+        setInterval(function(){
+            that.change(that.lastIndex+1);
+        },5000);
+        $(window).resize(function(){
+            that.resize();
+        })
+        window.bannerL=function(){
+            that.change(that.lastIndex-1);
+        }
+        window.bannerR=function(){
+            that.change(that.lastIndex+1);
+        }
+        this.resize();
+    }
+    NSBanner.prototype.resize=function(){
+        this.obj.find('ul').width($(window).width()*this.liCount+'px');
+       // console.log($(window).width());
+        this.obj.find('li').width($(window).width()+'px');
+        this.change(this.lastIndex);
+    }
+    NSBanner.prototype.change=function(i){
+        if(i<0){
+            i=this.liCount-1;
+        }
+        if(i>=this.liCount){
+            i=0;
+        }
+
+        this.obj.find('ul').stop().animate({left:(0-$(window).width()*i)+'px'});
+        this.lastIndex=i;
+    }
+
+    $(function(){
+        new NSBanner($('.banner'));
+        $('.xbox').hover(function(){
+            $(this).find('.pop').stop().fadeIn();
+        },function(){
+            $(this).find('.pop').stop().fadeOut();
+        })
+        $('.xbox2').hover(function(){
+            $(this).addClass('fire');
+        },function(){
+            $(this).removeClass('fire')
+        })
+
+		
+    });
+</script>
+
+</body>
+</html>

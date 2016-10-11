@@ -232,13 +232,13 @@
 		<delete file="sakai-bupt-${sakai.version}.zip.MD5" />
 		<delete file="sakai-bupt-${sakai.version}.zip.SHA1" />
 		
-	    <zip destfile="sakai-bupt-${sakai.version}.zip" compress="yes">
-	        <zipfileset dir="${basedir}/target/pack/" prefix="sakai-bupt-${sakai.version}" />
+	    <zip destfile="sakai-bupt-mooc-11.1.zip" compress="yes">
+	        <zipfileset dir="${basedir}/target/pack/" prefix="sakai-bupt-mooc-11.1" />
 	    </zip>
 		
 	    <echo message="[INFO] create sakai-bupt-${sakai.version}.zip md5 and SHA1 checksums." />
-	    <checksum file="sakai-bupt-${sakai.version}.zip" forceOverwrite="true" />
-	    <checksum file="sakai-bupt-${sakai.version}.zip" forceOverwrite="true" algorithm="SHA1" />
+	    <checksum file="sakai-bupt-mooc-11.1.zip" forceOverwrite="true" />
+	    <checksum file="sakai-bupt-mooc-11.1.zip" forceOverwrite="true" algorithm="SHA1" />
 	</target>
 	
 	<target name="cleanup" depends="tar,zip" description="Delete target directories.">

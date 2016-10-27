@@ -28,8 +28,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.sakaiproject.component.cover.ServerConfigurationService;
@@ -39,7 +39,7 @@ import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 
 public class DBHelper extends HibernateDaoSupport {
-	private static Log	LOG						= LogFactory.getLog(DBHelper.class);
+	private static Logger	LOG						= LoggerFactory.getLogger(DBHelper.class);
 	private boolean		autoDdl					= false;
 	private String		dbVendor				= null;
 	private boolean		notifiedIndexesUpdate	= false;
@@ -142,8 +142,6 @@ public class DBHelper extends HibernateDaoSupport {
 					// SST_EVENTS
 					if(sstEventsIxs.contains("SITE_ID_IX")) renameIndex(c, "SITE_ID_IX", "SST_EVENTS_SITE_ID_IX", "SITE_ID", "SST_EVENTS");
 					else if(!sstEventsIxs.contains("SST_EVENTS_SITE_ID_IX")) createIndex(c, "SST_EVENTS_SITE_ID_IX", "SITE_ID", "SST_EVENTS");
-					if(sstEventsIxs.contains("USER_ID_IX")) renameIndex(c, "USER_ID_IX", "SST_EVENTS_USER_ID_IX", "USER_ID", "SST_EVENTS");
-					else if(!sstEventsIxs.contains("SST_EVENTS_USER_ID_IX")) createIndex(c, "SST_EVENTS_USER_ID_IX", "USER_ID", "SST_EVENTS");
 					if(sstEventsIxs.contains("EVENT_ID_IX")) renameIndex(c, "EVENT_ID_IX", "SST_EVENTS_EVENT_ID_IX", "EVENT_ID", "SST_EVENTS");
 					else if(!sstEventsIxs.contains("SST_EVENTS_EVENT_ID_IX")) createIndex(c, "SST_EVENTS_EVENT_ID_IX", "EVENT_ID", "SST_EVENTS");
 					if(sstEventsIxs.contains("DATE_ID_IX")) renameIndex(c, "DATE_ID_IX", "SST_EVENTS_DATE_ID_IX", "EVENT_DATE", "SST_EVENTS");

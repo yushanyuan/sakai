@@ -37,9 +37,9 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.math.util.MathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.commons.math3.util.Precision;
 import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingAttachment;
@@ -69,7 +69,7 @@ import org.sakaiproject.tool.assessment.util.TextFormat;
 public class StudentScoreUpdateListener
   implements ActionListener
 {
-  private static Log log = LogFactory.getLog(StudentScoreUpdateListener.class);
+  private static Logger log = LoggerFactory.getLogger(StudentScoreUpdateListener.class);
   private static ContextUtil cu;
 
   /**
@@ -192,7 +192,7 @@ public class StudentScoreUpdateListener
             }
             
             // if newAutoScore != oldAutoScore then updateScore = true
-            boolean updateScore = !(MathUtils.equalsIncludingNaN(newAutoScore, oldAutoScore, 0.0001));
+            boolean updateScore = !(Precision.equalsIncludingNaN(newAutoScore, oldAutoScore, 0.0001));
             boolean updateComments = !newComments.equals(oldComments);
             StringBuffer logString = new StringBuffer();
             logString.append("gradedBy=");

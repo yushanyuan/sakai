@@ -37,8 +37,8 @@ import javax.faces.event.ActionListener;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentAccessControl;
 import org.sakaiproject.tool.assessment.data.dao.assessment.EvaluationModel;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAnswer;
@@ -92,7 +92,7 @@ import org.sakaiproject.component.cover.ServerConfigurationService;
 
 public class QuestionScoreListener implements ActionListener,
 		ValueChangeListener {
-	private static Log log = LogFactory.getLog(QuestionScoreListener.class);
+	private static Logger log = LoggerFactory.getLogger(QuestionScoreListener.class);
 
 	// private static EvaluationListenerUtil util;
 	private static BeanSort bs;
@@ -531,21 +531,21 @@ public class QuestionScoreListener implements ActionListener,
 				// row
 				ArrayList answerList = (ArrayList) iter.next();
 				results.setItemGradingArrayList(answerList);
-				// The list is sorted by answer id so that it will come back from the student in a 
+				// The list is sorted by item id so that it will come back from the student in a 
 				// predictable order. This is also required by the getCalcQResult method.
 				Collections.sort(answerList, new Comparator<ItemGradingData>() {
 					public int compare(ItemGradingData i1, ItemGradingData i2) {
 						if (i1 == i2) {
 							return 0;
 						}
-						else if (i1 == null || i1.getPublishedAnswerId() == null) {
+						else if (i1 == null || i1.getPublishedItemId() == null) {
 							return -1;
 						}
-						else if (i2 == null || i2.getPublishedAnswerId() == null) {
+						else if (i2 == null || i2.getPublishedItemId() == null) {
 							return 1;
 						}
 						else {
-							return NumberUtils.compare(i1.getPublishedAnswerId(),i2.getPublishedAnswerId());
+							return NumberUtils.compare(i1.getPublishedItemId(),i2.getPublishedItemId());
 						}
 					}
 				});

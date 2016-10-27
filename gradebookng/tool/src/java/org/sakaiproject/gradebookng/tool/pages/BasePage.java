@@ -4,7 +4,6 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -24,17 +23,18 @@ import org.sakaiproject.gradebookng.business.GbRole;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
 import org.sakaiproject.gradebookng.tool.component.GbFeedbackPanel;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Base page for our app
  *
  * @author Steve Swinsburg (steve.swinsburg@gmail.com)
  *
  */
+@Slf4j
 public class BasePage extends WebPage {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final Logger log = Logger.getLogger(BasePage.class);
 
 	@SpringBean(name = "org.sakaiproject.gradebookng.business.GradebookNgBusinessService")
 	protected GradebookNgBusinessService businessService;
@@ -84,7 +84,7 @@ public class BasePage extends WebPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(new GradebookPage());
+				setResponsePage(GradebookPage.class);
 			}
 
 			@Override
@@ -102,7 +102,7 @@ public class BasePage extends WebPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(new ImportExportPage());
+				setResponsePage(ImportExportPage.class);
 			}
 
 			@Override
@@ -119,7 +119,7 @@ public class BasePage extends WebPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(new PermissionsPage());
+				setResponsePage(PermissionsPage.class);
 			}
 
 			@Override
@@ -136,7 +136,7 @@ public class BasePage extends WebPage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(new SettingsPage());
+				setResponsePage(SettingsPage.class);
 			}
 
 			@Override
@@ -208,6 +208,7 @@ public class BasePage extends WebPage {
 		final WebMarkupContainer flagWithPopover = new WebMarkupContainer(componentId);
 
 		flagWithPopover.add(new AttributeModifier("title", message));
+		flagWithPopover.add(new AttributeModifier("aria-label", message));
 		flagWithPopover.add(new AttributeModifier("data-toggle", "popover"));
 		flagWithPopover.add(new AttributeModifier("data-trigger", "manual"));
 		flagWithPopover.add(new AttributeModifier("data-placement", "bottom"));

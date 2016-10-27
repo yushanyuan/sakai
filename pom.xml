@@ -118,6 +118,7 @@
                 <module>web</module>
                 <module>webservices</module>
 				<module>cms-rest-tool</module>
+				<module>bigbluebutton-sakai</module>
             </modules>
         </profile>
         <profile>

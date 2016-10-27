@@ -250,7 +250,7 @@
                         return {name: role};
                     });
             
-                roster.render('permissions', { siteTitle: roster.site.title, roles: roles }, 'roster_content');
+                roster.render('permissions', { siteTitle: roster.site.title, showVisits: roster.showVisits, roles: roles }, 'roster_content');
                 
                 $(document).ready(function () {
 
@@ -350,8 +350,9 @@
 
                     m.formattedProfileUrl = "/direct/profile/" + m.userId + "/formatted?siteId=" + encodeURIComponent(roster.siteId);
                     m.profileImageUrl = "/direct/profile/" + m.userId + "/image";
-                    if (options.forceOfficialPicture) {
+                    if (options.forceOfficialPicture || options.showOfficialPictures) {
                         m.profileImageUrl += "/official";
+                        m.formattedProfileUrl = "/direct/profile/" + m.userId + "/formatted/official?siteId=" + encodeURIComponent(roster.siteId);
                     }
                     m.profileImageUrl += "?siteId=" + encodeURIComponent(roster.siteId);
                     var groupIds = Object.keys(m.groups);
@@ -365,10 +366,12 @@
 
                     m.enrollmentStatusText = roster.site.enrollmentStatusCodes[m.enrollmentStatusId];
 
-                    if (m.totalSiteVisits > 0) {
-                        m.formattedLastVisitTime = roster.formatDate(m.lastVisitTime);
-                    } else {
-                        m.formattedLastVisitTime = roster.i18n.no_visits_yet;
+                    if (roster.showVisits) {
+                        if (m.totalSiteVisits > 0) {
+                            m.formattedLastVisitTime = roster.formatDate(m.lastVisitTime);
+                        } else {
+                            m.formattedLastVisitTime = roster.i18n.no_visits_yet;
+                        }
                     }
                 });
 
@@ -393,6 +396,8 @@
 
                         $('#roster-group-option-' + value).prop('selected', true);
                     });
+                    
+                    $('a.profile').unbind();
 
                     $('a.profile').cluetip({
                         width: '640px',
@@ -404,7 +409,8 @@
                         closeText: '<img src="/library/image/silk/cross.png" alt="close" />',
                         closePosition: 'top',
                         showTitle: false,
-                        hoverIntent: true
+                        hoverIntent: true,
+                        activation: 'toggle'
                     });
                 });
 
@@ -520,7 +526,8 @@
                 'currentUserId': roster.userId,
                 'viewOfficialPhoto': roster.currentUserPermissions.viewOfficialPhoto,
                 'viewSiteVisits': roster.currentUserPermissions.viewSiteVisits,
-                'viewConnections': ((undefined != window.friendStatus) && roster.viewConnections)
+                'viewConnections': ((undefined != window.friendStatus) && roster.viewConnections),
+                'showVisits': roster.showVisits
             };
 
         var templateName = (enrollmentsMode) ? 'enrollments' : 'members';

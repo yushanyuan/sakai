@@ -39,7 +39,7 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.faces.model.SelectItemGroup;
 
-import org.apache.commons.math.util.MathUtils;
+import org.apache.commons.math3.util.Precision;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.tool.assessment.facade.TypeFacade;
@@ -58,7 +58,7 @@ import org.sakaiproject.util.ResourceLoader;
 public class ItemBean
   implements Serializable
 {
-  //private static Log log = LogFactory.getLog(ItemBean.class);
+  //private static Logger log = LoggerFactory.getLogger(ItemBean.class);
 
   // internal use
   private static final String answerNumbers =
@@ -249,7 +249,7 @@ public class ItemBean
    */
   public double getItemScore()
   {
-    return MathUtils.round(itemScore, 2);
+    return Precision.round(itemScore, 2);
   }
 
   /**
@@ -267,7 +267,7 @@ public class ItemBean
    */
   public double getItemDiscount()
   {
-    return MathUtils.round(itemDiscount, 2);
+    return Precision.round(itemDiscount, 2);
   }
 
   /**

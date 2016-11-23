@@ -26,6 +26,7 @@ public class MeleteSectionRecordModel implements java.io.Serializable {
 	private Long studyrecordId;//学习记录ID
 	private Long meleteModuleRecordId;//所属模块记录ID
 
+	public MeleteSectionRecordModel(){}
 	// Property accessors
 
 	public Long getSectionrecordId() {

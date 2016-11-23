@@ -25,6 +25,8 @@ public class MeleteSelftestAttemptModel implements java.io.Serializable {
 	private String pagerstatus;//试卷通过状态
 	private String checkstatus;//批改状态
 
+	
+	public MeleteSelftestAttemptModel(){}
 	// Property accessors
 
 	public String getCheckstatus() {

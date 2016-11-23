@@ -34,6 +34,9 @@ public class MeleteStudyHistoryRecordModel implements java.io.Serializable {
 	/** 时间 */
 	private Date historyDate = new Date();
 
+	
+	public MeleteStudyHistoryRecordModel(){}
+	
 	public Date getHistoryDate() {
 		return historyDate;
 	}

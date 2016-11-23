@@ -52,6 +52,16 @@
             <comment>修改时间</comment>
             </column>
         </property>
+         <property name="buildType" type="java.lang.String">
+            <column name="BUILD_TYPE" length="20"  >
+            <comment>组卷方式</comment>
+            </column>
+        </property>
+        <property name="buildNum" type="java.lang.Long">
+            <column name="BUILD_NUM" precision="2" scale="0"  >
+            <comment>组卷份数</comment>
+            </column>
+        </property>
         <property name="samepaper" type="java.lang.String">
             <column name="SAMEPAPER" length="255"  >
             <comment>使用同一策略</comment>

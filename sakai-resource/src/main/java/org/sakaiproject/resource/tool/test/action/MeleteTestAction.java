@@ -73,6 +73,8 @@ public class MeleteTestAction extends ActionSupport {
 	
 	/**模块id*/
 	private Long modelId;
+	
+	private String userId;
 
 	private SiteService siteService = (SiteService) ComponentManager
 			.get(SiteService.class);
@@ -210,7 +212,9 @@ public class MeleteTestAction extends ActionSupport {
 			String courseId = courseService.getCourseBySiteId(siteId).getId();
 			String materialPath = org.sakaiproject.resource.util.Constants
 					.getTestMaterialURL(courseId);
-			String userId = this.getCurrentUserId();
+			if(StringUtils.isBlank(userId)){
+				userId = this.getCurrentUserId();
+			}
 			String path2 = org.sakaiproject.resource.util.Constants
 					.getStuTestPath(userId, courseId);
 			String paperName = Helper.getPaperName(testPaperid);
@@ -430,4 +434,13 @@ public class MeleteTestAction extends ActionSupport {
 	public void setModelId(Long modelId) {
 		this.modelId = modelId;
 	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
 }

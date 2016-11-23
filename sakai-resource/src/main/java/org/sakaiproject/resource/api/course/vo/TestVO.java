@@ -4,6 +4,7 @@
 package org.sakaiproject.resource.api.course.vo;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author yushanyuan
@@ -25,6 +26,10 @@ public class TestVO implements Serializable{
 	private String totalNum;
 	private String score;
 	private String isPass;
+	private Date openStart;
+	private Date openEnd;
+	private Long minInterval;
+
 	public String getTestId() {
 		return testId;
 	}
@@ -66,5 +71,23 @@ public class TestVO implements Serializable{
 	}
 	public void setIsPass(String isPass) {
 		this.isPass = isPass;
+	}
+	public Date getOpenStart() {
+		return openStart;
+	}
+	public void setOpenStart(Date openStart) {
+		this.openStart = openStart;
+	}
+	public Date getOpenEnd() {
+		return openEnd;
+	}
+	public void setOpenEnd(Date openEnd) {
+		this.openEnd = openEnd;
+	}
+	public Long getMinInterval() {
+		return minInterval;
+	}
+	public void setMinInterval(Long minInterval) {
+		this.minInterval = minInterval;
 	}
 }

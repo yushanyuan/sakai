@@ -18,6 +18,7 @@ public class MeleteSectionRecordDetailModel implements java.io.Serializable {
 	private Date startStudyTime;//学习开始时间(精确到分)
 	private Date endStudyTime;//学习结束时间(精确到分)
 
+	public MeleteSectionRecordDetailModel(){}
 
 	// Property accessors
 

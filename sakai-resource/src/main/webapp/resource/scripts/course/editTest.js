@@ -32,7 +32,7 @@ function addTest(node,wintitle) {
 		}
 	});
 	var endOpenDate = new Cls.form.DateTimeField({
-		fieldLabel : '作业开放开始时间',
+		fieldLabel : '作业开放结束时间',
 		id : 'endOpenDate',
 		name : 'endOpenDate',
 		format : 'Y-m-d H:i:s',
@@ -76,7 +76,7 @@ function addTest(node,wintitle) {
 		fieldLabel : '<font style=color:red>*</font>试卷生成份数',
 		width:80,
 		validator:function(value) {
-			if(/^\d+$/.test(value) && value <= operateCount){
+			if(/^\d+$/.test(value) && parseInt(value) <= parseInt(operateCount)){
 				return true;
 			}else{
 				return "试卷生成份数必须是数字，且不能大于"+operateCount;
@@ -321,7 +321,7 @@ function updateTest(node,wintitle) {
 		}
 	});
 	var endOpenDate = new Cls.form.DateTimeField({
-		fieldLabel : '作业开放开始时间',
+		fieldLabel : '作业开放结束时间',
 		id : 'endOpenDate',
 		name : 'endOpenDate',
 		format : 'Y-m-d H:i:s',
@@ -367,7 +367,7 @@ function updateTest(node,wintitle) {
 		fieldLabel : '<font style=color:red>*</font>试卷生成份数',
 		width:80,
 		validator:function(value) {
-			if(/^\d+$/.test(value) && value <= operateCount){
+			if(/^\d+$/.test(value) && parseInt(value) <= parseInt(operateCount)){
 				return true;
 			}else{
 				return "试卷生成份数必须是数字，且不能大于"+operateCount;

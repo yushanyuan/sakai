@@ -40,6 +40,8 @@ public class MeleteSectionModel implements java.io.Serializable{
 	private Long videoSize;//视频大小
 	private String videoTime;//视频时长
 	
+	public MeleteSectionModel() {
+	}
 	public String getSectionItemId() {
 		return sectionItemId;
 	}

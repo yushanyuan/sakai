@@ -3384,8 +3384,7 @@ public class CourseServiceImpl extends HibernateDaoSupport implements ICourseSer
 	public List<MeleteModuleModel> getAllModule(String courseId) throws Exception {
 		String hql = "from MeleteModuleModel where courseId=? and status=?";
 		Object[] param = { courseId, Long.valueOf(CodeTable.normal) };
-		//List<MeleteModuleModel> list = this.getHibernateTemplate().find(hql, param);
-		List list = this.getHibernateTemplate().find(hql, param);
+		List<MeleteModuleModel> list = this.getHibernateTemplate().find(hql, param);
 		return list;
 	}
 
@@ -3393,8 +3392,7 @@ public class CourseServiceImpl extends HibernateDaoSupport implements ICourseSer
 	public List<MeleteSectionModel> getAllSection(String courseId) throws Exception {
 		String hql = "from MeleteSectionModel where courseId=? and status=?";
 		Object[] param = { courseId, Long.valueOf(CodeTable.normal) };
-		//List<MeleteSectionModel> list = this.getHibernateTemplate().find(hql, param);
-		List list = this.getHibernateTemplate().find(hql, param);
+		List<MeleteSectionModel> list = this.getHibernateTemplate().find(hql, param);
 		return list;
 	}
 
@@ -3424,6 +3422,61 @@ public class CourseServiceImpl extends HibernateDaoSupport implements ICourseSer
 		hql = "select test from MeleteSectionModel section,MeleteTestModel test "
 				+ "where section.courseId=? and section.id=test.sectionId " + "and test.status=?";
 		returnList.addAll(this.findEntity(hql, parameters));
+		return returnList;
+	}
+	
+	/**
+	 * 得到test
+	 * @param testId
+	 * @return
+	 * @throws Exception
+	 */
+	public MeleteTestModel getTest(Long testId) throws Exception{
+		return (MeleteTestModel)this.findEntityById(MeleteTestModel.class, testId);
+	}
+	
+	/**
+	 * 获得旧课程空间的作业
+	 */
+	public List<MeleteTestModel> getAllTestByOldMelete(String courseId) throws Exception {
+		List<MeleteTestModel> returnList = new ArrayList<MeleteTestModel>();
+		
+		String sql = "select test_id from melete_test moduletest0_ left outer join melete_module module2_ " +
+				"on moduletest0_.MODULE_ID=module2_.MODULE_ID, melete_course_module" +
+				" coursemodu1_ where moduletest0_.BELONG_TYPE='MODULETEST'" +
+				" and coursemodu1_.DELETE_FLAG=0 " +
+				"and coursemodu1_.COURSE_ID=? and moduletest0_.MODULE_ID=coursemodu1_.MODULE_ID and moduletest0_.COUNT=1";
+		
+		List list = this.getSession().createSQLQuery(sql).setString(0, courseId).list();
+
+		if(list != null && !list.isEmpty()){
+			StringBuffer hql = new StringBuffer();
+			hql.append("from MeleteTestModel test where test.id in (");
+			for(Object o : list){
+				hql.append(o.toString()+",");
+			}
+			hql.deleteCharAt(hql.length()-1);
+			hql.append(")");
+			returnList.addAll(this.findEntity(hql.toString()));
+		}
+        sql = "select test_id from melete_test sectiontes0_ left outer join melete_section section2_ on sectiontes0_.SECTION_ID=section2_.SECTION_ID," +
+        		"melete_course_module coursemodu1_ where sectiontes0_.BELONG_TYPE='SECTIONTEST' " +
+        		"and section2_.DELETE_FLAG=0 and coursemodu1_.DELETE_FLAG=0 and " +
+        		"coursemodu1_.COURSE_ID=? and section2_.MODULE_ID=coursemodu1_.MODULE_ID and " +
+        		"section2_.SECTION_ID=sectiontes0_.SECTION_ID and sectiontes0_.COUNT=1";
+		
+		list = this.getSession().createSQLQuery(sql).setString(0, courseId).list();
+		
+		if(list != null && !list.isEmpty()){
+			StringBuffer hql = new StringBuffer();
+			hql.append("from MeleteTestModel test where test.id in (");
+			for(Object o : list){
+				hql.append(o.toString()+",");
+			}
+			hql.deleteCharAt(hql.length()-1);
+			hql.append(")");
+			returnList.addAll(this.findEntity(hql.toString()));
+		}
 		return returnList;
 	}
 
@@ -5131,8 +5184,7 @@ public class CourseServiceImpl extends HibernateDaoSupport implements ICourseSer
 	 */
 	public List<Long> getStudyrecordidListByCourseId(String courseId) {
 		String hql = "select studyrecordId from MeleteStudyRecordModel where courseId=?";
-		//List<Long> list = this.getHibernateTemplate().find(hql, courseId);
-		List  list = this.getHibernateTemplate().find(hql, courseId);
+		List<Long> list = this.getHibernateTemplate().find(hql, courseId);
 		return list;
 	}
 

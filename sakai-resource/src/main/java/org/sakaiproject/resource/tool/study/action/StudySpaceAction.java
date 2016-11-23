@@ -910,6 +910,8 @@ public class StudySpaceAction extends ActionSupport {
 			sectionDetail.setStartStudyTime(nowTime);
 			// 设置结束时间为 开始时间 + 向服务器提交时间的一半
 			sectionDetail.setEndStudyTime(new Date(nowTime.getTime() + new Long(Constants.SUBMIT_INTERVAL) / 2));
+			sectionDetail.setStudyTime((sectionDetail.getEndStudyTime().getTime() - sectionDetail.getStartStudyTime().getTime())
+					/ (1000 * 60));// 节点学习时长
 			studyService.saveSectionRecordDetail(sectionDetail);
 			request.setAttribute("coursewarePath", path);
 			request.setAttribute("moduleId", moduleId);
@@ -1027,6 +1029,8 @@ public class StudySpaceAction extends ActionSupport {
 			sectionDetail.setStartStudyTime(nowTime);
 			// 设置结束时间为 开始时间 + 向服务器提交时间的一半
 			sectionDetail.setEndStudyTime(new Date(nowTime.getTime() + new Long(Constants.SUBMIT_INTERVAL) / 2));
+			sectionDetail.setStudyTime((sectionDetail.getEndStudyTime().getTime() - sectionDetail.getStartStudyTime().getTime())
+					/ (1000 * 60));// 节点学习时长
 			studyService.saveSectionRecordDetail(sectionDetail);
 
 			String path = CourseUtil.getSectionPath(preSection.getPath());
@@ -1194,6 +1198,8 @@ public class StudySpaceAction extends ActionSupport {
 			sectionDetail.setStartStudyTime(nowTime);
 			// 设置结束时间为 开始时间 + 向服务器提交时间的一半
 			sectionDetail.setEndStudyTime(new Date(nowTime.getTime() + new Long(Constants.SUBMIT_INTERVAL) / 2));
+			sectionDetail.setStudyTime((sectionDetail.getEndStudyTime().getTime() - sectionDetail.getStartStudyTime().getTime())
+					/ (1000 * 60));// 节点学习时长
 			studyService.saveSectionRecordDetail(sectionDetail);
 
 			String path = CourseUtil.getSectionPath(nextSection.getPath());
@@ -1715,6 +1721,8 @@ public class StudySpaceAction extends ActionSupport {
 		sectionDetail.setStartStudyTime(nowTime);
 		// 设置结束时间为 开始时间 + 向服务器提交时间的一半
 		sectionDetail.setEndStudyTime(new Date(nowTime.getTime() + new Long(Constants.SUBMIT_INTERVAL) / 2));
+		sectionDetail.setStudyTime((sectionDetail.getEndStudyTime().getTime() - sectionDetail.getStartStudyTime().getTime())
+				/ (1000 * 60));// 节点学习时长
 		studyService.saveSectionRecordDetail(sectionDetail);
 		// 将节点详细学习记录信息Id返回到页面（用于更新该详细学习记录信息表数据）
 		HttpServletResponse response = ServletActionContext.getResponse();
@@ -1792,8 +1800,7 @@ public class StudySpaceAction extends ActionSupport {
 				MeleteSectionRecordModel sectionRecord = studyService.getSectionRecordById(detailRecord
 						.getSectionrecordId());
 				if (sectionRecord != null) {
-					Long studyTime = sectionRecord.getStudyTime() == null ? detailRecord.getStudyTime()
-							: (sectionRecord.getStudyTime() + intervalTime);
+					Long studyTime = studyService.getSectionStudyTimeDetailSum(sectionRecord.getSectionrecordId());
 					sectionRecord.setStudyTime(studyTime);
 					studyService.updateModel(sectionRecord);
 				}
@@ -1858,8 +1865,7 @@ public class StudySpaceAction extends ActionSupport {
 			MeleteSectionModel section = cacheCourse.getSecton(sectionRecord.getSectionId());
 			String moduleId = section.getModuleId().toString();
 			if (sectionRecord != null) {
-				Long sectionTime = sectionRecord.getStudyTime() == null ? detailRecord.getStudyTime() : (sectionRecord
-						.getStudyTime() + detailRecord.getStudyTime());
+				Long sectionTime = studyService.getSectionStudyTimeDetailSum(sectionRecord.getSectionrecordId());
 				sectionRecord.setStudyTime(sectionTime);
 				studyService.updateModel(sectionRecord);// 更新数据库页记录
 				cacheStudy.editSectionRecord(sectionRecord);// 更新页缓存
@@ -1876,8 +1882,7 @@ public class StudySpaceAction extends ActionSupport {
 							.getStudyrecordId().toString(), ids[i]);
 					// 如果不存在则按照对应的模块Id新增模块学习记录信息
 					if (existRecord != null) {
-						Long moduleTime = existRecord.getStudyTime() == null ? detailRecord.getStudyTime()
-								: (existRecord.getStudyTime() + detailRecord.getStudyTime());
+						Long moduleTime = studyService.getSectionStudyTimeSumByModule(existRecord.getModulerecordId());
 						existRecord.setStudyTime(moduleTime);
 						studyService.updateModel(existRecord);// 更新数据库模块记录
 						cacheStudy.editModuleRecord(existRecord);// 更新模块缓存
@@ -1886,6 +1891,14 @@ public class StudySpaceAction extends ActionSupport {
 								true);
 					}
 				}
+			}
+			// 更新学习记录中的学习时长,不能使用module的学习时长，要使用section的学习时长，因为module课程不存在
+			Long sumStudyTime = studyService.getSectionStudyTimeSum(studyrecordId);
+			if(sumStudyTime != null 
+					&& (studyRecord.getTotalTime() == null 
+					|| (studyRecord.getTotalTime() != null && studyRecord.getTotalTime() < sumStudyTime))){
+				studyRecord.setTotalTime(sumStudyTime);
+				studyService.updateModel(studyRecord);
 			}
 		}
 	}
@@ -2696,7 +2709,7 @@ public class StudySpaceAction extends ActionSupport {
 		// HttpServletRequest request = ServletActionContext.getRequest();
 		// String type = request.getParameter("type") == null ? "moduleType" :
 		// request.getParameter("type");
-
+ 
 		// 检查缓存数据
 		CacheElement cacheCourse = CacheUtil.getInstance().getCacheOfCourse(this.getCurrentSite().getId());
 		CacheElement cacheStudy = CacheUtil.getInstance().getCacheOfStudyrecord(this.getCurrentSite().getId(),

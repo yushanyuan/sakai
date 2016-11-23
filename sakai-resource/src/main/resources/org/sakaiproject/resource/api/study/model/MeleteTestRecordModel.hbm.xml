@@ -41,8 +41,8 @@
                 <comment>通过状态</comment>
             </column>
         </property>
-        <property name="required" type="java.lang.String">
-            <column name="REQUIRED" length="10">
+        <property name="required" type="java.lang.Boolean">
+            <column name="REQUIRED">
                 <comment>选必修</comment>
             </column>
         </property>

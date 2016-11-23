@@ -40,6 +40,33 @@ function addSelfTest(node,wintitle) {
 							name : 'samepaper'
 						})
 			});
+	var buildType = new Ext.form.RadioGroup({
+		name : 'buildType',
+		fieldLabel : '<font style=color:red>*</font>组卷方式',
+		anchor : '99%',
+		columns : [80, 80],
+		vertical : true,
+		allowBlank : false,
+		items : new Ext.ux.RadioGroupData({
+					baseData : buildTypeArray,
+					defaultValue : '1',
+					name : 'buildType'
+				})
+	});
+	var buildNum = new Ext.form.TextField({
+		name : 'buildNum',
+		value:operateCount,
+		fieldLabel : '<font style=color:red>*</font>试卷生成份数',
+		width:80,
+		validator:function(value) {
+			if(/^\d+$/.test(value) && parseInt(value) <= parseInt(operateCount)){
+				return true;
+			}else{
+				return "试卷生成份数必须是数字，且不能大于"+operateCount;
+			}
+		},
+		allowBlank : false
+	});
 	var exStore = new Ext.data.SimpleStore({
 				fields : ['value', 'text', 'score'],
 				baseParams : {
@@ -129,7 +156,7 @@ function addSelfTest(node,wintitle) {
 											flex : 1
 										},
 										items : [schemaId, checkButton]
-									}, totalScore, {
+									},buildType,buildNum, totalScore, {
 										xtype : 'compositefield',
 										msgTarget : 'side',
 										anchor : '-20',
@@ -320,6 +347,33 @@ function updateSelfTest(node,wintitle) {
 				anchor : '99%',
 				readOnly : true
 			});
+	var buildType = new Ext.form.RadioGroup({
+		name : 'buildType',
+		value : node.attributes.buildType,
+		fieldLabel : '<font style=color:red>*</font>组卷方式',
+		anchor : '99%',
+		columns : [80, 80],
+		vertical : true,
+		allowBlank : false,
+		items : new Ext.ux.RadioGroupData({
+					baseData : buildTypeArray,
+					name : 'buildType'
+				})
+	});
+	var buildNum = new Ext.form.TextField({
+		name : 'buildNum',
+		value : node.attributes.buildNum,
+		fieldLabel : '<font style=color:red>*</font>试卷生成份数',
+		width:80,
+		validator:function(value) {
+			if(/^\d+$/.test(value) && parseInt(value) <= parseInt(operateCount)){
+				return true;
+			}else{
+				return "试卷生成份数必须是数字，且不能大于"+operateCount;
+			}
+		},
+		allowBlank : false
+	});
 	var masteryScore = new Ext.form.NumberField({
 				name : 'masteryScore',
 				value : node.attributes.masteryScore,
@@ -357,7 +411,7 @@ function updateSelfTest(node,wintitle) {
 											flex : 1
 										},
 										items : [schemaId, checkButton]
-									}, totalScore, {
+									}, buildType,buildNum, totalScore, {
 										xtype : 'compositefield',
 										msgTarget : 'side',
 										anchor : '-20',

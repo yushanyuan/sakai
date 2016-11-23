@@ -23,7 +23,7 @@ public interface IStudyService {
 	 * @throws Exception
 	 */
 	public String saveStudyRecord(MeleteStudyRecordModel studyRecord) throws Exception;
-
+	
 	/**
 	 * 保存模块记录信息
 	 * 
@@ -115,6 +115,10 @@ public interface IStudyService {
 	 * @return
 	 */
 	public MeleteStudyRecordModel getStudyRecordById(String studyRecordId);
+	
+	// 保存提交的作业(旧课程空间)
+	public MeleteTestAttemptModel saveOldMeleteTestAttempt(String courseId, String recordId, String userId, String paperId, String answer,
+			String startTime, String passScore, String studyrecordId, String testId) throws Exception;
 
 	/**
 	 * 根据课程Id与学生Id获取学习记录信息
@@ -426,4 +430,32 @@ public interface IStudyService {
 	 * @throws Exception
 	 */
 	public List<MeleteTestRecordModel> getTestRecordByStudyrecordId(String studyrecordId) throws Exception;
+	
+	/**
+	 * 根据学习记录id得到所有Section的学习时长和
+	 * @param studyrecordId
+	 * @return
+	 */
+	public Long getSectionStudyTimeSum(String studyrecordId)throws Exception;
+	
+	/**
+	 * 根据模块学习记录id得到所有Section的学习时长和
+	 * @param studyrecordId
+	 * @return
+	 */
+	public Long getSectionStudyTimeSumByModule(Long moduleId)throws Exception;
+	
+	/**
+	 * 根据学习节点id得到所有Section的学习时长和
+	 * @param sectionrecordId
+	 * @return
+	 */
+	public Long getSectionStudyTimeDetailSum(Long sectionrecordId)throws Exception;
+	
+	/**
+	 * 得到最早的页学习时间
+	 * @param studyrecordId
+	 * @return
+	 */
+	public Date getSectionFirstStartStudyTime(String studyrecordId)throws Exception;
 }

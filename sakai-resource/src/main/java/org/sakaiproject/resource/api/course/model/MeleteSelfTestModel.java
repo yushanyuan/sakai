@@ -19,7 +19,13 @@ public class MeleteSelfTestModel implements java.io.Serializable{
 	private Long idx;//前测序号
 	private Float ratio;//百分比
 	private Long status;//前测状态
+	private String buildType;//组卷方式，即时和已有试卷
+	private Long buildNum;//组卷份数
 	private Long isCaculateScore;//是否计算平时成绩
+	
+	
+	public MeleteSelfTestModel() {
+	}
 	public Long getIsCaculateScore() {
 		return isCaculateScore;
 	}
@@ -33,7 +39,7 @@ public class MeleteSelfTestModel implements java.io.Serializable{
 		this.status = status;
 	}
 	public Long getMasteryScore() {
-		return masteryScore;
+		return masteryScore; 
 	}
 	public void setMasteryScore(Long masteryScore) {
 		this.masteryScore = masteryScore;
@@ -121,5 +127,17 @@ public class MeleteSelfTestModel implements java.io.Serializable{
 	}
 	public void setRatio(Float ratio) {
 		this.ratio = ratio;
+	}
+	public String getBuildType() {
+		return buildType;
+	}
+	public void setBuildType(String buildType) {
+		this.buildType = buildType;
+	}
+	public Long getBuildNum() {
+		return buildNum;
+	}
+	public void setBuildNum(Long buildNum) {
+		this.buildNum = buildNum;
 	}
 }

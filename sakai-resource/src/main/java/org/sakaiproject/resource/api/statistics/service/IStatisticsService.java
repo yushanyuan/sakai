@@ -33,4 +33,22 @@ public interface IStatisticsService {
 	public List<Map<String,Object>> getSelfTestBySIiteId(String siteId) throws Exception;
 	/**根据站点ID查询所有论坛*/
 	public List<Map<String,Object>> getForumBySIiteId(String siteId) throws Exception;
+	/** 查询学习时长 */
+	public Object[] getStudyTimeByCondition(Map<String, Object> conditions,Integer start,String sort,String dir) throws Exception;
+	/** 查询学习时长汇总 */
+	public  Map<String,Object> getStudyTimeSumByCondition(Map<String, Object> conditions) throws Exception;
+	/** 查询详细学习情况 */
+	public Object[] getStudyInfo(Long studyrecordId,String sort,String dir) throws Exception;
+	/** 查询阶段成绩 */
+	public Object[] getTestScoreByCondition(Map<String, Object> conditions,Integer start,String sort,String dir) throws Exception;
+	/** 查询阶段成绩汇总数据 */
+	public Map<String,Object> getTestScoreSumByCondition(Map<String, Object> conditions) throws Exception;
+	/** 查询详细阶段成绩情况 */
+	public Object[] getTestScoreInfo(Long testrecordId,String sort,String dir) throws Exception;
+	/** 查询总成绩 */
+	public Object[] getScoreByCondition(Map<String, Object> conditions,Integer start,String sort,String dir) throws Exception;
+	/** 查询总成绩汇总数据 */
+	public Map<String,Object> getScoreSumByCondition(Map<String, Object> conditions) throws Exception;
+	/** 查询详细总成绩情况 */
+	public Object[] getScoreInfo(Long studyrecordId,String sort,String dir) throws Exception;
 }

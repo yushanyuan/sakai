@@ -26,6 +26,7 @@ public class MeleteSelftestRecordModel implements java.io.Serializable {
 	private Long studyrecordId;//学习记录ID
 	// Property accessors
 
+	public MeleteSelftestRecordModel(){}
 	public Long getStudyrecordId() {
 		return studyrecordId;
 	}

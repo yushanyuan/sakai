@@ -71,6 +71,7 @@ public class TemplateModel implements java.io.Serializable {
 	
 	private Integer isDefault = 0;
 	
+	public TemplateModel(){}
 	public String getId() {
 		return id;
 	}

@@ -695,7 +695,11 @@ public class CourseSpaceAction extends ActionSupport {
 					studyRecord.setStudentId(studentId); // 学生ID
 					studyRecord.setScore(0f); // 课程成绩
 					studyRecord.setLessonStatus(Long.valueOf(CodeTable.passStatusNo)); // 课程通过状态
-					studyRecord.setStartStudyTime(null); // 学习开始时间
+					studyRecord.setStartStudyTime(new Date()); // 学习开始时间
+				}else if(studyRecord.getStartStudyTime() == null){
+					Date date = studyService.getSectionFirstStartStudyTime(studyRecord.getStudyrecordId().toString());
+					studyRecord.setStartStudyTime(date);
+					studyService.updateModel(studyRecord);
 				}
 				ServletActionContext.getRequest().setAttribute("lessonStatus",
 						String.valueOf(studyRecord.getLessonStatus()).equals(CodeTable.passStatusYes) ? "通过" : "未通过");
@@ -1172,6 +1176,8 @@ public class CourseSpaceAction extends ActionSupport {
 					map.put("idx", self.getIdx());// 前测序号
 					map.put("type", CodeTable.selftest);// 节点类型：前测
 					map.put("studyTimeShow", "");// 学习时间
+					map.put("buildType", self.getBuildType());//生成试卷方式 
+					map.put("buildNum", self.getBuildNum());// 生成试卷数 
 					map.put("mainAttr", qtip);// 主要属性
 					asyncTree.setAttributes(map);
 					asyncTree.setIcon(CodeTable.icoSelftest);
@@ -1718,7 +1724,10 @@ public class CourseSpaceAction extends ActionSupport {
 				test.setBelongType(CodeTable.belongSection);// 所属类型
 			}
 			if (isCaculateScore.equals(CodeTable.IsCaculateScoreYes)) {// 需要计算平时成绩
-				test.setRequirement("≥" + masteryScore);// 通过条件中文说明
+				BigDecimal total = new BigDecimal(totalScore);
+				BigDecimal mastery = new BigDecimal(masteryScore);
+				BigDecimal requirement = total.multiply(mastery.divide(new BigDecimal("100")));
+				test.setRequirement("≥" + requirement.setScale(0, BigDecimal.ROUND_HALF_UP).toString());// 通过条件中文说明
 			}
 			test.setCourseId(getCourseId());
 			test.setName(name);// 作业名称
@@ -1789,7 +1798,7 @@ public class CourseSpaceAction extends ActionSupport {
 			// 得到作业的信息
 			MeleteTestModel mtm = courseService.getMeleteTestModelById(Long.valueOf(testId));
 			// 读取题库接口：生成试卷压缩包
-			generateTestFile(schemaId, courseId, testId,mtm.getBelongType(), mtm.getBuildNum().toString(), testPath, testLibPath, answerLibPath);
+			generateTestFile(schemaId, courseId, testId,mtm.getBuildType(), mtm.getBuildNum().toString(), testPath, testLibPath, answerLibPath);
 
 			logger.info("生成试卷成功");
 			return null;
@@ -1972,6 +1981,8 @@ public class CourseSpaceAction extends ActionSupport {
 			test.setModificationDate(new Date());// 修改时间
 			test.setStatus(new Long(CodeTable.normal));// 前测状态
 			test.setIsCaculateScore(new Long(isCaculateScore));// 是否计算平时成绩
+			test.setBuildNum(buildNum);
+			test.setBuildType(buildType);
 			test.setIdx(new Long(0));// 前测序号
 			test.setRatio(new Float(0));// 百分比初始化0
 			String testId = courseService.editSelfTest(test, CodeTable.addType);
@@ -2010,13 +2021,15 @@ public class CourseSpaceAction extends ActionSupport {
 			 * ServerActionTool.generateTest(libPath, ansPath, materialPath, new
 			 * Integer(schemaId).intValue(), new Integer(count).intValue());
 			 * generateTestFile(schemaId, courseId, testId,
-			 * Constants.operateCount); System.out.println("生成前测试卷成功");
+			 * Constants.operateCount); System.out.println("生成前测试卷成功"); 
 			 */
 			String testPath = Constants.getSelfTestPath();
 			String answerLibPath = Constants.getSelfTestLibAnswerPath(courseId, testId);
 			String testLibPath = Constants.getSelfTestLibPath(courseId, testId);
+			// 得到作业的信息
+			MeleteSelfTestModel mtm = (MeleteSelfTestModel)courseService.getModelById(MeleteSelfTestModel.class, Long.parseLong(testId));
 			// 读取题库接口：生成试卷压缩包
-			generateTestFile(schemaId, courseId, testId,"1", Constants.operateCount, testPath, testLibPath, answerLibPath);
+			generateTestFile(schemaId, courseId, testId,mtm.getBuildType(), mtm.getBuildNum().toString(), testPath, testLibPath, answerLibPath);
 
 			return null;
 		} catch (Exception e) {
@@ -2261,7 +2274,10 @@ public class CourseSpaceAction extends ActionSupport {
 			String oldScore = test.getMasteryScore().toString();// 建议通过百分比
 			test.setName(name);// 作业名称
 			if (isCaculateScore.equals(CodeTable.IsCaculateScoreYes)) {
-				test.setRequirement("≥" + masteryScore);// 通过条件中文说明
+				BigDecimal total = new BigDecimal(totalScore);
+				BigDecimal mastery = new BigDecimal(masteryScore);
+				BigDecimal requirement = total.multiply(mastery.divide(new BigDecimal("100")));
+				test.setRequirement("≥" + requirement.setScale(0, BigDecimal.ROUND_HALF_UP).toString());// 通过条件中文说明
 			} else {
 				test.setRequirement(null);
 			}

@@ -24,6 +24,8 @@ public class MeleteModuleRecordModel implements java.io.Serializable {
 	private Long studyTime;//学习时长
 	private Long studyrecordId;//学习记录ID
 
+	
+	public  MeleteModuleRecordModel(){}
 	// Property accessors
 
 	public Long getModulerecordId() {

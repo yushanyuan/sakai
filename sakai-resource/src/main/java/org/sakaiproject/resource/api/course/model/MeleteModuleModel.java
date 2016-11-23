@@ -45,6 +45,10 @@ public class MeleteModuleModel implements java.io.Serializable {
 	private Long videoSize;//视频大小
 	private String videoTime;//视频时长
 	
+	
+	
+	public MeleteModuleModel() {
+	}
 	public String getChildType() {
 		return childType;
 	}

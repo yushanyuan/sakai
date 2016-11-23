@@ -691,6 +691,19 @@ public interface ICourseService {
 	public List<MeleteSectionModel> getAllSection(String courseId) throws Exception;
 
 	public List<MeleteTestModel> getAllTest(String courseId) throws Exception;
+	
+	/**
+	 * 获得旧课程空间的作业
+	 */
+	public List<MeleteTestModel> getAllTestByOldMelete(String courseId) throws Exception;
+	
+	/**
+	 * 得到test
+	 * @param testId
+	 * @return
+	 * @throws Exception
+	 */
+	public MeleteTestModel getTest(Long testId) throws Exception;
 
 	public List<MeleteForumModel> getAllForum(String courseId) throws Exception;
 

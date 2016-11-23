@@ -1,21 +1,14 @@
 function fitScreen() {
-    var sectionfrm = parent.document.getElementById("coursewareFrame");
-    var fp1 = $(parent.document).find("iframe")[0];
-	var fp2 = $(parent.parent.document).find(".portletMainIframe")[0];
-	var extralHeight = 35;
-	var mainHeight = $("#checkWorkListGP").height()+50;
-	if(mainHeight <200){
-		mainHeight = 200;
+	var fp2 = $(parent.document).find("#ifrm_c_test")[0];
+	var fp3 = $(parent.parent.document).find(".portletMainIframe")[0];
+    $("body").height(700);
+    
+	if($(fp2).height() < 700){
+    	$(fp2).height(700);
 	}
-
-    $("body").height(mainHeight);
-
-    if (fp1) {
-        $(fp1).height($("body").outerHeight()+extralHeight);
-        if (fp2) {
-            $(fp2).height($(fp1).outerHeight() + 50);
-        }
-    }
+    if($(fp3).height() < 700){
+    	$(fp3).height(700);
+	}    
 }
 
 var checkWorkListStore;

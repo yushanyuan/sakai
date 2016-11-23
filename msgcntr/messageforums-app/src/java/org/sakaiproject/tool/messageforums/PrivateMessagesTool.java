@@ -45,8 +45,8 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.validator.EmailValidator;
 import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.Attachment;
@@ -112,7 +112,7 @@ import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureExcep
 public class PrivateMessagesTool
 {
   
-  private static final Log LOG = LogFactory.getLog(PrivateMessagesTool.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PrivateMessagesTool.class);
 
   private static final String MESSAGECENTER_PRIVACY_URL = "messagecenter.privacy.url";
   private static final String MESSAGECENTER_PRIVACY_TEXT = "messagecenter.privacy.text";
@@ -2769,12 +2769,8 @@ private   int   getNum(char letter,   String   a)
     	for (Iterator i = totalComposeToList.iterator(); i.hasNext();) {      
     		MembershipItem membershipItem = (MembershipItem) i.next();                
 
-    		if (MembershipItem.TYPE_USER.equals(membershipItem.getType())) {
-    			if (membershipItem.getUser() != null) {
-    				if (membershipItem.getUser().getId().equals(currentMessage.getCreatedBy())) {
-    					selectedComposeToList.add(membershipItem.getId());
-    				}
-    			}
+    		if (membershipItem.getUser() != null && membershipItem.getUser().getId().equals(currentMessage.getCreatedBy())) {
+    			selectedComposeToList.add(membershipItem.getId());
     		}
     	}
 
@@ -5185,7 +5181,7 @@ private   int   getNum(char letter,   String   a)
 		try{
 			return SiteService.getSite(ToolManager.getCurrentPlacement().getContext());
 		} catch (IdUnusedException e) {
-			LOG.error(e);
+			LOG.error(e.getMessage());
 		}
 		return null;
 	}

@@ -5,3 +5,6 @@ bundle/target/*
 components/target*
 impl/target*
 tool/target*
+assembly*
+.classpath
+.settings

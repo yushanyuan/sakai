@@ -1,8 +1,5 @@
 package org.sakaiproject.gradebookng.tool.panels.importExport;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.log4j.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -14,23 +11,24 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.StringResourceModel;
 import org.sakaiproject.gradebookng.business.model.ProcessedGradeItem;
 import org.sakaiproject.gradebookng.tool.model.ImportWizardModel;
+import org.sakaiproject.gradebookng.tool.pages.ImportExportPage;
 import org.sakaiproject.gradebookng.tool.panels.AddOrEditGradeItemPanelContent;
 import org.sakaiproject.service.gradebook.shared.Assignment;
 
-import java.util.ArrayList;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Importer has detected that items need to be created so extract the data and wrap the 'AddOrEditGradeItemPanelContent' panel
  */
+@Slf4j
 public class CreateGradeItemStep extends Panel {
-	private static final Logger LOG = Logger.getLogger(CreateGradeItemStep.class);
-	private static final long serialVersionUID = 1L;
-	
-	private String panelId;
-    private IModel<ImportWizardModel> model;
 
-    public CreateGradeItemStep(String id, IModel<ImportWizardModel> importWizardModel) {
+	private static final long serialVersionUID = 1L;
+
+	private final String panelId;
+    private final IModel<ImportWizardModel> model;
+
+    public CreateGradeItemStep(final String id, final IModel<ImportWizardModel> importWizardModel) {
         super(id);
         this.panelId = id;
         this.model = importWizardModel;
@@ -44,45 +42,53 @@ public class CreateGradeItemStep extends Panel {
         final ImportWizardModel importWizardModel = this.model.getObject();
 
         final int step = importWizardModel.getStep();
-        
-        ProcessedGradeItem processedGradeItem = importWizardModel.getGbItemsToCreate().get(step - 1);
-        
-        //setup new assignment for populating
-        Assignment assignment = new Assignment();
-        assignment.setName(StringUtils.trim(processedGradeItem.getItemTitle()));
-        assignment.setPoints(Double.parseDouble(processedGradeItem.getItemPointValue()));
 
-        Model<Assignment> assignmentModel = new Model<>(assignment);
+        // original data
+        final ProcessedGradeItem processedGradeItem = importWizardModel.getItemsToCreate().get(step - 1);
+
+        // setup new assignment for populating
+        final Assignment assignment = new Assignment();
+        assignment.setName(StringUtils.trim(processedGradeItem.getItemTitle()));
+        if(StringUtils.isNotBlank(processedGradeItem.getItemPointValue())) {
+        	assignment.setPoints(Double.parseDouble(processedGradeItem.getItemPointValue()));
+        }
+
+        final Model<Assignment> assignmentModel = new Model<>(assignment);
 
         @SuppressWarnings("unchecked")
+		final
 		Form<Assignment> form = new Form("form", assignmentModel) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
             protected void onSubmit() {
-                List<Assignment> assignmentsToCreate = new ArrayList<Assignment>();
-                
-                Assignment a = (Assignment)getDefaultModel().getObject();
 
-                if (a != null) {
-                    assignmentsToCreate.add(assignment);
-                }
-                
-                LOG.debug("Assignment: " + assignment);
-                
+                final Assignment a = (Assignment)getDefaultModel().getObject();
+
+                //add to model
+                importWizardModel.getAssignmentsToCreate().add(a);
+
+                log.debug("Assignment: " + assignment);
+
+                // sync up the assignment data so we can present it for confirmation
+                processedGradeItem.setAssignmentTitle(a.getName());
+                processedGradeItem.setAssignmentPoints(a.getPoints());
+
                 //Figure out if there are more steps
                 //If so, go to the next step (ie do it all over again)
                 Component newPanel = null;
-                importWizardModel.setAssignmentsToCreate(assignmentsToCreate);
-
                 if (step < importWizardModel.getTotalSteps()) {
                     importWizardModel.setStep(step+1);
-                    newPanel = new CreateGradeItemStep(panelId, Model.of(importWizardModel));
+                    newPanel = new CreateGradeItemStep(CreateGradeItemStep.this.panelId, Model.of(importWizardModel));
                 } else {
                     //If not, continue on in the wizard
-                    newPanel = new GradeImportConfirmationStep(panelId, Model.of(importWizardModel));
+                    newPanel = new GradeImportConfirmationStep(CreateGradeItemStep.this.panelId, Model.of(importWizardModel));
                 }
-                
+
+                // clear any previous errors
+				final ImportExportPage page = (ImportExportPage) getPage();
+				page.clearFeedback();
+
                 newPanel.setOutputMarkupId(true);
                 CreateGradeItemStep.this.replaceWith(newPanel);
 
@@ -90,24 +96,27 @@ public class CreateGradeItemStep extends Panel {
         };
         add(form);
 
-        Button backButton = new Button("backbutton") {
+        final Button backButton = new Button("backbutton") {
 			private static final long serialVersionUID = 1L;
 
 			@Override
             public void onSubmit() {
-                LOG.debug("Clicking back button...");
+
+				// clear any previous errors
+				final ImportExportPage page = (ImportExportPage) getPage();
+				page.clearFeedback();
+
                 Component newPanel = null;
                 if (step > 1) {
                     importWizardModel.setStep(step-1);
-                    newPanel = new CreateGradeItemStep(panelId, Model.of(importWizardModel));
+                    newPanel = new CreateGradeItemStep(CreateGradeItemStep.this.panelId, Model.of(importWizardModel));
                 }
                 else {
-                    newPanel = new GradeItemImportSelectionStep(panelId, Model.of(importWizardModel));
+                    newPanel = new GradeItemImportSelectionStep(CreateGradeItemStep.this.panelId, Model.of(importWizardModel));
                 }
+
                 newPanel.setOutputMarkupId(true);
                 CreateGradeItemStep.this.replaceWith(newPanel);
-
-
             }
         };
         backButton.setDefaultFormProcessing(false);

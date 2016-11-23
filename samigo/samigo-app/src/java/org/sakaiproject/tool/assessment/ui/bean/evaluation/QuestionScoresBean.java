@@ -36,9 +36,9 @@ import java.util.Set;
 import javax.faces.event.ActionEvent;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.math.util.MathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.commons.math3.util.Precision;
 import org.sakaiproject.jsf.model.PhaseAware;
 import org.sakaiproject.tool.assessment.business.entity.RecordingData;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentAccessControl;
@@ -91,7 +91,7 @@ public class QuestionScoresBean
   private String totalPeople;
   private String typeId;
   private HashMap scoresByItem;
-  private static Log log = LogFactory.getLog(QuestionScoresBean.class);
+  private static Logger log = LoggerFactory.getLogger(QuestionScoresBean.class);
 
   //private String selectedSectionFilterValue = TotalScoresBean.ALL_SECTIONS_SELECT_VALUE;
   private String selectedSectionFilterValue = null;
@@ -339,7 +339,7 @@ public class QuestionScoresBean
    */
   public double getMaxScore()
   {
-    return MathUtils.round(maxScore, 2);
+    return Precision.round(maxScore, 2);
   }
 
   /**

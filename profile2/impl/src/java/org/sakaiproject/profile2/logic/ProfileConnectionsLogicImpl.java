@@ -21,10 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.Setter;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.profile2.cache.CacheManager;
 import org.sakaiproject.profile2.dao.ProfileDao;
@@ -35,6 +32,10 @@ import org.sakaiproject.profile2.types.EmailType;
 import org.sakaiproject.profile2.types.PrivacyType;
 import org.sakaiproject.profile2.util.ProfileConstants;
 import org.sakaiproject.user.api.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.Setter;
 
 /**
  * Implementation of ProfileConnectionsLogic for Profile2.
@@ -44,7 +45,7 @@ import org.sakaiproject.user.api.User;
  */
 public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 
-	private static final Logger log = Logger.getLogger(ProfileConnectionsLogicImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(ProfileConnectionsLogicImpl.class);
 
 	private Cache cache;
 	private final String CACHE_NAME = "org.sakaiproject.profile2.cache.connections";
@@ -53,6 +54,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<BasicConnection> getBasicConnectionsForUser(final String userUuid) {
 		List<User> users = getConnectedUsers(userUuid);
 		return getBasicConnections(users);
@@ -61,6 +63,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<Person> getConnectionsForUser(final String userUuid) {
 		List<User> users = getConnectedUsers(userUuid);
 		return profileLogic.getPersons(users);
@@ -70,6 +73,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */	
+	@Override
 	public int getConnectionsForUserCount(final String userId) {
 		return getConnectionsForUser(userId).size();
 	}
@@ -77,6 +81,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */	
+	@Override
 	public List<Person> getConnectionRequestsForUser(final String userId) {
 		List<User> users = sakaiProxy.getUsers(dao.getRequestedConnectionUserIdsForUser(userId));
 		return profileLogic.getPersons(users);
@@ -85,6 +90,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */	
+	@Override
 	public int getConnectionRequestsForUserCount(final String userId) {
 		return getConnectionRequestsForUser(userId).size();
 	}
@@ -92,11 +98,12 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean isUserXFriendOfUserY(String userX, String userY) {
 		
 		//if same then friends.
 		//added this check so we don't need to do it everywhere else and can call isFriend for all user pairs.
-		if(userY.equals(userX)) {
+		if(StringUtils.equals(userX, userY)) {
 			return true;
 		}
 		
@@ -117,6 +124,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<Person> getConnectionsSubsetForSearch(List<Person> connections, String search) {
 		return getConnectionsSubsetForSearch( connections, search, false);
 	}
@@ -124,6 +132,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<Person> getConnectionsSubsetForSearch(List<Person> connections, String search, boolean forMessaging) {
 		
 		List<Person> subList = new ArrayList<Person>();
@@ -162,6 +171,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getConnectionStatus(String userA, String userB) {
 		
 		//current user must be the user making the request
@@ -200,6 +210,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean requestFriend(String userId, String friendId) {
 		
 		if(userId == null || friendId == null){
@@ -232,6 +243,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean isFriendRequestPending(String fromUser, String toUser) {
 		
 		ProfileFriend profileFriend = dao.getPendingConnection(fromUser, toUser);
@@ -247,6 +259,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean confirmFriendRequest(final String fromUser, final String toUser) {
 		
 		if(fromUser == null || toUser == null){
@@ -294,6 +307,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean ignoreFriendRequest(final String fromUser, final String toUser) {
 		
 		if(fromUser == null || toUser == null){
@@ -330,6 +344,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean removeFriend(String userId, String friendId) {
 		
 		if(userId == null || friendId == null){
@@ -368,6 +383,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public BasicConnection getBasicConnection(String userUuid) {
 		return getBasicConnection(sakaiProxy.getUserById(userUuid));
 	}
@@ -375,6 +391,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public BasicConnection getBasicConnection(User user) {
 		BasicConnection p = new BasicConnection();
 		p.setUuid(user.getId());
@@ -387,6 +404,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<BasicConnection> getBasicConnections(List<User> users) {
 		
 		List<BasicConnection> list = new ArrayList<BasicConnection>();
@@ -411,6 +429,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getOnlineStatus(String userUuid) {
 		
 		//TODO check prefs and privacy for the user. has the user allowed it?
@@ -442,6 +461,7 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public Map<String, Integer> getOnlineStatus(List<String> userUuids) {
 		
 		//get the list of users that have active sessions
@@ -455,9 +475,11 @@ public class ProfileConnectionsLogicImpl implements ProfileConnectionsLogic {
 		//iterate over original list, create the map
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		for(String uuid: userUuids) {
-			if(lastEventTimes.containsKey(uuid)){
-				//calc time, iff less than interval, online, otherwise away
-				if((timeNow - lastEventTimes.get(uuid).longValue()) < ProfileConstants.ONLINE_INACTIVITY_INTERVAL) {
+			if(lastEventTimes.containsKey(uuid)) {
+				
+				//calc time, if less than interval, online, otherwise away
+				Long lastEventTime = lastEventTimes.get(uuid);
+				if(lastEventTime != null && ((timeNow - lastEventTime.longValue()) < ProfileConstants.ONLINE_INACTIVITY_INTERVAL)) {
 					map.put(uuid, ProfileConstants.ONLINE_STATUS_ONLINE);
 				} else {
 					map.put(uuid, ProfileConstants.ONLINE_STATUS_AWAY);

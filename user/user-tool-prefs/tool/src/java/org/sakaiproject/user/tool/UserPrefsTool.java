@@ -41,8 +41,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.entity.api.ResourceProperties;
@@ -71,7 +71,7 @@ import org.sakaiproject.util.Web;
 public class UserPrefsTool
 {
 	/** Our log (commons). */
-	private static final Log LOG = LogFactory.getLog(UserPrefsTool.class);
+	private static final Logger LOG = LoggerFactory.getLogger(UserPrefsTool.class);
 
 	/** * Resource bundle messages */
 	ResourceLoader msgs = new ResourceLoader("user-tool-prefs");
@@ -647,21 +647,10 @@ public class UserPrefsTool
 		boolean show_tab_label_option = ServerConfigurationService.getBoolean("preference.show.tab.label.option", true);
 		setPrefShowTabLabelOption(show_tab_label_option);
 
-		//Tab order configuration
-		String defaultPreference="prefs_noti_title, prefs_timezone_title, prefs_lang_title, prefs_hidden_title, prefs_hidden_title";
-
-		if (ServerConfigurationService.getString("preference.pages")== null || ServerConfigurationService.getString("preference.pages").length() == 0)
-		{
-			LOG.info("The preference.pages is not specified in sakai.properties, hence the default option of '" + defaultPreference + "' is considered");
-		}
-		else
-		{
-			LOG.debug("Setting preference.pages as "+ ServerConfigurationService.getString("preference.pages"));
-		}
-		
 		//To indicate that it is in the refresh mode
 		refreshMode=true;
-		String tabOrder=ServerConfigurationService.getString("preference.pages",defaultPreference);
+		String tabOrder = ServerConfigurationService.getString("preference.pages", "prefs_noti_title, prefs_timezone_title, prefs_lang_title, prefs_hidden_title, prefs_hidden_title");
+		LOG.debug("Setting preference.pages as " + tabOrder);
 
 		tablist=tabOrder.split(",");
 
@@ -673,10 +662,8 @@ public class UserPrefsTool
 			else if (tablist[i].equals(Language)) language_selection=i+1;
 			else if (tablist[i].equals(Privacy)) privacy_selection=i+1;
 			else if (tablist[i].equals(Hidden)) hidden_selection=i+1;
-			else LOG.warn(tablist[i] + " is not valid!!! Re-configure preference.pages at sakai.properties");
+			else LOG.warn(tablist[i] + " is not valid!!! Please fix preference.pages property in sakai.properties");
 		}
-
-		//defaultPage=tablist[0];
 
 		initNotificationStructures();
 		LOG.debug("new UserPrefsTool()");

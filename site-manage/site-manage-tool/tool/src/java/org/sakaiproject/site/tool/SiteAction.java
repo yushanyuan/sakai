@@ -61,8 +61,8 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.velocity.tools.generic.SortTool;
 import org.sakaiproject.alias.api.Alias;
@@ -167,6 +167,7 @@ import org.sakaiproject.userauditservice.api.UserAuditService;
 import org.sakaiproject.shortenedurl.api.ShortenedUrlService;
 import org.sakaiproject.util.*;
 // for basiclti integration
+import org.sakaiproject.util.api.LinkMigrationHelper;
 
 
 /**
@@ -179,10 +180,11 @@ public class SiteAction extends PagedResourceActionII {
 	private static final String TEMPLATE_USED = "template_used";
 	
 	/** Our log (commons). */
-	private static Log M_log = LogFactory.getLog(SiteAction.class);
+	private static Logger M_log = LoggerFactory.getLogger(SiteAction.class);
 	
 	private LTIService m_ltiService = (LTIService) ComponentManager.get("org.sakaiproject.lti.api.LTIService");
 	private ContentHostingService m_contentHostingService = (ContentHostingService) ComponentManager.get("org.sakaiproject.content.api.ContentHostingService");
+	private LinkMigrationHelper m_linkMigrationHelper = (LinkMigrationHelper) ComponentManager.get("org.sakaiproject.util.api.LinkMigrationHelper");
 
 	private ImportService importService = org.sakaiproject.importer.cover.ImportService
 			.getInstance();
@@ -1780,6 +1782,21 @@ public class SiteAction extends PagedResourceActionII {
 			context.put("toolsByGroup", (LinkedHashMap<String,List>) state.getAttribute(STATE_TOOL_GROUP_LIST));
 			
 			context.put("toolGroupMultiples", getToolGroupMultiples(state, (List) state.getAttribute(STATE_TOOL_REGISTRATION_LIST)));
+			
+			//get expanded groups
+			List<String> expandedGroups_lst = new ArrayList<>();
+			String[] tokens = ServerConfigurationService.getStrings("sitemanage.tools.groups.expanded");
+			if(tokens != null) {
+				for(String token : tokens) {
+					if(StringUtils.isNotEmpty(token)) {
+						String groupName = getGroupName(token);
+						if(StringUtils.isNotEmpty(groupName)) {
+							expandedGroups_lst.add(groupName);
+						}
+					}
+				}
+			}
+			context.put("expandedGroups", expandedGroups_lst);
 
 			return (String) getContext(data).get("template") + TEMPLATE[4];
 
@@ -3041,15 +3058,10 @@ public class SiteAction extends PagedResourceActionII {
 			context.put("importSupportedTools", allImportableToolIdsInOriginalSites);
 			context.put("hideImportedContent", ServerConfigurationService.getBoolean("content.import.hidden", false));
 			
-			if(ServerConfigurationService.getBoolean("site-manage.importoption.siteinfo", false)){
-				try{
-					String siteInfoToolTitle = ToolManager.getTool(SITE_INFO_TOOL_ID).getTitle();
-					context.put("siteInfoToolTitle", siteInfoToolTitle);
-				}catch(Exception e){
-					
-				}
+			Tool siteInfoTool = ToolManager.getTool(SITE_INFO_TOOL_ID);
+			if (siteInfoTool != null) {
+				context.put("siteInfoToolTitle", siteInfoTool.getTitle());
 			}
-			
 			
 			return (String) getContext(data).get("template") + TEMPLATE[27];
 		}
@@ -3182,8 +3194,10 @@ public class SiteAction extends PagedResourceActionII {
 					.getAttribute(STATE_TOOL_HOME_SELECTED));
 			context.put("importSupportedTools", allImportableToolIdsInOriginalSites);
 
-			
-			
+			Tool siteInfoTool = ToolManager.getTool(SITE_INFO_TOOL_ID);
+			if (siteInfoTool != null) {
+				context.put("siteInfoToolTitle", siteInfoTool.getTitle());
+			}
 			
 			return (String) getContext(data).get("template") + TEMPLATE[60];
 		}
@@ -4472,14 +4486,14 @@ public class SiteAction extends PagedResourceActionII {
 				if (fileInput != null && importService.isValidArchive(fileInput)) {
 					ImportDataSource importDataSource = importService
 							.parseFromFile(fileInput);
-					Log.info("chef", "Getting import items from manifest.");
+				 	M_log.info("Getting import items from manifest.");
 					List lst = importDataSource.getItemCategories();
 					if (lst != null && lst.size() > 0) {
 						Iterator iter = lst.iterator();
 						while (iter.hasNext()) {
 							ImportMetadata importdata = (ImportMetadata) iter
 									.next();
-							// Log.info("chef","Preparing import
+							// Logger.info("chef","Preparing import
 							// item '" + importdata.getId() + "'");
 							if ((!importdata.isMandatory())
 									&& (importdata.getFileName()
@@ -4612,16 +4626,12 @@ public class SiteAction extends PagedResourceActionII {
 
 		// combine the selected import items with the mandatory import items
 		fnlList.addAll(directList);
-		Log.info("chef", "doSaveMtrlSite() about to import " + fnlList.size()
-				+ " top level items");
-		Log.info("chef", "doSaveMtrlSite() the importDataSource is "
-				+ importDataSource.getClass().getName());
+	 	M_log.info("about to import {} top level items", fnlList.size());
+	 	M_log.info("the importDataSource is {}", importDataSource.getClass().getName());
 		if (importDataSource instanceof SakaiArchive) {
-			Log.info("chef",
-					"doSaveMtrlSite() our data source is a Sakai format");
+		 	M_log.info("our data source is a Sakai format");
 			((SakaiArchive) importDataSource).buildSourceFolder(fnlList);
-			Log.info("chef", "doSaveMtrlSite() source folder is "
-					+ ((SakaiArchive) importDataSource).getSourceFolder());
+		 	M_log.info("source folder is {}", ((SakaiArchive) importDataSource).getSourceFolder());
 			ArchiveService.merge(((SakaiArchive) importDataSource)
 					.getSourceFolder(), siteId, null);
 		} else {
@@ -4666,7 +4676,7 @@ public class SiteAction extends PagedResourceActionII {
 		// read the search form field into the state object
 		String search = StringUtils.trimToNull(data.getParameters().getString(
 				FORM_SEARCH));
-
+		resetPaging(state);
 		// set the flag to go to the prev page on the next list
 		if (search == null) {
 			state.removeAttribute(STATE_SEARCH);
@@ -8509,7 +8519,7 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 										SecurityService.pushAdvisor(yesMan);
 										commitSite(currentSite);
 									}catch (Exception e) {
-										M_log.debug(e);
+										M_log.debug(e.getMessage());
 									}finally{
 										SecurityService.popAdvisor();
 									}
@@ -8567,19 +8577,19 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 									SecurityService.pushAdvisor(yesMan);
 									commitSite(currentSite);
 								}catch (Exception e) {
-									M_log.debug(e);
+									M_log.debug(e.getMessage());
 								}finally{
 									SecurityService.popAdvisor();
 								}
 							}
 						}
 					}catch (Exception e) {
-						M_log.debug("Error removing user to group: " + groupRef + ", " + e.getMessage(), e);
+						M_log.debug("Error removing user to group: {}, {}", groupRef, e.getMessage(), e);
 					}
 				}
 			}
 		} catch (IdUnusedException e) {
-			M_log.debug("Error removing user to group: " + groupRef + ", " + e.getMessage(), e);
+			M_log.debug("Error removing user to group: {}, {}", groupRef, e.getMessage(), e);
 		}
 	}
 	
@@ -9669,12 +9679,8 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 								try 
 								{
 									AuthzGroup realmEdit = authzGroupService.getAuthzGroup(realm);
-									if (SiteTypeUtil.isCourseSite(siteType)) 
-									{
-										// also remove the provider id attribute if any
-										realmEdit.setProviderGroupId(null);
-									}
-									
+									// also remove the provider id attribute if any
+									realmEdit.setProviderGroupId(null);
 									// add current user as the maintainer
 									realmEdit.addMember(UserDirectoryService.getCurrentUser().getId(), site.getMaintainRole(), true, false);
 									
@@ -9686,7 +9692,6 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 									addAlert(state, this + rb.getString("java.notaccess"));
 									M_log.error(this + ".actionForTemplate chef_siteinfo-duplicate: " + rb.getString("java.notaccess"), e);
 								}
-							
 							} catch (IdUnusedException e) {
 								M_log.warn(this + " actionForTemplate chef_siteinfo-duplicate:: IdUnusedException when saving " + newSiteId);
 							} catch (PermissionException e) {
@@ -11909,7 +11914,9 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 			editToSite.setDescription(fromSite.getDescription());
 			editToSite.setInfoUrl(fromSite.getInfoUrl());
 			commitSite(editToSite);
-			toSite = editToSite;
+			//Update the site that's passed in
+			toSite.setDescription(fromSite.getDescription());
+			toSite.setInfoUrl(fromSite.getInfoUrl());
 		} catch (IdUnusedException e) {
 
 		}
@@ -13663,17 +13670,10 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 			
 			String msgBody = newSite.getDescription();
 			if(msgBody != null && !"".equals(msgBody)){
-				boolean updated = false;
-				Iterator<Entry<String, String>> entryItr = entrySet.iterator();
-				while(entryItr.hasNext()) {
-					Entry<String, String> entry = (Entry<String, String>) entryItr.next();
-					String fromContextRef = entry.getKey();
-					if(msgBody.contains(fromContextRef)){									
-						msgBody = msgBody.replace(fromContextRef, entry.getValue());
-						updated = true;
-					}								
-				}	
-				if(updated){
+				String msgBodyPreMigrate = msgBody;
+				msgBody = m_linkMigrationHelper.migrateAllLinks(entrySet, msgBody);
+				
+				if(!msgBody.equals(msgBodyPreMigrate)){
 					//update the site b/c some tools (Lessonbuilder) updates the site structure (add/remove pages) and we don't want to
 					//over write this
 					try {
@@ -15486,7 +15486,7 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 			} catch (PermissionException e)	{
 				// This could occur if the user's role is the maintain role for the site, and we don't let the user
 				// unjoin sites they are maintainers of
-				Log.warn("chef", this + ".doUnjoin(): " + e);
+			 	M_log.warn(e.getMessage());
 				//TODO can't access site so redirect to portal
 				
 			} catch (InUseException e) {

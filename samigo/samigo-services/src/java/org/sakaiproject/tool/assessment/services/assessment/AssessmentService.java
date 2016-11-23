@@ -34,8 +34,8 @@ import java.util.Set;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityAdvisor.SecurityAdvice;
 import org.sakaiproject.authz.cover.SecurityService;
@@ -91,7 +91,7 @@ import org.sakaiproject.tool.cover.ToolManager;
  * @author Rachel Gollub <rgollub@stanford.edu>
  */
 public class AssessmentService {
-	private Log log = LogFactory.getLog(AssessmentService.class);
+	private Logger log = LoggerFactory.getLogger(AssessmentService.class);
 	public static final int UPDATE_SUCCESS = 0;
 	public static final int UPDATE_ERROR_DRAW_SIZE_TOO_LARGE = 1;
 
@@ -109,7 +109,7 @@ public class AssessmentService {
 					.getAssessmentFacadeQueries().getAssessmentTemplate(
 							new Long(assessmentTemplateId));
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -120,7 +120,7 @@ public class AssessmentService {
 					.getAssessmentFacadeQueries().getAssessment(
 							Long.valueOf(assessmentId));
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -130,7 +130,7 @@ public class AssessmentService {
 			return PersistenceService.getInstance()
 					.getAssessmentFacadeQueries().getAssessment(assessmentId);
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -141,7 +141,7 @@ public class AssessmentService {
 					.getAssessmentFacadeQueries().getBasicInfoOfAnAssessment(
 							new Long(assessmentId));
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -150,7 +150,7 @@ public class AssessmentService {
 		try {
 			return PersistenceService.getInstance().getAssessmentFacadeQueries().getBasicInfoOfAnAssessmentFromSectionId(sectionId);
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -160,7 +160,7 @@ public class AssessmentService {
 			return PersistenceService.getInstance()
 					.getAssessmentFacadeQueries().getAllAssessmentTemplates();
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -171,7 +171,7 @@ public class AssessmentService {
 					.getAssessmentFacadeQueries()
 					.getAllActiveAssessmentTemplates();
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -182,7 +182,7 @@ public class AssessmentService {
 					.getAssessmentFacadeQueries()
 					.getTitleOfAllActiveAssessmentTemplates();
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -250,7 +250,7 @@ public class AssessmentService {
 						.getAllAssessments(orderBy);
 			}
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -267,13 +267,15 @@ public class AssessmentService {
 			AssessmentTemplateFacade assessmentTemplate = null;
 			// #1 - check templateId and prepared it in Long
 			Long templateIdLong = AssessmentTemplateFacade.DEFAULTTEMPLATE;
-			if (templateId != null && !templateId.equals(""))
+			if (StringUtils.isNotBlank(templateId)) {
 				templateIdLong = new Long(templateId);
+			}
 
 			// #2 - check typeId and prepared it in Long
 			Long typeIdLong = TypeFacade.HOMEWORK;
-			if (typeId != null && !typeId.equals(""))
+			if (StringUtils.isNotBlank(typeId)) {
 				typeIdLong = new Long(typeId);
+			}
 
 			AssessmentFacadeQueriesAPI queries = PersistenceService
 					.getInstance().getAssessmentFacadeQueries();
@@ -281,7 +283,7 @@ public class AssessmentService {
 			assessment = queries.createAssessment(title, description,
 					typeIdLong, templateIdLong, siteId);
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new Exception(e);
 		}
 		return assessment;
@@ -344,7 +346,7 @@ public class AssessmentService {
 					.getInstance().getAssessmentFacadeQueries();
 			section = queries.addSection(assessmentIdLong);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return section;
 	}
@@ -356,7 +358,7 @@ public class AssessmentService {
 					.getInstance().getAssessmentFacadeQueries();
 			queries.removeSection(sectionIdLong);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 
 	}
@@ -367,7 +369,7 @@ public class AssessmentService {
 					.getAssessmentFacadeQueries().getSection(
 							new Long(sectionId));
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -377,7 +379,7 @@ public class AssessmentService {
 			PersistenceService.getInstance().getAssessmentFacadeQueries()
 					.saveOrUpdateSection(section);
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -395,13 +397,8 @@ public class AssessmentService {
 	}
 
 	public boolean verifyItemsDrawSize(SectionFacade section){
-		if ((section != null)
-				&& (section
-						.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE) != null)
-						&& (section
-								.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE)
-								.equals(SectionDataIfc.RANDOM_DRAW_FROM_QUESTIONPOOL
-										.toString()))) {
+		if (section != null && section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE) != null
+				&& StringUtils.equals(section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE), SectionDataIfc.RANDOM_DRAW_FROM_QUESTIONPOOL.toString())) {
 			QuestionPoolService qpService = new QuestionPoolService();
 			ArrayList itemlist = qpService
 			.getAllItems(Long.valueOf(section
@@ -430,10 +427,8 @@ public class AssessmentService {
 	}
 	
 	public int updateRandomPoolQuestions(SectionFacade section, boolean publishing){
-		if ((section != null)
-				&& (section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE) != null)
-				&& (section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE).
-				equals(SectionDataIfc.RANDOM_DRAW_FROM_QUESTIONPOOL.toString()))) {
+		if (section != null && section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE) != null
+				&& StringUtils.equals(section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE), SectionDataIfc.RANDOM_DRAW_FROM_QUESTIONPOOL.toString())) {
 
 			QuestionPoolService qpService = new QuestionPoolService();
 			ArrayList itemlist = qpService.getAllItems(Long.valueOf(section
@@ -466,7 +461,7 @@ public class AssessmentService {
 				String requestedScore = (section.getSectionMetaDataByLabel(SectionDataIfc.POINT_VALUE_FOR_QUESTION) != null) ? 
 						                 section.getSectionMetaDataByLabel(SectionDataIfc.POINT_VALUE_FOR_QUESTION)	: "";
 						                 
-				if (requestedScore != null && !requestedScore.equals("")) {
+				if (StringUtils.isNotBlank(requestedScore)) {
 					hasRandomPartScore = true;
 					score = new Double(requestedScore);
 				}
@@ -475,7 +470,7 @@ public class AssessmentService {
 				String requestedDiscount = (section.getSectionMetaDataByLabel(SectionDataIfc.DISCOUNT_VALUE_FOR_QUESTION) != null) ? 
 											section.getSectionMetaDataByLabel(SectionDataIfc.DISCOUNT_VALUE_FOR_QUESTION) : "";
 
-				if (requestedDiscount != null && !requestedDiscount.equals("")) {
+				if (StringUtils.isNotBlank(requestedDiscount)) {
 					hasRandomPartDiscount = true;
 					discount = new Double(requestedDiscount);
 				}
@@ -589,20 +584,22 @@ public class AssessmentService {
 			AssessmentTemplateFacade assessmentTemplate = null;
 			// #1 - check templateId and prepared it in Long
 			Long templateIdLong = AssessmentTemplateFacade.DEFAULTTEMPLATE;
-			if (templateId != null && !templateId.equals(""))
+			if (StringUtils.isNotBlank(templateId)) {
 				templateIdLong = new Long(templateId);
+			}
 
 			// #2 - check typeId and prepared it in Long
 			Long typeIdLong = TypeFacade.HOMEWORK;
-			if (typeId != null && !typeId.equals(""))
+			if (StringUtils.isNotBlank(typeId)) {
 				typeIdLong = new Long(typeId);
+			}
 
 			AssessmentFacadeQueriesAPI queries = PersistenceService
 					.getInstance().getAssessmentFacadeQueries();
 			assessment = queries.createAssessmentWithoutDefaultSection(title,
 					description, typeIdLong, templateIdLong, siteId);
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new Exception(e);
 		}
 		return assessment;
@@ -645,7 +642,7 @@ public class AssessmentService {
 			attachment = queries.createItemAttachment(item, resourceId,
 					filename, protocol, isEditPendingAssessmentFlow);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return attachment;
 	}
@@ -670,7 +667,7 @@ public class AssessmentService {
 			attachment = queries.createItemTextAttachment(itemText, resourceId,
 					filename, protocol, isEditPendingAssessmentFlow);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return attachment;
 	}
@@ -686,7 +683,7 @@ public class AssessmentService {
 			PersistenceService.getInstance().getAssessmentFacadeQueries()
 					.updateAssessmentLastModifiedInfo((AssessmentFacade) assessment);
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -700,7 +697,7 @@ public class AssessmentService {
 			attachment = queries.createSectionAttachment(section, resourceId,
 					filename, protocol);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return attachment;
 	}
@@ -720,7 +717,7 @@ public class AssessmentService {
 			attachment = queries.createAssessmentAttachment(assessment,
 					resourceId, filename, protocol);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return attachment;
 	}
@@ -739,7 +736,7 @@ public class AssessmentService {
 			attachment = queries.createEmailAttachment(resourceId, filename,
 					protocol);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return attachment;
 	}
@@ -849,7 +846,7 @@ public class AssessmentService {
 			// create a copy of the resource
 			ContentResource cr = AssessmentService.getContentHostingService().getResource(resourceId);
 			String escapedName = escapeResourceName(filename);
-			if (toContext != null && !toContext.equals("")) {
+			if (StringUtils.isNotBlank(toContext)) {
 				cr_copy = AssessmentService.getContentHostingService().addAttachmentResource(escapedName, 
 						toContext, 
 						ToolManager.getTool("sakai.samigo").getTitle(), cr
@@ -982,7 +979,7 @@ public class AssessmentService {
 		}
 		catch (Exception e)
 		{
-			Log log = LogFactory.getLog(AssessmentService.class);
+		 Logger log = LoggerFactory.getLogger(AssessmentService.class);
 			log.warn("escapeResourceName: ", e);
 			return id;
 		}
@@ -1018,7 +1015,7 @@ public class AssessmentService {
 			PersistenceService.getInstance().getAssessmentFacadeQueries()
 					.copyAssessment(assessmentId, apepndCopyTitle);
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -1028,7 +1025,7 @@ public class AssessmentService {
 			return PersistenceService.getInstance().getAssessmentFacadeQueries()
 					.getAllActiveAssessmentsByAgent(fromContext);
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 
@@ -1059,7 +1056,7 @@ public class AssessmentService {
 			  return PersistenceService.getInstance().getFavoriteColChoicesFacadeQueries()
 			  .getFavoriteColChoicesByAgent(fromContext);
 		  } catch (Exception e) {
-			  log.error(e);
+			  log.error(e.getMessage(), e);
 			  throw new RuntimeException(e);
 		  }
 
@@ -1138,7 +1135,7 @@ public class AssessmentService {
 			boolean hasRandomPartDiscount = false;
 			Double discount = null;
 			
-			if (section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE).equals(SectionDataIfc.QUESTIONS_AUTHORED_ONE_BY_ONE.toString()))
+			if (StringUtils.equals(section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE), SectionDataIfc.QUESTIONS_AUTHORED_ONE_BY_ONE.toString()))
   			{
 				items = section.getItemArray();
   			}
@@ -1279,28 +1276,33 @@ public class AssessmentService {
 		for (Object sectionObj : assessment.getSectionArray()) {
 			SectionFacade section = (SectionFacade)sectionObj;
 			List<ItemDataIfc> items = null;
-						
-			if (section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE).equals(SectionDataIfc.QUESTIONS_AUTHORED_ONE_BY_ONE.toString()))
-  			{
-				items = section.getItemArray();
-  			}
-			else 
-			{
-				QuestionPoolService qpService = new QuestionPoolService();
-				try {
-					Long qpId = Long.valueOf(section.getSectionMetaDataByLabel(SectionDataIfc.POOLID_FOR_RANDOM_DRAW));
-					items = qpService.getAllItems(qpId);
-				} catch (NumberFormatException e) {
-					log.error("NumberFormatException converting to Long: " + section.getSectionMetaDataByLabel(SectionDataIfc.POOLID_FOR_RANDOM_DRAW));
+			if (section != null) {
+				if (section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE) == null || StringUtils.equals(section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE), SectionDataIfc.QUESTIONS_AUTHORED_ONE_BY_ONE.toString()))
+				{
+					items = section.getItemArray();
+				}
+				else if (StringUtils.equals(section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE), SectionDataIfc.RANDOM_DRAW_FROM_QUESTIONPOOL.toString()))
+				{
+					QuestionPoolService qpService = new QuestionPoolService();
+					try {
+						Long qpId = Long.valueOf(section.getSectionMetaDataByLabel(SectionDataIfc.POOLID_FOR_RANDOM_DRAW));
+						items = qpService.getAllItems(qpId);
+					} catch (NumberFormatException e) {
+						log.error("NumberFormatException converting to Long: " + section.getSectionMetaDataByLabel(SectionDataIfc.POOLID_FOR_RANDOM_DRAW));
+					}
 				}
 			}
-  				
-			for (ItemDataIfc item : items) 
-			{
-				// only exports these questions types
-				if (isQuestionTypeExportable2MarkupText(item.getTypeId())) {
-					exportToMarkupText = true;
-					break;
+			if (items == null) {
+				log.info("Items for assessment {} section {} is null in isExportable", assessment.getAssessmentId(), section.getSectionId());
+			}
+			else {
+				for (ItemDataIfc item : items) 
+				{
+					// only exports these questions types
+					if (isQuestionTypeExportable2MarkupText(item.getTypeId())) {
+						exportToMarkupText = true;
+						break;
+					}
 				}
 			}
 			if (exportToMarkupText) {

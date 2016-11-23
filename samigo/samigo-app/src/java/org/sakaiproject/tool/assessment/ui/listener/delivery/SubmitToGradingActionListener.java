@@ -37,8 +37,8 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.entity.api.EntityPropertyNotDefinedException;
@@ -93,8 +93,7 @@ import org.sakaiproject.user.api.UserDirectoryService;
  */
 
 public class SubmitToGradingActionListener implements ActionListener {
-	private static final Log log = LogFactory
-			.getLog(SubmitToGradingActionListener.class);
+	private static final Logger log = LoggerFactory.getLogger(SubmitToGradingActionListener.class);
 	
 	/**
 	 * The publishedAssesmentService
@@ -174,7 +173,7 @@ public class SubmitToGradingActionListener implements ActionListener {
 			delivery.setIsAnyInvalidFinInput(false);
 
 		} catch (GradebookServiceException ge) {
-			log.warn( ge );
+			log.warn(ge.getMessage(), ge);
 			FacesContext context = FacesContext.getCurrentInstance();
 			String err = (String) ContextUtil.getLocalizedString(
 					"org.sakaiproject.tool.assessment.bundle.AuthorMessages",
@@ -384,7 +383,7 @@ public class SubmitToGradingActionListener implements ActionListener {
 							if (finBean.getItemGradingData() != null) {
 								Long itemGradingId = finBean.getItemGradingData().getItemGradingId();
 								if (list.contains(itemGradingId)) {
-									finBean.setIsCorrect(false);
+									finBean.setIsCorrect(Boolean.FALSE);
 								}
 							}
 						}
@@ -869,22 +868,21 @@ public class SubmitToGradingActionListener implements ActionListener {
 			if (answerModified) {
 				for (int m = 0; m < grading.size(); m++) {
 					ItemGradingData itemgrading = grading.get(m);
+
+					// Remove all previous answers
 					if (itemgrading !=null && itemgrading.getItemGradingId() != null && itemgrading.getItemGradingId().intValue() > 0) {
-						// remove all old answer
 						removes.add(itemgrading);
-					} else {
-						// add new answer
-						if (itemgrading !=null && (itemgrading.getPublishedAnswerId() != null
-							|| itemgrading.getAnswerText() != null
-							|| (itemgrading.getRationale() != null 
-							&& StringUtils.isNotBlank(itemgrading.getRationale())))) { 
-							itemgrading.setAgentId(AgentFacade.getAgentString());
-							itemgrading.setSubmittedDate(new Date());
-							if (itemgrading.getRationale() != null && itemgrading.getRationale().length() > 0) {
-								itemgrading.setRationale(TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, itemgrading.getRationale()));
-							}
-							adds.add(itemgrading);
+					}
+
+					// Add all provided answers, regardless if they're new or not
+					if (itemgrading !=null && (itemgrading.getPublishedAnswerId() != null || itemgrading.getAnswerText() != null
+							|| (itemgrading.getRationale() != null && StringUtils.isNotBlank(itemgrading.getRationale())))) { 
+						itemgrading.setAgentId(AgentFacade.getAgentString());
+						itemgrading.setSubmittedDate(new Date());
+						if (itemgrading.getRationale() != null && itemgrading.getRationale().length() > 0) {
+							itemgrading.setRationale(TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, itemgrading.getRationale()));
 						}
+						adds.add(itemgrading);
 					}
 				}
 			}

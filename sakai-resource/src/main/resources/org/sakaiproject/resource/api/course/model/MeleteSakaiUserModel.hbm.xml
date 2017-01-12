@@ -67,6 +67,9 @@
         <property name="organizationName" type="java.lang.String">
             <column name="ORGANIZATION_NAME" length="256" />
         </property>
+        <property name="deptName" type="java.lang.String">
+            <column name="DEPT_NAME" length="256" />
+        </property>
         <property name="specialtyId" type="java.lang.String">
             <column name="SPECIALTY_ID" length="32" />
         </property>

@@ -130,3 +130,4 @@ public class ContributorPartStructure extends edu.indiana.lib.osid.base.reposito
         return new PartStructureIterator(new java.util.Vector());
     }
 }
+

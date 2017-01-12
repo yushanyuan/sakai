@@ -41,3 +41,4 @@ public class EventTrackingServiceStandaloneImpl implements EventTrackingService 
         if(log.isDebugEnabled()) log.debug("action: "+message + "  object reference:"+referenceObject);
     }
 }
+

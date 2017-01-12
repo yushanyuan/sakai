@@ -42,8 +42,8 @@ import java.util.Stack;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.antivirus.api.VirusFoundException;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.cover.SecurityService;
@@ -115,7 +115,7 @@ public class ListItem
 	/** Resource bundle using current language locale */
     private static ResourceLoader trb = new ResourceLoader("types");
 
-    private static final Log logger = LogFactory.getLog(ListItem.class);
+    private static final Logger logger = LoggerFactory.getLogger(ListItem.class);
     
     protected static final Comparator<ContentEntity> DEFAULT_COMPARATOR = ContentHostingService.newContentHostingComparator(ResourceProperties.PROP_DISPLAY_NAME, true);
 
@@ -145,6 +145,7 @@ public class ListItem
 	 */
 	private static final MetadataService metadataService = (MetadataService) ComponentManager.get(MetadataService.class.getCanonicalName());
 	private static final org.sakaiproject.tool.api.ToolManager toolManager = (org.sakaiproject.tool.api.ToolManager) ComponentManager.get(org.sakaiproject.tool.api.ToolManager.class.getCanonicalName());
+	private static final AuthzGroupService authzGroupService = (AuthzGroupService) ComponentManager.get(AuthzGroupService.class.getCanonicalName());
 
 	/** 
 	 ** Comparator for sorting Group objects
@@ -2648,28 +2649,17 @@ public class ListItem
      */
     public boolean isPossible(Group group)
     {
-    	boolean isPossible = false;
+    	if (group==null) return false;
     	
-    	Collection<Group> groupsToCheck = this.possibleGroups;
-    	if(AccessMode.GROUPED == this.inheritedAccessMode)
-    	{
-    		groupsToCheck = this.inheritedGroups;
-    	}
+    	Collection<Group> groupsToCheck = (AccessMode.GROUPED == this.inheritedAccessMode) ? this.inheritedGroups : this.possibleGroups;    	
+    	Collection<String> groupsToCheckReference = new ArrayList<String>();
+    	for (Group gr:groupsToCheck) {
+    		groupsToCheckReference.add(gr.getReference()); 
+    	}    	
+    	String userId = UserDirectoryService.getCurrentUser().getId();
+    	Collection<String> groupsOfUser = authzGroupService.getAuthzGroupsIsAllowed(userId, SiteService.SITE_VISIT, groupsToCheckReference);
     	
-    	for(Group gr : groupsToCheck)
-    	{
-    		if(gr == null)
-    		{
-    			// ignore
-    		}
-    		else if(gr.getId().equals(group.getId()))
-    		{
-    			isPossible = true;
-    			break;
-    		}
-    	}
-    	
-    	return isPossible;
+    	return groupsOfUser.contains(group.getReference());
     }
     
 	/**

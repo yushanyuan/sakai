@@ -46,8 +46,8 @@ import java.util.Vector;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.alias.api.Alias;
 import org.sakaiproject.alias.api.AliasService;
 import org.sakaiproject.authz.api.PermissionsHelper;
@@ -122,7 +122,7 @@ extends VelocityPortletStateAction
 	private static final long serialVersionUID = -8571818334710261359L;
 
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(CalendarAction.class);
+	private static Logger M_log = LoggerFactory.getLogger(CalendarAction.class);
 
 	/** Resource bundle using current language locale */
 	private static ResourceLoader rb = new ResourceLoader("calendar");
@@ -7667,8 +7667,9 @@ extends VelocityPortletStateAction
 		}
 		
 		
-		// A link for subscribing to the implicit calendar
-		if ( ServerConfigurationService.getBoolean("ical.public.secureurl.subscribe", ServerConfigurationService.getBoolean("ical.opaqueurl.subscribe", true)) )
+		// A link for subscribing to the implicit calendar if the user is logged in.
+		if ( sessionManager.getCurrentSessionUserId() != null &&
+				(ServerConfigurationService.getBoolean("ical.public.secureurl.subscribe", ServerConfigurationService.getBoolean("ical.opaqueurl.subscribe", true))) )
 		{
 			bar.add( new MenuEntry(rb.getString("java.opaque_subscribe"), rb.getString("java.opaque_subscribe.title"), null, allow_subscribe_this, MenuItem.CHECKED_NA, "doOpaqueUrl") );
 		}

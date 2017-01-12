@@ -87,7 +87,7 @@ function updateModule(m,wintitle){
 	var	videoPicPath = new Ext.form.TextField({
 		name : 'videoPicPath',
 		value : m.videoPicPath,
-		fieldLabel : '视频图片地址(建议原图大小为325*208)',
+		fieldLabel : '视频图片地址',
 		anchor : '99%'
 	})
 	var	videoUrl = new Ext.form.TextField({

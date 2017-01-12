@@ -32,8 +32,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.sakaiproject.util.api.FormattedText;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.FunctionManager;
 import org.sakaiproject.authz.api.Member;
@@ -78,7 +79,7 @@ import org.sakaiproject.util.ResourceLoader;
  */
 public class SakaiFacadeImpl implements SakaiFacade {
 
-	private static Log log = LogFactory.getLog(SakaiFacadeImpl.class);
+	private static Logger log = LoggerFactory.getLogger(SakaiFacadeImpl.class);
 
 	private FunctionManager functionManager;
 	
@@ -202,6 +203,27 @@ public class SakaiFacadeImpl implements SakaiFacade {
 	}
 	
 	private AuthzGroupService authzGroupService;
+
+	private FormattedText formattedText;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public FormattedText getFormattedText() {
+		return formattedText;
+	}
+
+	/**
+	 * Sets the FormattedText Service.
+	 *
+	 * @param formattedText
+	 *            a FormattedText object
+	 */
+	public void setFormattedText(FormattedText formattedText) {
+		this.formattedText = formattedText;
+	}
+
 	public AuthzGroupService getAuthzGroupService() {
 		return authzGroupService;
 	}
@@ -1007,9 +1029,9 @@ public class SakaiFacadeImpl implements SakaiFacade {
 				calendarService.commitCalendar(calendarEdit);
 				calendar = getCalendarById(calendarId);
 			} catch (IdInvalidException highlyUnlikely) {
-				log.error(highlyUnlikely);
+				log.error(highlyUnlikely.getMessage());
 			} catch (IdUsedException extremelyUnlikely) {
-				log.error(extremelyUnlikely);
+				log.error(extremelyUnlikely.getMessage());
 			}
 		}
 		return calendar;
@@ -1063,8 +1085,8 @@ public class SakaiFacadeImpl implements SakaiFacade {
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<User> getUsersByEmail(String email) {
-		return (List<User>)userDirectoryService.findUsersByEmail(email);
+	public Collection<User> getUsersByEmail(String email) {
+		return (Collection<User>)userDirectoryService.findUsersByEmail(email);
 	}
 	
 	/**
@@ -1072,13 +1094,13 @@ public class SakaiFacadeImpl implements SakaiFacade {
 	 */
 	public User getUserByEmail(String email) {
 		
-		List<User> users =  (List<User>)userDirectoryService.findUsersByEmail(email);
+		Collection<User> users =  (Collection<User>)userDirectoryService.findUsersByEmail(email);
 		
 		if(users.isEmpty()) {
 			return null;
 		}
 		
-		return users.get(0);
+		return users.iterator().next();
 	}
 	
 	/**

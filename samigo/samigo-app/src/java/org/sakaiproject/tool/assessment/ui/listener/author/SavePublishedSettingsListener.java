@@ -37,8 +37,8 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.samigo.util.SamigoConstants;
@@ -90,7 +90,7 @@ import org.sakaiproject.tool.assessment.util.ExtendedTimeService;
 public class SavePublishedSettingsListener
 implements ActionListener
 {
-	private static final Log LOG = LogFactory.getLog(SavePublishedSettingsListener.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SavePublishedSettingsListener.class);
 	private static final GradebookServiceHelper gbsHelper =
 		IntegrationContextFactory.getInstance().getGradebookServiceHelper();
 	private static final boolean integrated =
@@ -198,7 +198,7 @@ implements ActionListener
 	    }
 	    catch( NullPointerException | NumberFormatException ex )
 	    {
-	        LOG.warn( ex );
+	        LOG.warn(ex.getMessage(), ex);
 	        assessment.setInstructorNotification( SamigoConstants.NOTI_PREF_INSTRUCTOR_EMAIL_DEFAULT );
 	    }
 	    
@@ -297,6 +297,15 @@ implements ActionListener
 		    }
 	    }
 
+        // if due date is null we cannot have late submissions
+        if (dueDate == null && assessmentSettings.getLateHandling() != null && AssessmentAccessControlIfc.ACCEPT_LATE_SUBMISSION.toString().equals(assessmentSettings.getLateHandling()) &&
+            retractDate !=null){
+            String noDueDate = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","due_null_with_retract_date");
+            context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_WARN, noDueDate, null));
+            error=true;
+            
+        }
+
 	    // SAM-1088
 	    // if late submissions not allowed and late submission date is null, set late submission date to due date
 	    if (assessmentSettings.getLateHandling() != null && AssessmentAccessControlIfc.NOT_ACCEPT_LATE_SUBMISSION.equals(assessmentSettings.getLateHandling()) &&
@@ -315,6 +324,12 @@ implements ActionListener
 	    		context.addMessage(null,new FacesMessage(FacesMessage.SEVERITY_WARN, dateError4, null));
 	    		error=true;
 	    	}
+	    }
+	    
+	    // if auto-submit and late-submissions are disabled Set retract date to null
+	    if ( !assessmentSettings.getAutoSubmit() && retractDate != null && 
+	        assessmentSettings.getLateHandling() != null && AssessmentAccessControlIfc.NOT_ACCEPT_LATE_SUBMISSION.toString().equals(assessmentSettings.getLateHandling())){
+	        assessmentSettings.setRetractDate(null);
 	    }
 	    	    
 		// if timed assessment, does it has value for time
@@ -529,7 +544,7 @@ implements ActionListener
 			}
 			catch( NumberFormatException ex )
 			{
-				LOG.warn( ex );
+				LOG.warn(ex.getMessage(), ex);
 				assessment.setInstructorNotification( SamigoConstants.NOTI_PREF_INSTRUCTOR_EMAIL_DEFAULT );
 			}
 		}

@@ -122,6 +122,14 @@
 			<result name="studyRecordStat">/WEB-INF/jsp/statistics/viewStudyRecord.jsp
 			</result>
 		</action>
+		
+		<!-- 学习管理相关配置 -->
+		<action name="studyManage_*" class="studyManageAction" method="{1}">
+			<result name="success">/WEB-INF/jsp/studymanage/studyManage.jsp</result>
+			<result name="studyTime">/WEB-INF/jsp/studymanage/studyTime.jsp</result>
+			<result name="testScore">/WEB-INF/jsp/studymanage/testScore.jsp</result>
+			<result name="score">/WEB-INF/jsp/studymanage/score.jsp</result>
+		</action>
 
 		<!-- 批改作业相关配置 -->
 		<action name="checkwork_*" class="checkWorkAction" method="{1}">
@@ -152,17 +160,16 @@
 			<result name="viewPaper">/WEB-INF/jsp/test/viewPaper.jsp</result>
 			<result name="viewForum">/WEB-INF/jsp/test/froumViewList.jsp</result>	
 		</action>
-
 	</package>
-	
 	<package name="rest" namespace="/rest" extends="struts-default">
-		 
+
 		<!-- 视频接口 -->
 		<action name="vedio_*" class="vedioAction" method="{1}">
 		</action>
 		<!-- 作业接口 -->
 		<action name="course_*" class="testAction" method="{1}">
 		</action>
-		
+
 	</package>
+	
 </struts>

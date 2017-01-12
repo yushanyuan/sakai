@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.email.api.Attachment;
 import org.sakaiproject.exception.IdUnusedException;
@@ -40,6 +40,8 @@ import org.sakaiproject.mailsender.model.ConfigEntry;
 import org.sakaiproject.mailsender.model.EmailEntry;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.util.StringUtil;
+import org.sakaiproject.util.Web;
+import org.sakaiproject.tool.cover.SessionManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import uk.org.ponder.messageutil.MessageLocator;
@@ -53,7 +55,7 @@ public class EmailBean
 	public static final String EMAIL_CANCELLED = "emailCancelled";
 
 	private Map<String, MultipartFile> multipartMap;
-	private final Log log = LogFactory.getLog(EmailBean.class);
+	private final Logger log = LoggerFactory.getLogger(EmailBean.class);
 	private ComposeLogic composeLogic;
 	private ConfigLogic configLogic;
 	private ExternalLogic externalLogic;
@@ -136,6 +138,10 @@ public class EmailBean
 
 		ConfigEntry config = emailEntry.getConfig();
 		User curUser = externalLogic.getCurrentUser();
+
+		String csrfToken = SessionManager.getCurrentSession().getAttribute("sakai.csrf.token").toString();
+		if (csrfToken != null && !csrfToken.equals(emailEntry.getCsrf()))
+		    return EMAIL_FAILED;
 
 		String fromEmail = "";
 		String fromDisplay = "";
@@ -261,7 +267,7 @@ public class EmailBean
 		catch (MailsenderException me)
 		{
 			//Print this exception
-			log.warn(me);
+			log.warn(me.getMessage());
 			messages.clear();
 			List<Map<String, Object[]>> msgs = me.getMessages();
 			if (msgs != null)
@@ -459,4 +465,5 @@ public class EmailBean
 		
 		return recipientList.toString();
 	}
+
 }

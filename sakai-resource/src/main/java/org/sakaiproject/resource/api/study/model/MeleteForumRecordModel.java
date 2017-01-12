@@ -24,6 +24,10 @@ public class MeleteForumRecordModel implements java.io.Serializable {
 	private Date startStudyTime;//开始学习时间
 	private Long studyrecordId;//学习记录ID
 
+	
+	public MeleteForumRecordModel() {
+	}
+
 	public Long getForumrecordId() {
 		return this.forumrecordId;
 	}

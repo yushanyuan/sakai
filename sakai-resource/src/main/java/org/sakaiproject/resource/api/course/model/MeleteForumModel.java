@@ -20,6 +20,10 @@ public class MeleteForumModel  implements java.io.Serializable{
 	private Float ratio;//百分比
 	private Long status;//论坛状态
 	private Long isCaculateScore;//是否计算平时成绩
+	
+	
+	public MeleteForumModel() {
+	}
 	public Long getIsCaculateScore() {
 		return isCaculateScore;
 	}

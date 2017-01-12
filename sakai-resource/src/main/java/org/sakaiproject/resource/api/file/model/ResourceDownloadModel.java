@@ -21,10 +21,11 @@ public class ResourceDownloadModel implements java.io.Serializable {
 	private Date lastTime;
 
 	// Constructors
-
 	public Date getLastTime() {
 		return lastTime;
 	}
+
+
 
 	public void setLastTime(Date lastTime) {
 		this.lastTime = lastTime;

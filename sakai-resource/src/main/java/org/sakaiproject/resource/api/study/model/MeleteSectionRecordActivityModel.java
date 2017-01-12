@@ -17,6 +17,8 @@ public class MeleteSectionRecordActivityModel implements java.io.Serializable {
 	private String activityId;//活动ID
 	private Float activityValue;//活动值
 	private Date activityTime;//活动时间
+	
+	public  MeleteSectionRecordActivityModel(){}
 	public Long getSectionRecordActivityId() {
 		return sectionRecordActivityId;
 	}

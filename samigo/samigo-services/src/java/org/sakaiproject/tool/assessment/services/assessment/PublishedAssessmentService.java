@@ -30,8 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentAccessControl;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAttachmentData;
@@ -62,7 +63,7 @@ import org.sakaiproject.tool.assessment.services.PersistenceService;
  * @author Rachel Gollub <rgollub@stanford.edu>
  */
 public class PublishedAssessmentService extends AssessmentService{
-  private Log log = LogFactory.getLog(PublishedAssessmentService.class);
+  private Logger log = LoggerFactory.getLogger(PublishedAssessmentService.class);
 
   /**
    * Creates a new QuestionPoolService object.
@@ -179,23 +180,23 @@ public class PublishedAssessmentService extends AssessmentService{
       }
     }
     catch (Exception e) {
-      log.error(e);
+      log.error(e.getMessage(), e);
       throw new RuntimeException(e);
     }
   }
 
   public PublishedAssessmentFacade getPublishedAssessment(String assessmentId) {
-	//SAM-1995 if an empty or null id is passed throw and exception
-	if (assessmentId == null || "".equals(assessmentId)) {
-		throw new IllegalArgumentException("AssesmentId must be specified");
-	}
+    //SAM-1995 if an empty or null id is passed throw and exception
+    if (StringUtils.isBlank(assessmentId)) {
+      throw new IllegalArgumentException("AssesmentId must be specified");
+    }
     try {
       return PersistenceService.getInstance().
           getPublishedAssessmentFacadeQueries().
           getPublishedAssessment(Long.valueOf(assessmentId));
     }
     catch (Exception e) {
-      log.error(e);
+      log.error(e.getMessage(), e);
       throw new RuntimeException(e);
     }
 	}
@@ -209,7 +210,7 @@ public class PublishedAssessmentService extends AssessmentService{
 			return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries()
 					.getPublishedAssessmentQuick(Long.valueOf(assessmentId));
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -221,7 +222,7 @@ public class PublishedAssessmentService extends AssessmentService{
 	          getPublishedAssessment(Long.valueOf(assessmentId), withGroupsInfo);
 	    }
 	    catch (Exception e) {
-	      log.error(e);
+	      log.error(e.getMessage(), e);
 	      throw new RuntimeException(e);
 	    }
   }
@@ -231,7 +232,7 @@ public class PublishedAssessmentService extends AssessmentService{
 			return PersistenceService.getInstance()
 					.getPublishedAssessmentFacadeQueries().getPublishedAssessment(assessmentId);
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
   }
@@ -243,7 +244,7 @@ public class PublishedAssessmentService extends AssessmentService{
           getPublishedAssessmentId(new Long(assessmentId));
     }
     catch (Exception e) {
-      log.error(e);
+      log.error(e.getMessage(), e);
       throw new RuntimeException(e);
     }
   }
@@ -263,7 +264,7 @@ public class PublishedAssessmentService extends AssessmentService{
           publishPreviewAssessment(assessment);
     }
     catch (Exception e) {
-      log.error(e);
+      log.error(e.getMessage(), e);
       throw new RuntimeException(e);
     }
   }
@@ -279,7 +280,7 @@ public class PublishedAssessmentService extends AssessmentService{
         saveOrUpdate(assessment);
     }
     catch (Exception e) {
-      log.error(e);
+      log.error(e.getMessage(), e);
     }
   }
 
@@ -312,7 +313,7 @@ public class PublishedAssessmentService extends AssessmentService{
           getSettingsOfPublishedAssessment(new Long(assessmentId));
     }
     catch (Exception e) {
-      log.error(e);
+      log.error(e.getMessage(), e);
       throw new RuntimeException(e);
     }
   }
@@ -324,7 +325,7 @@ public class PublishedAssessmentService extends AssessmentService{
           loadPublishedItem(new Long(itemId));
     }
     catch (Exception e) {
-      log.error(e);
+      log.error(e.getMessage(), e);
       throw new RuntimeException(e);
     }
   }
@@ -336,7 +337,7 @@ public class PublishedAssessmentService extends AssessmentService{
           loadPublishedItemText(new Long(itemTextId));
     }
     catch (Exception e) {
-      log.error(e);
+      log.error(e.getMessage(), e);
       throw new RuntimeException(e);
     }
   }
@@ -722,7 +723,7 @@ public class PublishedAssessmentService extends AssessmentService{
 			attachment = queries.createAssessmentAttachment(assessment,
 					resourceId, filename, protocol);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return attachment;
    }
@@ -741,7 +742,7 @@ public class PublishedAssessmentService extends AssessmentService{
 		   attachment = queries.createSectionAttachment(section, resourceId,
 				   filename, protocol);
 	   } catch (Exception e) {
-		   e.printStackTrace();
+		   log.error(e.getMessage(), e);
 	   }
 	   return attachment;
    }

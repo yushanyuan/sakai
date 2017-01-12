@@ -149,7 +149,7 @@ public class ScoreRecalculateAction extends ActionSupport {
 	public String scoreRecalculate() throws Exception {
 		try {
 			HttpServletResponse response = ServletActionContext.getResponse();
-			String msg = "success"; 
+			String msg = "success";  
 			studyService.updateScoreByStudyRecordIds(studyRecordIds);
 			response.getWriter().print(msg);
 			return null;
@@ -168,11 +168,23 @@ public class ScoreRecalculateAction extends ActionSupport {
 	public String scoreRecalculateAll() throws Exception {
 		try {
 			String msg = "success";
-			String startTimeTrans = startTime.replace("T", " ");
-			String endTimeTrans = endTime.replace("T", " ");
+			String startTimeTrans = "";
+			String endTimeTrans = "";
+			Date startDate = null;
+			Date endDate = null;
+			
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			Date startDate = sdf.parse(startTimeTrans);
-			Date endDate = sdf.parse(endTimeTrans);
+			
+			if(StringUtils.isNotBlank(startTime)){
+				startTimeTrans = startTime.replace("T", " ");
+				startDate = sdf.parse(startTimeTrans);
+			}
+			
+			if(StringUtils.isNotBlank(endTime)){
+				endTimeTrans = endTime.replace("T", " ");
+				endDate = sdf.parse(endTimeTrans);
+			}
+			
 			Site site = this.getCurrentSite();
 			// 检查缓存
 			CacheElement cacheCourse = CacheUtil.getInstance().getCacheOfCourse(site.getId());

@@ -15,6 +15,10 @@ public class Test implements java.io.Serializable{
 	private String status;//作业状态:1未发布、0无效、2已发布、3发布中
 	private Date creationDate;//创建时间
 	private Date modificationDate;//修改时间
+	
+	
+	public Test() {
+	}
 	public int getTestId() {
 		return testId;
 	}

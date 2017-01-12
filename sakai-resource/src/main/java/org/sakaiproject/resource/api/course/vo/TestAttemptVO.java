@@ -15,6 +15,7 @@ public class TestAttemptVO implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	
+	private String testAttemptId;
 	private String testRecordId;
 	private String testName;
 	private String score;
@@ -57,5 +58,11 @@ public class TestAttemptVO implements Serializable{
 	}
 	public void setSubScore(String subScore) {
 		this.subScore = subScore;
+	}
+	public String getTestAttemptId() {
+		return testAttemptId;
+	}
+	public void setTestAttemptId(String testAttemptId) {
+		this.testAttemptId = testAttemptId;
 	}
 }

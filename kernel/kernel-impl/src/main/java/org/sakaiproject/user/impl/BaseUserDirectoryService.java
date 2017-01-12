@@ -23,8 +23,8 @@
 package org.sakaiproject.user.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.*;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -66,7 +66,7 @@ import java.util.*;
 public abstract class BaseUserDirectoryService implements UserDirectoryService, UserFactory
 {
 	/** Our log (commons). */
-	private static Log M_log = LogFactory.getLog(BaseUserDirectoryService.class);
+	private static Logger M_log = LoggerFactory.getLogger(BaseUserDirectoryService.class);
 
 	/** Storage manager for this service. */
 	protected Storage m_storage = null;
@@ -1375,10 +1375,12 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 	 * @inheritDoc
 	 */
 	@SuppressWarnings("unchecked")
-	public Collection findUsersByEmail(String email)
+	public Collection<User> findUsersByEmail(String email)
 	{
+		Set<User> users = new HashSet<User>();
+
 		// check internal users
-		Collection users = m_storage.findUsersByEmail(email);
+		users.addAll(m_storage.findUsersByEmail(email));
 
 		// add in provider users
 		if (m_provider != null)

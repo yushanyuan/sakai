@@ -26,8 +26,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.azeckoski.reflectutils.FieldUtils;
 import org.azeckoski.reflectutils.ReflectUtils;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -62,7 +62,7 @@ import org.sakaiproject.user.api.UserPermissionException;
  */
 public class UserEntityProvider extends AbstractEntityProvider implements CoreEntityProvider, RESTful, Describeable {
 
-    private static Log log = LogFactory.getLog(UserEntityProvider.class);
+    private static Logger log = LoggerFactory.getLogger(UserEntityProvider.class);
 
     private static final String ID_PREFIX = "id=";
 
@@ -241,7 +241,9 @@ public class UserEntityProvider extends AbstractEntityProvider implements CoreEn
             edit.setEmail(u.getEmail());
             edit.setFirstName(u.getFirstName());
             edit.setLastName(u.getLastName());
-            edit.setPassword(u.getPassword());
+            if (u.getPassword() != null && !"".equals(u.getPassword())) {
+                edit.setPassword(u.getPassword());
+            }
             edit.setType(u.getType());
             // put in properties
             ResourcePropertiesEdit rpe = edit.getPropertiesEdit();
@@ -400,6 +402,11 @@ public class UserEntityProvider extends AbstractEntityProvider implements CoreEn
          */
         // ID only lookup so prefix with "id="
         User user = getUserByIdEid(ID_PREFIX+userId);
+
+        // It is possible the user is orphaned/unregistered; deleted from LDAP
+        if (user == null) {
+            return null;
+        }
         // convert
         EntityUser eu = convertUser(user);
         return eu;
@@ -623,9 +630,6 @@ public class UserEntityProvider extends AbstractEntityProvider implements CoreEn
                         //msg += " (attempting check using user id="+userId+")";
                         doCheckForId = true;
                     }
-                    // SAK-22690 removed this log warning
-                    //msg += " :: " + e.getMessage();
-                    //log.warn(msg);
                 }
             }
             if (doCheckForId) {
@@ -633,13 +637,7 @@ public class UserEntityProvider extends AbstractEntityProvider implements CoreEn
                     user = userDirectoryService.getUser(userId);
                 } catch (UserNotDefinedException e) {
                     user = null;
-                    // SAK-22690 removed this log warning
-                    //String msg = "Could not find user with id="+userId+" :: " + e.getMessage();
-                    //log.warn(msg);
                 }
-            }
-            if (user == null) {
-                throw new IllegalArgumentException("Could not find user with eid="+userEid+" or id="+userId);
             }
         }
         return user;

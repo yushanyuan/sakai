@@ -32,6 +32,7 @@ public class MeleteSakaiUserModel implements java.io.Serializable {
 	private String sex; //性别
 	private String organizationId; //组织ID
 	private String organizationName; //组织名称
+	private String deptName;//院系
 	private String specialtyId; //特征ID
 	private String specialtyName; //特征名
 	private String studentclassId; //学生班级ID
@@ -345,6 +346,14 @@ public class MeleteSakaiUserModel implements java.io.Serializable {
 
 	public void setSeason(Integer season) {
 		this.season = season;
+	}
+
+	public String getDeptName() {
+		return deptName;
+	}
+
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
 	}
 
 }

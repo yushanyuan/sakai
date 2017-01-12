@@ -32,8 +32,8 @@ import net.fortuna.ical4j.model.property.*;
 
 import org.apache.avalon.framework.logger.ConsoleLogger;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.fop.apps.Driver;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.Options;
@@ -109,7 +109,7 @@ import java.util.Map.Entry;
 public abstract class BaseCalendarService implements CalendarService, DoubleStorageUser, ContextObserver, EntityTransferrer, SAXEntityReader, EntityTransferrerRefMigrator
 {
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(BaseCalendarService.class);
+	private static Logger M_log = LoggerFactory.getLogger(BaseCalendarService.class);
 
 	/** The initial portion of a relative access point URL. */
 	protected String m_relativeAccessPoint = null;
@@ -6484,8 +6484,8 @@ public abstract class BaseCalendarService implements CalendarService, DoubleStor
 		// If a "Faculty" extra field is present, then add the node.
 		writeStringNodeToDom(doc, eventElement, FACULTY_NODE, event.getField(FACULTY_EVENT_ATTRIBUTE_NAME));
 
-
 		// If a "Description" field is present, then add the node.
+		writeStringNodeToDom(doc, eventElement, DESCRIPTION_NODE, event.getDescription());
 
 		parent.appendChild(eventElement);
 	}

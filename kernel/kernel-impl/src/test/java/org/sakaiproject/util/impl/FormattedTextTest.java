@@ -937,6 +937,27 @@ public class FormattedTextTest {
       formattedText.setDefaultAddBlankTargetToLinks(BLANK_DEFAULT);
     }
 
+    @Test 
+    public void testEmoji() {
+        StringBuilder errorMessages = new StringBuilder();
+        String etext = new StringBuilder().appendCodePoint(0x1F600).append("smiley face").appendCodePoint(0x1F600).toString();
+        //Retrict to utf8 only
+        serverConfigurationService.registerConfigItem(BasicConfigItem.makeConfigItem("content.cleaner.filter.utf8", "true", "FormattedTextTest"));
+        formattedText.init();
+        
+        Assert.assertEquals("smiley face",formattedText.processFormattedText(etext, errorMessages));
+
+        //Test the replacement of ?
+        serverConfigurationService.registerConfigItem(BasicConfigItem.makeConfigItem("content.cleaner.filter.utf8.replacement", "?", "FormattedTextTest"));
+        formattedText.init();
+        Assert.assertEquals("??smiley face??",formattedText.processFormattedText(etext, errorMessages));
+
+        //Don't restrict to UTF8
+        serverConfigurationService.registerConfigItem(BasicConfigItem.makeConfigItem("content.cleaner.filter.utf8", "false", "FormattedTextTest"));
+        formattedText.init();
+        Assert.assertEquals(etext,formattedText.processFormattedText(etext, errorMessages));
+    }
+
     @Test
     public void testKNL_1253() {
         // https://jira.sakaiproject.org/browse/KNL-1253
@@ -980,7 +1001,7 @@ public class FormattedTextTest {
             for (int k=0; k<CUT_METHODS.length; k++) {
                 ServerConfigurationService scs = new BasicConfigurationService();
                 scs.registerConfigItem(BasicConfigItem.makeDefaultedConfigItem("site.title.cut.method", CUT_METHODS[k], "FormattedTextTest"));
-                scs.registerConfigItem(BasicConfigItem.makeDefaultedConfigItem("site.title.maxlength", MAX_LENGTHS[k], "FormattedTextTest"));
+                scs.registerConfigItem(BasicConfigItem.makeDefaultedConfigItem("site.title.cut.maxlength", MAX_LENGTHS[k], "FormattedTextTest"));
                 scs.registerConfigItem(BasicConfigItem.makeDefaultedConfigItem("site.title.cut.separator", CUT_SEPARATORS[k], "FormattedTextTest"));
                 formattedText.setServerConfigurationService(scs);
                 String resumeTitle = formattedText.makeShortenedText(siteTitle, null, null, null);
@@ -998,6 +1019,37 @@ public class FormattedTextTest {
                 }
             }
         }
+    }
+
+    @Test
+    public void testStripHtmlFromText() {
+        String text, result = null;
+
+        result = formattedText.stripHtmlFromText(null, false, false);
+        Assert.assertEquals(null, result);
+
+        text = "<table><tr><th>Column1</th></tr><tr><td>Row1</td></tr></table>";
+        result = formattedText.stripHtmlFromText(text, false, false);
+        Assert.assertEquals("Column1Row1", result);
+
+        result = formattedText.stripHtmlFromText(text, true, false);
+        Assert.assertEquals("Column1 Row1", result);
+
+        text = "<p>line one &amp;</br>newline</p>";
+        result = formattedText.stripHtmlFromText(text, true, true);
+        Assert.assertEquals("line one & newline", result);
+
+        text = "<table><tr><th>Column1 </th></tr><tr><td>Row1&nbsp; </td></tr></table>";
+        result = formattedText.stripHtmlFromText(text, false, true);
+        Assert.assertEquals("Column1 Row1", result);
+
+        text = "<table>this is a table?";
+        result = formattedText.stripHtmlFromText(text, false, false);
+        Assert.assertEquals("this is a table?", result);
+
+        text = "a<b>d";
+        result = formattedText.stripHtmlFromText(text, false, false);
+        Assert.assertEquals("ad", result);
     }
 
 }

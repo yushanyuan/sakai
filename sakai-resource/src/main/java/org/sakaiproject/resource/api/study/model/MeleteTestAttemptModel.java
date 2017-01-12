@@ -27,6 +27,9 @@ public class MeleteTestAttemptModel implements java.io.Serializable {
 
 	// Property accessors
 
+	public MeleteTestAttemptModel() {
+	}
+
 	public String getCheckstatus() {
 		return checkstatus;
 	}

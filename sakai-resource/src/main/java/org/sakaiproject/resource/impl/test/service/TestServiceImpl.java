@@ -39,7 +39,6 @@ public class TestServiceImpl extends HibernateDaoSupport implements ITestService
 			}else{
 				hql = "from Test where status='2' and siteId=?";
 			}
-			//List<Test> list = this.getHibernateTemplate().find(hql, siteId);
 			List list = this.getHibernateTemplate().find(hql, siteId);
 			return list;
 		}catch(Exception e ){

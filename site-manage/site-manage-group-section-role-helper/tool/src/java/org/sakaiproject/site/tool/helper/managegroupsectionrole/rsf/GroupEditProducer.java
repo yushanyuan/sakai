@@ -2,6 +2,7 @@ package org.sakaiproject.site.tool.helper.managegroupsectionrole.rsf;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,10 +10,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.authz.api.Role;
 import org.sakaiproject.site.api.Group;
@@ -57,7 +59,7 @@ import uk.org.ponder.rsf.viewstate.ViewParamsReporter;
 public class GroupEditProducer implements ViewComponentProducer, ActionResultInterceptor, ViewParamsReporter{
 
 	/** Our log (commons). */
-	private static final Log M_log = LogFactory.getLog(GroupEditProducer.class);
+	private static final Logger M_log = LoggerFactory.getLogger(GroupEditProducer.class);
 	
     public SiteManageGroupSectionRoleHandler handler;
     public static final String VIEW_ID = "GroupEdit";
@@ -97,7 +99,7 @@ public class GroupEditProducer implements ViewComponentProducer, ActionResultInt
     	// group provider id
     	String groupProviderId = null;
     	// list of group role provider ids
-    	List<String> groupRoleProviderRoles = null;
+    	Collection<String> groupRoleProviderRoles = null;
     	
     	UIForm groupForm = UIForm.make(arg0, "groups-form");
 
@@ -267,7 +269,7 @@ public class GroupEditProducer implements ViewComponentProducer, ActionResultInt
 
 	     /********************** for the group members list **************************/
 	     List<String> groupRosters = handler.getGroupRosters(g);
-	     List<String> groupProviderRoles = handler.getGroupProviderRoles(g);
+	     Collection<String> groupProviderRoles = handler.getGroupProviderRoles(g);
 	     List<Member> groupMembersCopy = new ArrayList<>();
 	     groupMembersCopy.addAll(groupMembers);
 	     for( Member p : groupMembersCopy )

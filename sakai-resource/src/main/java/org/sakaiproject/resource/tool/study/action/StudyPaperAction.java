@@ -125,7 +125,8 @@ public class StudyPaperAction extends ActionSupport {
 		if (f != null) {
 			return (ForumService) SpringContextUtil.getBean("messageforumService");
 		}
-		return (ForumService) SpringContextUtil.getBean("jforumService");
+		//return (ForumService) SpringContextUtil.getBean("jforumService");
+		return null;
 	}
 
 	/**

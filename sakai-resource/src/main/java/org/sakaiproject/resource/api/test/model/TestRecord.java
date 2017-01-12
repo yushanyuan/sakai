@@ -17,6 +17,10 @@ public class TestRecord implements java.io.Serializable{
 	private float subScore ;
 	private Date startTime ;
 	private Date endTime ;
+	
+	
+	public TestRecord() {
+	}
 	public int getTestrecordId() {
 		return testrecordId;
 	}

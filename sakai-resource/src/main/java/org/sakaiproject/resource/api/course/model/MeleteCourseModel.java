@@ -23,6 +23,8 @@ public class MeleteCourseModel implements java.io.Serializable{
 	private Long impressionType;//加分方式
 	private String showStuStatus;//是否显示课程通过状态 0否  1是
 	
+	public MeleteCourseModel() {
+	}
 	public String getShowStuStatus() {
 		return showStuStatus;
 	}

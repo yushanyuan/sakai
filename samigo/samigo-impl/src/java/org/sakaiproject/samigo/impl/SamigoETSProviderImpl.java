@@ -27,7 +27,8 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.AuthzGroupService;
@@ -55,7 +56,7 @@ import org.sakaiproject.entity.api.EntityPropertyTypeException;
 import org.sakaiproject.util.ResourceLoader;
 
 public class SamigoETSProviderImpl implements SamigoETSProvider {
-    private static  final   Logger              LOG                                 = Logger.getLogger(SamigoETSProviderImpl.class);
+    private static  final   Logger              LOG                                 = LoggerFactory.getLogger(SamigoETSProviderImpl.class);
     private         final   Map<String,String>  constantValues                      = new HashMap<>();
     private         final   String              MULTIPART_BOUNDARY                  = "======sakai-multi-part-boundary======";
     private         final   String              BOUNDARY_LINE                       = "\n\n--"+MULTIPART_BOUNDARY+"\n";
@@ -156,18 +157,18 @@ public class SamigoETSProviderImpl implements SamigoETSProvider {
             replacementValues.put("confirmationNumber"  , notificationValues.get("confirmationNumber").toString());
 
             notifyStudent(user, priStr, assessmentSubmittedType, replacementValues);
-            notifyInstructor(siteID, pubAssFac.getInstructorNotification(), priStr, assessmentSubmittedType, user, replacementValues);
+            notifyInstructor(siteID, pubAssFac.getInstructorNotification(), assessmentSubmittedType, user, replacementValues);
         } catch(UserNotDefinedException e){
             LOG.warn("UserNotDefined: " + notificationValues.get("userID").toString() + " in sending samigo notification.");
         }
     }
 
-    private     void                notifyInstructor                (String siteID, Integer instructNoti, String priStr, int assessmentSubmittedType, 
+    private     void                notifyInstructor                (String siteID, Integer instructNoti, int assessmentSubmittedType, 
                                                                         User submittingUser, Map<String, String> replacementValues){
         LOG.debug("notifyInstructor");
         replacementValues.put("changeSettingInstructions" , CHANGE_SETTINGS_HOW_TO_INSTRUCTOR);
 
-        Map<User, Integer>  validUsers              = new HashMap<>();
+        List<User>  validUsers              		= new ArrayList<>();
         RenderedTemplate    rt                      = getRenderedTemplateBySubmissionType(assessmentSubmittedType, submittingUser, replacementValues);
         String              message                 = getBody(rt);
 
@@ -180,9 +181,7 @@ public class SamigoETSProviderImpl implements SamigoETSProvider {
                 try{
                     if(!userString.equals(ADMIN)) {
                         User user = userDirectoryService.getUser(userString);
-
-                        Integer uPref = getUserPreferences(user, priStr);
-                        validUsers.put(user, uPref);
+                        validUsers.add(user);
                     }
                 } catch(UserNotDefinedException e){
                     LOG.warn("Instructor '" + userString +"' not found in samigo notification.");
@@ -190,25 +189,21 @@ public class SamigoETSProviderImpl implements SamigoETSProvider {
             }
         } catch(org.sakaiproject.exception.IdUnusedException e){
             //Site not found
-            LOG.warn("Site '" + siteID + "' not found while sending instructor notifications for samigo submission.");
-            LOG.debug(e);
+            LOG.warn("Site '{}' not found while sending instructor notifications for samigo submission.", siteID);
+            LOG.debug(e.getMessage(), e);
         } catch(org.sakaiproject.authz.api.GroupNotDefinedException e){
             // Realm not found
-            LOG.warn("AuthzGroup '/site/" + siteID + "' not found while sending instructor notifications for samigo submission");
-            LOG.debug(e);
+            LOG.warn("AuthzGroup '/site/{}' not found while sending instructor notifications for samigo submission", siteID);
+            LOG.debug(e.getMessage(), e);
         }
 
-        List<User>          users                   = new ArrayList<>();
         List<User>          immediateUsers          = new ArrayList<>();
 
         if(validUsers.size() > 0){
-            users.addAll(validUsers.keySet());
-
-            List<String>        headers         = getHeaders(rt, users, constantValues.get("localSakaiName"), fromAddress);
+            List<String>        headers         = getHeaders(rt, validUsers, constantValues.get("localSakaiName"), fromAddress);
 
 
-            for(Map.Entry<User, Integer> entry : validUsers.entrySet()){
-                User user = entry.getKey();
+            for(User user : validUsers){
                 if(instructNoti == NotificationService.PREF_IMMEDIATE){
                     immediateUsers.add(user);
                 } else if(instructNoti == NotificationService.PREF_DIGEST){
@@ -409,7 +404,7 @@ public class SamigoETSProviderImpl implements SamigoETSProvider {
                     decodedHtml = URLDecoder.decode(bodyHtml, "utf8");
                 } catch (UnsupportedEncodingException e) {
                     decodedHtml = bodyHtml;
-                    LOG.warn(e);
+                    LOG.warn(e.getMessage(), e);
                 }
                 template.setHtmlMessage(decodedHtml);
             }

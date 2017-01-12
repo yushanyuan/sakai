@@ -32,6 +32,7 @@ public class MeleteStudyRecordModel implements java.io.Serializable {
 	private Date scoreUpdateTime;//分数更新时间
 	private String coursechoiceplanId;//选课计划ID
 
+	public MeleteStudyRecordModel(){}
 	// Property accessors
 
 	public Long getStudyrecordId() {

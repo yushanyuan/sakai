@@ -21,8 +21,8 @@
 package org.sakaiproject.messagebundle.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.messagebundle.api.MessageBundleService;
 import org.sakaiproject.messagebundle.api.MessageBundleProperty;
 import org.hibernate.*;
@@ -50,7 +50,7 @@ import java.util.Map.Entry;
  * To change this template use File | Settings | File Templates.
  */
 public class MessageBundleServiceImpl extends HibernateDaoSupport implements MessageBundleService {
-    private static Log logger = LogFactory.getLog(MessageBundleServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(MessageBundleServiceImpl.class);
 
    /**
      * list of bundles that we've already indexed, only want to update once per startup
@@ -178,36 +178,29 @@ public class MessageBundleServiceImpl extends HibernateDaoSupport implements Mes
     protected void saveOrUpdateInternal(String baseName, String moduleName, Map<String, String> newBundle, Locale loc) {
         String keyName = getIndexKeyName(baseName, moduleName, loc.toString());
         if (indexedList.contains(keyName)) {
-            if (logger.isDebugEnabled()) logger.debug("skip saveOrUpdate() as its already happened once for :" + keyName);
+            logger.debug("skip bundle as its already happened once for: {}", keyName);
             return;
         }
         
-        Set<Entry<String, String>> entrySet = newBundle.entrySet();
-        Iterator<Entry<String, String>> entries = entrySet.iterator();
-
-        while (entries.hasNext()) {
-        	Entry<String, String> entry = entries.next();  
-            String key = entry.getKey();
-            MessageBundleProperty mbp = new MessageBundleProperty();
-            mbp.setBaseName(baseName);
-            mbp.setModuleName(moduleName);
-            mbp.setLocale(loc.toString());
-            mbp.setPropertyName(key);
+        for (Entry<String, String> entry : newBundle.entrySet()) {
+            String value = entry.getValue();
+            MessageBundleProperty mbp = new MessageBundleProperty(baseName, moduleName, loc.toString(), entry.getKey());
             MessageBundleProperty existingMbp = getProperty(mbp);
-            if (existingMbp != null) {
-                //don"t update id or value, we don't want to loose that data
-                BeanUtils.copyProperties(mbp, existingMbp, new String[]{"id", "defaultValue", "value"});
-                if (logger.isDebugEnabled()) logger.debug("updating message bundle data for : " +
-                        getIndexKeyName(mbp.getBaseName(),mbp.getModuleName(), mbp.getLocale()));
-                updateMessageBundleProperty(existingMbp);
-            } else {
-                mbp.setDefaultValue(entry.getValue());
-                if (logger.isDebugEnabled()) logger.debug("adding message bundle data for : " +
-                        getIndexKeyName(mbp.getBaseName(),mbp.getModuleName(), mbp.getLocale()));
+            if (existingMbp == null) {
+                // new property so add
+                mbp.setDefaultValue(value);
                 updateMessageBundleProperty(mbp);
+                logger.debug("adding message bundle: {}", mbp.toString());
+            } else {
+                // update an existing properties default value if different
+                if (!StringUtils.equals(value, existingMbp.getDefaultValue())) {
+                    existingMbp.setDefaultValue(value);
+                    updateMessageBundleProperty(existingMbp);
+                    logger.debug("updating message bundle: {}", existingMbp.toString());
+                }
             }
         }
-        indexedList.add(getIndexKeyName(baseName, moduleName, loc.toString()));
+        indexedList.add(keyName);
     }
 
     @SuppressWarnings("unchecked")

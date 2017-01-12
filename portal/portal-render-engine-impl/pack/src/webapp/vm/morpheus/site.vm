@@ -123,7 +123,7 @@
         <script src="${pageWebjarsPath}/pnotify/2.1.0/pnotify.core.min.js$!{portalCDNQuery}"></script>
         <script src="${pageScriptPath}jquery/qtip/jquery.qtip-latest.min.js$!{portalCDNQuery}"></script>
         <script src="${pageScriptPath}jquery/qtip/tutorial.js$!{portalCDNQuery}"></script>
-
+	<script src="/library/courseware/course_plugin.js"></script>
         #if ( $tutorial && $loggedIn )
             <script>$(document).ready(function(){startTutorial({'showTutorialLocationOnHide': 'true'});});</script>
         #end ## END of IF ( $tutorial && $loggedIn )

@@ -428,6 +428,7 @@ GradebookSpreadsheet.prototype.setupFixedTableHeader = function(reset) {
                         attr("class", self.$table.attr("class")).
                         addClass("gb-fixed-header-table").
                         attr("role", "presentation").
+                        attr("aria-hidden", "true").
                         hide();
 
   var $fixedHeaderHead = $("<thead>");
@@ -493,11 +494,13 @@ GradebookSpreadsheet.prototype.setupFixedColumns = function() {
   self.$fixedColumnsHeader = $("<table>").attr("class", self.$table.attr("class")).
                                           addClass("gb-fixed-column-headers-table").
                                           attr("role", "presentation").
+                                          attr("aria-hidden", "true").
                                           hide();
 
   self.$fixedColumns = $("<table>").attr("class", self.$table.attr("class")).
                                     addClass("gb-fixed-columns-table").
                                     attr("role", "presentation").
+                                    attr("aria-hidden", "true").
                                     hide();
 
   var $headers = self.$table.find("> thead > tr.gb-headers > th").slice(0,3);
@@ -1806,6 +1809,13 @@ GradebookEditableCell.prototype.handleBeforeSave = function() {
 
 GradebookEditableCell.prototype.handleSaveComplete = function(cellId) {
   this.handleWicketCellReplacement(cellId);
+  // ensure fixed headers are aligned correctly after save, as vertical scroll
+  // may change as messages are added/removed from above the grade table
+  setTimeout(function() {
+    // take this off the critical path as we don't want any errors on
+    // the document scroll to stop the spreadsheet working
+    $(document).trigger("scroll");
+  });
 };
 
 

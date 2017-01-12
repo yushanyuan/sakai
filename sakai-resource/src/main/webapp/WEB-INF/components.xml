@@ -20,7 +20,7 @@
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 		<property name="url"
-			value="jdbc:mysql://localhost:3306/sakai?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;autoReconnectForPools=true" />
+			value="jdbc:mysql://localhost:3306/sakai112?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;autoReconnectForPools=true" />
 		<property name="username" value="root" />
 		<property name="password" value="123456" />
 		<property name="initialSize" value="10" />
@@ -289,6 +289,7 @@
 	<import resource="study-component.xml" />
 	<import resource="course-component.xml" />
 	<import resource="statistics-component.xml" />
+	<import resource="studymanage-component.xml" />
 	<import resource="template-component.xml" />
 	<import resource="forum-component.xml" />
 	<import resource="rest-component.xml" />

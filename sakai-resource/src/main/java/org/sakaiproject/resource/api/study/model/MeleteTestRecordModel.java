@@ -26,6 +26,7 @@ public class MeleteTestRecordModel implements java.io.Serializable {
 	private Long studyrecordId;//学习记录ID
 	private Long testId;//作业id
 
+	public MeleteTestRecordModel(){}
 	// Property accessors
 
 	public Long getTestId() {

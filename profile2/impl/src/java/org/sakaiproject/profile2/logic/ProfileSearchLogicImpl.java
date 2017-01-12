@@ -25,9 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.Setter;
-
-import org.apache.log4j.Logger;
+import org.apache.commons.lang.StringUtils;
 import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.profile2.cache.CacheManager;
@@ -39,6 +37,10 @@ import org.sakaiproject.profile2.util.ProfileConstants;
 import org.sakaiproject.profile2.util.ProfileUtils;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.user.api.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.Setter;
 
 /**
  * Implementation of ProfileSearchLogic API
@@ -48,7 +50,7 @@ import org.sakaiproject.user.api.User;
  */
 public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 
-	private static final Logger log = Logger.getLogger(ProfileSearchLogicImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(ProfileSearchLogicImpl.class);
 	
 	private Cache cache;
 	private final String CACHE_NAME = "org.sakaiproject.profile2.cache.search";
@@ -56,6 +58,7 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<Person> findUsersByNameOrEmail(String search, boolean includeConnections, String worksiteId) {
 				
 		//add users from SakaiPerson (clean list)
@@ -99,6 +102,7 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<Person> findUsersByInterest(String search, boolean includeConnections, String worksiteId) {
 				
 		//add users from SakaiPerson		
@@ -132,6 +136,7 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public ProfileSearchTerm getLastSearchTerm(String userUuid) {
 		
 		List<ProfileSearchTerm> searchHistory = getSearchHistory(userUuid);
@@ -144,23 +149,19 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public List<ProfileSearchTerm> getSearchHistory(String userUuid) {
 
 		if (cache.containsKey(userUuid)) {
 
 			log.debug("Fetching searchHistory from cache for: " + userUuid);
 		
+			//TODO this could do with a refactor
 			List<ProfileSearchTerm> searchHistory = new ArrayList<ProfileSearchTerm>(
 					((Map<String, ProfileSearchTerm>) cache.get(userUuid))
 							.values());
 
-			if(searchHistory != null) {
-				Collections.sort(searchHistory);
-			} else {
-				// This means that the cache has expired. evict the key from the cache
-				log.debug("SearchHistory cache appears to have expired for " + userUuid);
-				evictFromCache(userUuid);
-			}
+			Collections.sort(searchHistory);
 
 			return searchHistory;
 		} else {
@@ -171,6 +172,7 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public void addSearchTermToHistory(String userUuid, ProfileSearchTerm searchTerm) {
 		
 		if (null == searchTerm) {
@@ -181,18 +183,17 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 			throw new IllegalArgumentException("search term must contain UUID of user");
 		}
 		
-		if (false == userUuid.equals(searchTerm.getUserUuid())) {
+		if (!StringUtils.equals(userUuid, searchTerm.getUserUuid())) {
 			throw new IllegalArgumentException("userUuid must match search term userUuid");
 		}
 		
 		Map<String, ProfileSearchTerm> searchHistory = null;
-		String sTUserUuid = searchTerm.getUserUuid();
-		if (cache.containsKey(sTUserUuid)) {
-			searchHistory = (HashMap<String, ProfileSearchTerm>) cache.get(sTUserUuid);
+		if (cache.containsKey(userUuid)) {
+			searchHistory = (HashMap<String, ProfileSearchTerm>) cache.get(userUuid);
 			if(searchHistory == null) {
 				// This means that the cache has expired. evict the key from the cache
-				log.debug("SearchHistory cache appears to have expired for " + sTUserUuid);
-				evictFromCache(userUuid);
+				log.debug("SearchHistory cache appears to have expired for " + userUuid);
+				this.cacheManager.evictFromCache(this.cache, userUuid);
 			}
 		} else {
 			searchHistory = new HashMap<String, ProfileSearchTerm>();
@@ -214,6 +215,7 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public void clearSearchHistory(String userUuid) {
 		
 		if (cache.containsKey(userUuid)) {
@@ -257,7 +259,7 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 		List<BasicConnection> connections = connectionsLogic.getBasicConnectionsForUser(sakaiProxy.getCurrentUserId());
 		for (BasicConnection connection : connections) {
 			for (User user : users) {
-				if (user.getId().equals(connection.getUuid())) {
+				if (StringUtils.equals(user.getId(), connection.getUuid())) {
 					users.remove(user);
 					break;
 				}
@@ -300,7 +302,7 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 			Set<Member> members = sakaiProxy.getSite(worksiteId).getMembers();
 			for (Member member : members) {
 				for (User user : users) {
-					if (user.getId().equals(member.getUserId())) {
+					if (StringUtils.equals(user.getId(), member.getUserId())) {
 						worksiteMembers.add(user);
 						break;
 					}
@@ -329,7 +331,7 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 			Set<Member> members = sakaiProxy.getSite(worksiteId).getMembers();
 			for (Member member : members) {
 				for (String userId : userIds) {
-					if (userId.equals(member.getUserId())) {
+					if (StringUtils.equals(userId, member.getUserId())) {
 						worksiteMemberIds.add(userId);
 						break;
 					}
@@ -338,15 +340,6 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 		}
 
 		return worksiteMemberIds;
-	}
-	
-	/**
-	 * Helper to evict an item from a cache. 
-	 * @param cacheKey	the id for the data in the cache
-	 */
-	private void evictFromCache(String cacheKey) {
-		cache.remove(cacheKey);
-		log.debug("Evicted data in cache for key: " + cacheKey);
 	}
 
 	public void init() {

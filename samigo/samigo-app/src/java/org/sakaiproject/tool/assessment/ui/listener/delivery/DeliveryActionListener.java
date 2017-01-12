@@ -44,9 +44,9 @@ import javax.faces.event.ActionListener;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.math.util.MathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.commons.math3.util.Precision;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.event.api.Event;
@@ -120,7 +120,7 @@ public class DeliveryActionListener
 {
 
   static String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  private static Log log = LogFactory.getLog(DeliveryActionListener.class);
+  private static Logger log = LoggerFactory.getLogger(DeliveryActionListener.class);
   //private static ContextUtil cu;
   private boolean resetPageContents = true;
   private long previewGradingId = (long)(Math.random() * 1000);
@@ -1241,7 +1241,7 @@ public class DeliveryActionListener
     }
     
     //If the value close enough to the maximum value just set it to the maximum value (precision issue)
-    if (MathUtils.equals(itemBean.getExactPoints(),itemBean.getMaxPoints(),0.001d)) {
+    if (Precision.equals(itemBean.getExactPoints(),itemBean.getMaxPoints(),0.001d)) {
       itemBean.setPoints(itemBean.getMaxPoints());
     }
     
@@ -1926,12 +1926,12 @@ public class DeliveryActionListener
                 pubAnswer.getIsCorrect().booleanValue())
             {
               mbean.setFeedback(pubAnswer.getCorrectAnswerFeedback());
-              mbean.setIsCorrect(true);
+              mbean.setIsCorrect(Boolean.TRUE);
             }
             else
             {
               mbean.setFeedback(pubAnswer.getInCorrectAnswerFeedback());
-              mbean.setIsCorrect(false);
+              mbean.setIsCorrect(Boolean.FALSE);
             }
           } else if (NONE_OF_THE_ABOVE.equals(data.getPublishedAnswerId())) {
         	  mbean.setResponse(data.getPublishedAnswerId().toString());
@@ -1970,7 +1970,7 @@ public class DeliveryActionListener
       List<ItemGradingData> datas = bean.getItemGradingDataArray();
       if (datas == null || datas.isEmpty())
       {
-        fbean.setIsCorrect(false);
+        fbean.setIsCorrect(Boolean.FALSE);
       }
       else
       {
@@ -1994,10 +1994,10 @@ public class DeliveryActionListener
             }
             else {
             	if (data.getIsCorrect().booleanValue()) {
-            		fbean.setIsCorrect(true);
+            		fbean.setIsCorrect(Boolean.TRUE);
             	}
             	else {
-            		fbean.setIsCorrect(false);
+            		fbean.setIsCorrect(Boolean.FALSE);
             	}
             }
           }
@@ -2120,7 +2120,7 @@ public class DeliveryActionListener
       List<ItemGradingData> datas = bean.getItemGradingDataArray();
       if (datas == null || datas.isEmpty())
       {
-        fbean.setIsCorrect(false);
+        fbean.setIsCorrect(Boolean.FALSE);
       }
       else
       {
@@ -2149,10 +2149,10 @@ public class DeliveryActionListener
             }
             else {
             	if (data.getIsCorrect().booleanValue()) {
-            		fbean.setIsCorrect(true);
+            		fbean.setIsCorrect(Boolean.TRUE);
             	}
             	else {
-            		fbean.setIsCorrect(false);
+            		fbean.setIsCorrect(Boolean.FALSE);
             	}
             }
           }
@@ -2397,7 +2397,7 @@ public class DeliveryActionListener
           List<ItemGradingData> datas = bean.getItemGradingDataArray();
           if (datas == null || datas.isEmpty())
           {
-              fbean.setIsCorrect(false);
+              fbean.setIsCorrect(Boolean.FALSE);
           } else {
               for (ItemGradingData data : datas) {
 
@@ -2468,7 +2468,16 @@ public class DeliveryActionListener
         if (data.getPublishedItemTextId().equals(text.getId()))
         {
           mbean.setItemGradingData(data);
-		  mbean.setIsCorrect(data.getIsCorrect());
+		  if (data.getIsCorrect() != null &&
+				  data.getIsCorrect().booleanValue())
+		  {
+			  mbean.setIsCorrect(true);
+		  }
+		  else
+		  {
+			  mbean.setIsCorrect(false);
+		  }
+ 
           if (data.getAnswerText() != null)
           {
             mbean.setResponse(data.getAnswerText());

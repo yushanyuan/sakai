@@ -25,6 +25,10 @@ public class MeleteTestModel implements java.io.Serializable{
 	private String buildType;//组卷方式，即时和已有试卷
 	private Long buildNum;//组卷份数
 	private Long isCaculateScore;//是否计算平时成绩
+	
+	
+	public MeleteTestModel() {
+	}
 	public Long getIsCaculateScore() {
 		return isCaculateScore;
 	}

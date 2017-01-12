@@ -22,10 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import lombok.Setter;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.sakaiproject.profile2.dao.ProfileDao;
 import org.sakaiproject.profile2.model.Message;
 import org.sakaiproject.profile2.model.MessageParticipant;
@@ -33,6 +30,10 @@ import org.sakaiproject.profile2.model.MessageThread;
 import org.sakaiproject.profile2.types.EmailType;
 import org.sakaiproject.profile2.util.ProfileConstants;
 import org.sakaiproject.profile2.util.ProfileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.Setter;
 
 /**
  * Implementation of ProfileMessagingLogic for Profile2.
@@ -42,11 +43,12 @@ import org.sakaiproject.profile2.util.ProfileUtils;
  */
 public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 
-	private static final Logger log = Logger.getLogger(ProfileMessagingLogicImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(ProfileMessagingLogicImpl.class);
 
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getAllUnreadMessagesCount(final String userId) {
 		return dao.getAllUnreadMessagesCount(userId);
 	}
@@ -55,6 +57,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getThreadsWithUnreadMessagesCount(final String userId) {
 		return dao.getThreadsWithUnreadMessagesCount(userId);
 	}
@@ -62,6 +65,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getSentMessagesCount(final String userId) {
 		return dao.getSentMessagesCount(userId);
 	}
@@ -71,6 +75,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean sendNewMessage(final String uuidTo, final String uuidFrom, final String threadId, final String subject, final String messageStr) {
 		
 		//setup thread
@@ -127,6 +132,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public Message replyToThread(final String threadId, final String reply, final String uuidFrom) {
 		
 		try {
@@ -168,6 +174,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<MessageThread> getMessageThreads(final String userId) {
 		
 		List<MessageThread> threads = dao.getMessageThreads(userId);
@@ -183,6 +190,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getMessageThreadsCount(final String userId) {
 		return dao.getMessageThreadsCount(userId);
 	}
@@ -190,6 +198,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<Message> getMessagesInThread(final String threadId) {
 		return dao.getMessagesInThread(threadId);
 	}
@@ -197,6 +206,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getMessagesInThreadCount(final String threadId) {
 		return dao.getMessagesInThreadCount(threadId);
 	}
@@ -206,6 +216,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public Message getMessage(final String id) {
 		return dao.getMessage(id);
 	}
@@ -213,6 +224,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public MessageThread getMessageThread(final String threadId) {
 		
 		MessageThread thread = dao.getMessageThread(threadId);
@@ -232,6 +244,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean toggleMessageRead(MessageParticipant participant, final boolean status) {
 		return dao.toggleMessageRead(participant, status);
 	}
@@ -250,6 +263,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public MessageParticipant getMessageParticipant(final String messageId, final String userUuid) {
 		return dao.getMessageParticipant(messageId, userUuid);
 	}
@@ -276,6 +290,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<String> getThreadParticipants(final String threadId) {
 		return dao.getThreadParticipants(threadId);
 	}
@@ -283,6 +298,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean isThreadParticipant(final String threadId, final String userId) {
 		return getThreadParticipants(threadId).contains(userId);
 	}
@@ -290,6 +306,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public String getThreadSubject(final String threadId) {
 		MessageThread thread = dao.getMessageThread(threadId);
 		return thread.getSubject();

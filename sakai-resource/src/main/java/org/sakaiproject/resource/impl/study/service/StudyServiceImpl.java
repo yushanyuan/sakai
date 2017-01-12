@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -514,23 +515,49 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 			FileUtils.writeStringToFile(ansF, answer, "UTF8");
 			PaperCheckToolUtil.checkPaperAction(new File(path + Helper.getAnswerNameById(paperId)), ansF);// 判卷
 			Float objScore = new Float(PaperCheckToolUtil.findObjStudentScore(ansF));
-			BigDecimal percentageObjScore = new BigDecimal(objScore.toString()).divide(
-					new BigDecimal(totalScore.toString()), 2, BigDecimal.ROUND_CEILING).multiply(new BigDecimal("100"));
+			
+			// 2016.10.28修改存储的分数为实际分数（保证和试卷分数一致），更新平时成绩时换算为100分制
+			// 重新计算通过分数,目前传入的passScore其实是通过百分比
+			BigDecimal total = new BigDecimal(totalScore);
+			BigDecimal mastery = new BigDecimal(passScore);
+			BigDecimal passScoreBD = total.multiply(mastery.divide(new BigDecimal("100")));
+			passScore = passScoreBD.toString();
+//			BigDecimal percentageObjScore = new BigDecimal(objScore.toString()).divide(
+//					new BigDecimal(totalScore.toString()), 2, BigDecimal.ROUND_CEILING).multiply(new BigDecimal("100"));
+			
+			
 			// 客观题分 存储的分数为百分制分数
-			attempt.setObjScore(percentageObjScore.floatValue());
+			//attempt.setObjScore(percentageObjScore.floatValue());
+			// 2016.10.28修改存储的分数为实际分数（保证和试卷分数一致），更新平时成绩时换算为100分制
+			attempt.setObjScore(objScore);
 			// 总分 存储的分数为百分制分数
-			attempt.setScore(percentageObjScore.floatValue());
+			//ttempt.setScore(percentageObjScore.floatValue());
+			// 2016.10.28修改存储的分数为实际分数（保证试卷分数一致），更新平时成绩时换算为100分制
+			attempt.setScore(objScore);
+			
+			
+			
 			// 判断是否有主观题,是为T否为F
 			if (PaperToolUtil.isExistObject(new File(path + Helper.getAnswerNameById(paperId)))) {
 				attempt.setPagerstatus(CodeTable.subCheckNo);// 主观题未批改
 			} else {
 				attempt.setPagerstatus(CodeTable.subNotExist);// 无主观题
-				if (record.getScore() == null || (record.getScore().floatValue() < percentageObjScore.floatValue())) {// 作业分数小于尝试分数，更新作业分数
-					record.setScore(percentageObjScore.floatValue());
+				
+//				if (record.getScore() == null || (record.getScore().floatValue() < percentageObjScore.floatValue())) {// 作业分数小于尝试分数，更新作业分数
+//					record.setScore(percentageObjScore.floatValue());
+//					checkUsuallyScore = true;
+//					// 作业状态为未通过且分数大于通过分数
+//					if (record.getStatus().toString().equals(CodeTable.passStatusNo)
+//							&& percentageObjScore.floatValue() >= new Float(passScore)) {
+//						record.setStatus(new Long(CodeTable.passStatusYes));// 更新为已通过
+//					}
+//				}
+				if (record.getScore() == null || (record.getScore().floatValue() < attempt.getScore().floatValue())) {// 作业分数小于尝试分数，更新作业分数
+					record.setScore(attempt.getScore().floatValue());
 					checkUsuallyScore = true;
 					// 作业状态为未通过且分数大于通过分数
 					if (record.getStatus().toString().equals(CodeTable.passStatusNo)
-							&& percentageObjScore.floatValue() >= new Float(passScore)) {
+							&& record.getScore().floatValue() >= new Float(passScore)) {
 						record.setStatus(new Long(CodeTable.passStatusYes));// 更新为已通过
 					}
 				}
@@ -558,6 +585,255 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 			throw e;
 		}
 	}
+	
+	// 保存提交的作业(旧课程空间)
+	public MeleteTestAttemptModel saveOldMeleteTestAttempt(String courseId, String recordId, String userId, String paperId, String answer,
+			String startTime, String passScore, String studyrecordId, String testId) throws Exception {
+		// String courseId,
+		// String studentId, String moduleId, String sectionId, String testId,
+		// String paperId, boolean isFirst, Date startTime,
+		// String stuAnswerString
+		MeleteStudyRecordModel studyRecord = CacheUtil.getInstance().checkStudyRecord(courseId, userId);
+		// MeleteCourseModel course = courseService.getCourseBySiteId(courseId);
+
+		// 获取作业记录
+		MeleteTestRecordModel testRecord = this.getTestRecordById(studyRecord.getStudyrecordId().toString(), testId);
+        testRecord.setCourseId(courseId);
+		Long num = testRecord.getAttemptNumber();// 获取尝试次数
+		if (num == null) {
+			num = new Long(0);
+		}
+
+		Date startDate = new Date(Long.valueOf(startTime).longValue());
+		Date entTime = new Date();
+
+		MeleteTestAttemptModel attempt = new MeleteTestAttemptModel();// 创建作业尝试记录
+		attempt.setEndTime(entTime);
+		attempt.setCourseId(courseId);
+		attempt.setMeleteTestRecordId(new Long(recordId));
+		attempt.setStartTime(startDate);
+		attempt.setTestPaperid(paperId);
+		attempt.setObjScore(new Float(0));
+		attempt.setScore(new Float(0));
+		attempt.setSubScore(new Float(0));
+		attempt.setOrderIndex(num + 1);
+		String attemptId = this.createEntity(attempt);// 保存尝试记录生成id
+		if (attemptId != null && Long.parseLong(attemptId) != 0 && answer != null) {
+
+			String path = Constants.getStuTestPath(userId, courseId);
+			String testAnsFilename = Helper.getStuAnswerName(paperId, attemptId);
+			File filepath = new File(path);
+			if (!filepath.exists()) {
+				filepath.mkdirs();
+			}
+			filepath = null;
+			File ansF = new File(path, testAnsFilename);
+			FileUtils.writeStringToFile(ansF, answer, "UTF8");
+			PaperCheckToolUtil.checkPaperAction(new File(path + Helper.getAnswerNameById(paperId)), ansF);// 判卷
+			attempt.setObjScore(PaperCheckToolUtil.findObjStudentScore(ansF));// 客观题分
+			attempt.setScore(PaperCheckToolUtil.findObjStudentScore(ansF));// 总分
+			// 判断是否有主观题,是为T否为F(0.主观题未批改 1.主观题已经批改 2.无主观题)
+			if (PaperToolUtil.isExistObject(new File(path + Helper.getAnswerNameById(paperId)))) {
+				attempt.setPagerstatus("0");
+			} else {
+				attempt.setPagerstatus("2");
+			}
+		}
+
+		this.updateEntity(attempt);
+
+		testRecord.setAttemptNumber(num + 1);
+		testRecord.setLastCommitTime(entTime);
+		if (testRecord.getStartStudyTime() == null) {
+			testRecord.setStartStudyTime(startDate);
+		}
+
+		if (testRecord.getScore() < attempt.getScore()) {
+			testRecord.setScore(attempt.getScore());
+			this.updateEntity(testRecord);
+			String sql = "select count from MELETE_TEST where id = :testId";
+			Object o = this.getSession().createSQLQuery(sql).setParameter("testId", Long.parseLong(testId)).uniqueResult();
+			if (o != null && ((Integer) o) == 1) {
+				this.countOldMeleteCourseScore(courseId, userId, "");
+			}
+		} else {
+			this.updateEntity(testRecord);
+		}
+		return attempt;
+	}
+
+	/**
+	 * 计算课程成绩，旧课程空间（查出课程下所有的作业与测试，所有的学生完成的作业与测试的做答记录，用作业或测试的ID去匹配）
+	 * 
+	 * @param courseId
+	 *            课程ID
+	 * @param studentId
+	 *            学生ID
+	 */
+	@SuppressWarnings("unchecked")
+	public void countOldMeleteCourseScore(String courseId, String studentId,String noPassReason)  throws Exception{
+		float scoreSum = 0;
+		
+		String moduleHomeworkSql = "select modulehome0_.HOMEWORK_ID as HOMEWORK_ID,  modulehome0_.TOTAL_SCORE as TOTAL_SCORE,  modulehome0_.RATIO as RATIO, modulehome0_.COUNT as COUNT from melete_homework modulehome0_, melete_course_module coursemodu1_ where modulehome0_.BELONG_TYPE='MODULEHOME' and coursemodu1_.COURSE_ID=:courseId and coursemodu1_.DELETE_FLAG=0 and modulehome0_.COUNT=1 and modulehome0_.MODULE_ID=coursemodu1_.MODULE_ID order by coursemodu1_.SEQ_NO, modulehome0_.NAME";
+		List<Map<String,Object>> moduleHomeworkList = this.getSession().createSQLQuery(moduleHomeworkSql).setParameter("courseId", courseId).list();
+		
+		String  sectionHomeworkSql = "select sectionhom0_.HOMEWORK_ID as HOMEWORK_ID, sectionhom0_.TOTAL_SCORE as TOTAL_SCORE, sectionhom0_.RATIO as RATIO, sectionhom0_.COUNT as COUNT from melete_homework sectionhom0_, melete_section section1_, melete_course_module coursemodu2_ where sectionhom0_.BELONG_TYPE='SECTIONHOME' and coursemodu2_.DELETE_FLAG=0 and coursemodu2_.COURSE_ID=:courseId and sectionhom0_.COUNT=1 and sectionhom0_.SECTION_ID=section1_.SECTION_ID and section1_.MODULE_ID=coursemodu2_.MODULE_ID order by coursemodu2_.SEQ_NO, sectionhom0_.NAME";
+		List<Map<String,Object>> sectionHomeworkList = this.getSession().createSQLQuery(sectionHomeworkSql).setParameter("courseId", courseId).list();
+		
+		String  moduleTestSql = "select moduletest0_.TEST_ID as TEST_ID, moduletest0_.TOTAL_SCORE as TOTAL_SCORE,  moduletest0_.RATIO as RATIO, moduletest0_.COUNT as COUNT from melete_test moduletest0_ left outer join melete_module module2_ on moduletest0_.MODULE_ID=module2_.MODULE_ID, melete_course_module coursemodu1_ where moduletest0_.BELONG_TYPE='MODULETEST' and coursemodu1_.DELETE_FLAG=0 and coursemodu1_.COURSE_ID=:courseId and moduletest0_.MODULE_ID=coursemodu1_.MODULE_ID and moduletest0_.COUNT=1 order by coursemodu1_.SEQ_NO, moduletest0_.NAME";
+		List<Map<String,Object>> moduleTestList = this.getSession().createSQLQuery(moduleTestSql).setParameter("courseId", courseId).list();
+		
+		String  sectionTestSql = "select sectiontes0_.TEST_ID as TEST_ID, sectiontes0_.TOTAL_SCORE as TOTAL_SCORE, sectiontes0_.RATIO as RATIO, sectiontes0_.COUNT as COUNT from melete_test sectiontes0_ left outer join melete_section section2_ on sectiontes0_.SECTION_ID=section2_.SECTION_ID, melete_course_module coursemodu1_ where sectiontes0_.BELONG_TYPE='SECTIONTEST' and section2_.DELETE_FLAG=0 and coursemodu1_.DELETE_FLAG=0 and coursemodu1_.COURSE_ID=:courseId and section2_.MODULE_ID=coursemodu1_.MODULE_ID and section2_.SECTION_ID=sectiontes0_.SECTION_ID and sectiontes0_.COUNT=1 order by coursemodu1_.SEQ_NO, sectiontes0_.NAME";
+		List<Map<String,Object>> sectionTestList = this.getSession().createSQLQuery(sectionTestSql).setParameter("courseId", courseId).list();
+		
+		MeleteStudyRecordModel studyRecord = CacheUtil.getInstance().checkStudyRecord(courseId, studentId);		
+		
+		String  homeworkRecordsSql = "select  homeworkre0_.SCORE as SCORE, homeworkre0_.HOMEWORK_NAME as HOMEWORK_NAME,homeworkre0_.HOMEWORK_ID as HOMEWORK_ID from melete_homework_record homeworkre0_ where homeworkre0_.STUDYRECORD=:studyRecord";
+		List<Map<String,Object>> homeworkRecords = this.getSession().createSQLQuery(sectionTestSql).setParameter("studyRecord",studyRecord.getStudyrecordId()).list();
+		
+		String  testRecordsSql = "select  testrecord0_.SCORE as SCORE ,testrecord0_.TEST_NAME as TEST_NAME, testrecord0_.TEST_ID as TEST_ID from melete_test_record testrecord0_ where testrecord0_.STUDYRECORD=:studyRecord order by testrecord0_.START_STUDY_TIME";
+		List<Map<String,Object>> testRecords = this.getSession().createSQLQuery(sectionTestSql).setParameter("studyRecord",studyRecord.getStudyrecordId()).list();
+		
+		boolean notSetRadio = true;
+		int timesCount = 0;
+		float simpleScoreSum = 0;
+		for (Iterator iter = moduleHomeworkList.iterator(); iter.hasNext();) {
+			Map<String,Object> moduleHomework = (Map<String,Object>) iter.next();
+			if (((Boolean)moduleHomework.get("COUNT"))==true) {
+				timesCount++;
+				for (Map<String,Object> homeworkRecord : homeworkRecords) {
+
+					if (homeworkRecord.get("HOMEWORK_ID").toString().equals(
+							moduleHomework.get("HOMEWORK_ID").toString())) {
+						if ((Float)moduleHomework.get("RATIO") == 0) {
+							simpleScoreSum = simpleScoreSum
+									+ ((Float)homeworkRecord.get("SCORE") > (Float)moduleHomework
+											.get("TOTAL_SCORE") ? (Float)moduleHomework
+											.get("TOTAL_SCORE") : (Float)homeworkRecord
+											.get("SCORE"))
+									/ (Float)moduleHomework.get("TOTAL_SCORE");
+						} else {
+							notSetRadio = false;
+							scoreSum = scoreSum
+									+ ((Float)homeworkRecord.get("SCORE") > (Float)moduleHomework
+											.get("TOTAL_SCORE") ? (Float)moduleHomework
+											.get("TOTAL_SCORE") : (Float)homeworkRecord
+											.get("SCORE"))
+									* (Float)moduleHomework.get("RATIO")
+									/ (Float)moduleHomework.get("TOTAL_SCORE");
+						}
+					}
+				}
+			}
+		}
+		for (Iterator iter = sectionHomeworkList.iterator(); iter.hasNext();) {
+			Map<String,Object> sectionHomework = (Map<String,Object>) iter.next();
+			if (((Boolean)sectionHomework.get("COUNT"))==true) {
+				timesCount++;
+				for (Map<String,Object> homeworkRecord : homeworkRecords) {
+
+					if (homeworkRecord.get("HOMEWORK_ID").toString().equals(
+							sectionHomework.get("HOMEWORK_ID").toString())) {
+						if ((Float)sectionHomework.get("RATIO") == 0) {
+
+							simpleScoreSum = simpleScoreSum
+									+ ((Float)homeworkRecord.get("SCORE") > (Float)sectionHomework
+											.get("TOTAL_SCORE") ? (Float)sectionHomework
+											.get("TOTAL_SCORE") : (Float)homeworkRecord
+											.get("SCORE"))
+									/ (Float)sectionHomework.get("TOTAL_SCORE");
+						} else {
+							notSetRadio = false;
+							scoreSum = scoreSum
+									+ ((Float)homeworkRecord.get("SCORE") > (Float)sectionHomework
+											.get("TOTAL_SCORE") ? (Float)sectionHomework
+											.get("TOTAL_SCORE") : (Float)homeworkRecord
+											.get("SCORE"))
+									* (Float)sectionHomework.get("RATIO")
+									/ (Float)sectionHomework.get("TOTAL_SCORE");
+						}
+					}
+				}
+			}
+		}
+		for (Iterator iter = moduleTestList.iterator(); iter.hasNext();) {
+			Map<String,Object> moduleTest = (Map<String,Object>) iter.next();
+			if (((Boolean)moduleTest.get("COUNT"))==true) {
+				timesCount++;
+				for (Map<String,Object> testRecord : testRecords) {
+
+					if (testRecord.get("TEST_ID").toString().equals(moduleTest.get("TEST_ID").toString())) {
+						if ((Float)moduleTest.get("RATIO") == 0) {
+							simpleScoreSum = simpleScoreSum
+									+ ((Float)testRecord.get("SCORE") > (Float)moduleTest
+											.get("TOTAL_SCORE") ? (Float)moduleTest
+											.get("TOTAL_SCORE") : (Float)testRecord
+											.get("SCORE"))
+									/ (Float)moduleTest.get("TOTAL_SCORE");
+						} else {
+							notSetRadio = false;
+							scoreSum = scoreSum
+									+ ((Float)testRecord.get("SCORE") > (Float)moduleTest
+											.get("TOTAL_SCORE") ? (Float)moduleTest
+											.get("TOTAL_SCORE") : (Float)testRecord
+											.get("SCORE"))
+									* (Float)moduleTest.get("RATIO")
+									/ (Float)moduleTest.get("TOTAL_SCORE");
+						}
+					}
+				}
+			}
+		}
+		for (Iterator iter = sectionTestList.iterator(); iter.hasNext();) {
+			Map<String,Object> sectionTest = (Map<String,Object>) iter.next();
+			if (((Boolean)sectionTest.get("COUNT"))==true) {
+				timesCount++;
+				for (Map<String,Object> testRecord : testRecords) {
+
+					if (testRecord.get("TEST_ID").toString().equals(sectionTest.get("TEST_ID").toString())) {
+						if ((Float)sectionTest.get("RATIO") == 0) {
+							simpleScoreSum = simpleScoreSum
+									+ ((Float)testRecord.get("SCORE") > (Float)sectionTest
+											.get("TOTAL_SCORE") ? (Float)sectionTest
+											.get("TOTAL_SCORE") : (Float)testRecord
+											.get("SCORE"))
+									/ (Float)sectionTest.get("TOTAL_SCORE");
+						} else {
+							notSetRadio = false;
+							scoreSum = scoreSum
+									+ ((Float)testRecord.get("SCORE") > (Float)sectionTest
+											.get("TOTAL_SCORE") ? (Float)sectionTest
+											.get("TOTAL_SCORE") : (Float)testRecord
+											.get("SCORE"))
+									* (Float)sectionTest.get("RATIO")
+									/ (Float)sectionTest.get("TOTAL_SCORE");
+						}
+					}
+				}
+			}
+		}
+		if (notSetRadio) {
+			scoreSum = 100 * simpleScoreSum / timesCount;
+		}
+		// scoreSum += 0.05;
+		// DecimalFormat format = new DecimalFormat("#0.0");// 输出一位小数
+		// scoreSum = Float.parseFloat(format.format(scoreSum));
+		scoreSum = (float) (Math.round(scoreSum * 10) / 10.0); // 小数点后一位前移，并四舍五入
+		if (scoreSum > studyRecord.getScore()) {
+			if (scoreSum > 100) {
+				scoreSum = 100f;
+			}
+			studyRecord.setScore(scoreSum);
+			studyRecord.setScoreUpdateTime(new Date());
+			try {
+				updateEntity(studyRecord);
+			} catch (RuntimeException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	
 
 	// 保存提交的前测
 	public MeleteSelftestAttemptModel saveSelftestAttempt(String courseId, String recordId, String userId,
@@ -602,22 +878,36 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 			FileUtils.writeStringToFile(ansF, answer, "UTF8");
 			PaperCheckToolUtil.checkPaperAction(new File(path + Helper.getAnswerNameById(paperId)), ansF);// 判卷
 			Float objScore = new Float(PaperCheckToolUtil.findObjStudentScore(ansF));
-			BigDecimal percentageObjScore = new BigDecimal(objScore.toString()).divide(
-					new BigDecimal(totalScore.toString()), 2, BigDecimal.ROUND_CEILING).multiply(new BigDecimal("100"));
-			attempt.setObjScore(percentageObjScore.floatValue());// 客观题分
+			
+			
+//			BigDecimal percentageObjScore = new BigDecimal(objScore.toString()).divide(
+//					new BigDecimal(totalScore.toString()), 2, BigDecimal.ROUND_CEILING).multiply(new BigDecimal("100"));
+			// 2016.10.28修改存储的分数为实际分数（保证和试卷分数一致），更新平时成绩时换算为100分制
+			// 重新计算通过分数,目前传入的passScore其实是通过百分比
+			BigDecimal total = new BigDecimal(totalScore);
+			BigDecimal mastery = new BigDecimal(passScore);
+			BigDecimal passScoreBD = total.multiply(mastery.divide(new BigDecimal("100")));
+			passScore = passScoreBD.toString();
+			
+			//attempt.setObjScore(percentageObjScore.floatValue());// 客观题分
 			// 存储形式为百分制分数
-			attempt.setScore(percentageObjScore.floatValue());// 总分 存储形式为百分制分数
+			//attempt.setScore(percentageObjScore.floatValue());// 总分 存储形式为百分制分数
+			// 2016.10.28修改存储的分数为实际分数（保证和试卷分数一致），更新平时成绩时换算为100分制
+			attempt.setObjScore(objScore.floatValue());// 客观题分
+			// 存储形式为百分制分数
+			attempt.setScore(objScore.floatValue());// 总分 存储形式为百分制分数
+			
 			// 判断是否有主观题,是为T否为F
 			if (PaperToolUtil.isExistObject(new File(path + Helper.getAnswerNameById(paperId)))) {
 				attempt.setPagerstatus(CodeTable.subCheckNo);// 主观题未批改
 			} else {
 				attempt.setPagerstatus(CodeTable.subNotExist);// 无主观题
-				if (record.getScore() == null || (record.getScore().floatValue() < percentageObjScore.floatValue())) {// 作业分数小于尝试分数，更新作业分数
-					record.setScore(percentageObjScore.floatValue());// 前测记录中的存储形式为百分制分数
+				if (record.getScore() == null || (record.getScore().floatValue() < attempt.getScore().floatValue())) {// 作业分数小于尝试分数，更新作业分数
+					record.setScore(attempt.getScore().floatValue());// 前测记录中的存储形式为百分制分数
 					checkUsuallyScore = true;
 					// 前测状态为未通过且分数 大于等于 通过分数
 					if (record.getStatus().toString().equals(CodeTable.passStatusNo)
-							&& percentageObjScore.floatValue() >= new Float(passScore)) {
+							&& record.getScore().floatValue() >= new Float(passScore)) {
 						record.setStatus(new Long(CodeTable.passStatusYes));// 更新为已通过
 					}
 				}
@@ -653,8 +943,13 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 		if(StringUtils.isNotBlank(studyrecordIds)){
 			String[] studyIds = studyrecordIds.split(",");
 			for(String id : studyIds){
-				CacheElement ce = CacheUtil.getInstance().getCacheOfStudyrecord(id);
-				this.countUsuallyScore(ce.getStudyRecord().getCourseId(), ce.getStudyRecord().getStudentId(), ce.getStudyRecord().getStudyrecordId().toString());
+				try{
+					CacheElement ce = CacheUtil.getInstance().getCacheOfStudyrecord(id);
+					this.countUsuallyScore(ce.getStudyRecord().getCourseId(), ce.getStudyRecord().getStudentId(), ce.getStudyRecord().getStudyrecordId().toString());
+				}catch(Exception e){
+					e.printStackTrace();
+					logger.error(e.getMessage(), e);
+				}
 			}
 		}
 	}
@@ -677,7 +972,7 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 
 		// testlist = ce.getTestAndRecordList();// 从缓存中获得作业以及作业记录的集合
 		// 直接从数据库读取作业记录数据数据 zihongyan 2014-03-07
-		String testhql = "select mt.ratio as ratio,mtr.score as score from MeleteTestRecordModel mtr,MeleteTestModel mt "
+		String testhql = "select mt.ratio as ratio,mtr.score as score,mt.totalScore as totalScore from MeleteTestRecordModel mtr,MeleteTestModel mt "
 				+ "where mt.id=mtr.testId and mt.isCaculateScore=? and mtr.studyrecordId=? and mt.status=?";
 		Object[] testParameters = { Long.parseLong("1"), Long.parseLong(studyrecordId),
 				Long.parseLong(CodeTable.normal) };
@@ -685,7 +980,8 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 		if (testlist != null && !testlist.isEmpty() && testlist.size() > 0) {
 			for (int i = 0; i < testlist.size(); i++) {
 				Object[] obj = (Object[]) testlist.get(i);
-				testSumScore = testSumScore.doubleValue() + new Double((Float) obj[1]).doubleValue()
+				// 换算成百分制并计算成绩
+				testSumScore = testSumScore.doubleValue() + (new Double((Float) obj[1]).doubleValue()/new Double((Long) obj[2]).doubleValue() * 100)
 						* new Double((Float) obj[0]).doubleValue() * 0.01;
 			}
 		}
@@ -693,20 +989,20 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 
 		// selftestlist = ce.getSelftestAndRecordList();// 从缓存中获得前测以及前测记录的集合
 		// 直接从数据库读取前侧数据
-		String selftesthql = "select ms.ratio as ratio,msr.score as score from MeleteSelftestRecordModel msr,MeleteSelfTestModel ms "
+		String selftesthql = "select ms.ratio as ratio,msr.score as score,ms.totalScore as totalScore from MeleteSelftestRecordModel msr,MeleteSelfTestModel ms "
 				+ "where ms.id=msr.selftestId and ms.isCaculateScore=? and msr.studyrecordId=?";
 		Object[] selftestParameters = { Long.parseLong("1"), Long.parseLong(studyrecordId) };
 		selftestlist = findEntity(selftesthql, selftestParameters);
 		if (selftestlist != null && !selftestlist.isEmpty() && selftestlist.size() > 0) {
 			for (int i = 0; i < selftestlist.size(); i++) {
 				Object[] obj = (Object[]) selftestlist.get(i);
-				selfTestSumScore = selfTestSumScore.doubleValue() + new Double((Float) obj[1]).doubleValue()
+				selfTestSumScore = selfTestSumScore.doubleValue() + (new Double((Float) obj[1]).doubleValue()/new Double((Long) obj[2]).doubleValue() * 100)
 						* new Double((Float) obj[0]).doubleValue() * 0.01;
 			}
 		}
 
 		logger.debug("------selfTestSumScore--------" + selfTestSumScore);
-		// forumlist = ce.getForumAndRecordList();// 从缓存中获得讨论以及讨论记录的集合
+		// forumlist = ce.getForumAndRecordList();// 从缓存中获得讨论以及讨论记录的集合 
 
 		// 从数据库直接读取讨论以及讨论记录的集合
 		String forumhql = "select mf.ratio from MeleteForumRecordModel mfr,MeleteForumModel mf "
@@ -742,7 +1038,7 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 			e1.printStackTrace();
 			logger.error(e1.getMessage(), e1);
 		}
-		logger.debug("------fileScore--------" + fileScore);
+		logger.debug("------fileScore--------" + fileScore); 
 		Double sumScore = testScore + selftestScore + forumScore + fileScore;
 		Float sumScoref = new Float(sumScore);
 		try {
@@ -751,9 +1047,13 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 			//if(studyRecord != null){
 				// 增加更新时间 2014-7-31
 				studyRecord.setScoreUpdateTime(new Date());
+				sumScoref = sumScoref == null ? 0 : sumScoref;
+				BigDecimal bd = new BigDecimal((double)sumScoref);    
+				bd = bd.setScale(0,BigDecimal.ROUND_HALF_UP);    
+				sumScoref = bd.floatValue();  
 				studyRecord.setScore(sumScoref);
 				this.updateEntity(studyRecord);
-				// 更新学习记录缓存 zihongyan 2013-03-05
+				// 更新学习记录缓存 zihongyan 2013-03-05 
 				ce.setStudyRecord(studyRecord);
 			}
 		} catch (Exception e) {
@@ -1027,28 +1327,44 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 
 				// 根据学生答案文件获得主观题分数
 				Float subscore = new Float(PaperCheckToolUtil.findSubStudentScore(studentAnswerFile));
+				
+				
 				// 将主观体得分换算为百分制得分
-				BigDecimal percentageSubScore = new BigDecimal(subscore.toString()).divide(
-						new BigDecimal(totalScore.toString()), 2, BigDecimal.ROUND_CEILING).multiply(
-						new BigDecimal("100"));
+				//BigDecimal percentageSubScore = new BigDecimal(subscore.toString()).divide(
+				//		new BigDecimal(totalScore.toString()), 2, BigDecimal.ROUND_CEILING).multiply(
+				//		new BigDecimal("100"));
+				
 				// 存储作业得分按百分制存储
-				attemp.setSubScore(percentageSubScore.floatValue());
+				//attemp.setSubScore(percentageSubScore.floatValue());
 
 				// 存储作业总分按百分制存储
-				attemp.setScore(new Float(attemp.getObjScore().floatValue() + percentageSubScore.floatValue()));
+				//attemp.setScore(new Float(attemp.getObjScore().floatValue() + percentageSubScore.floatValue()));
+				
+				// 2016.10.28修改存储的分数为实际分数（保证和试卷分数一致），更新平时成绩时换算为100分制
+				attemp.setSubScore(subscore.floatValue());
+				attemp.setScore(new Float(attemp.getObjScore().floatValue() + subscore.floatValue()));
+				
 				// 批改状态设为主观题已批改
 				attemp.setPagerstatus(CodeTable.subCheckYes);
 				this.updateEntity(attemp);// 更新记录
 
 				if (record.getScore() == null || (record.getScore().floatValue() < attemp.getScore().floatValue())) { // 记录分数小于尝试分数，更新记录分数
-					record.setScore(attemp.getScore());
+					record.setScore(attemp.getScore() == null ? 0 : attemp.getScore());
 					if (record.getStatus().toString().equals(CodeTable.passStatusNo)) {// 记录状态为未通过
 						// 检查本次分数是否大于通过分数
 
-						Long passScoreLong = test.getMasteryScore();
+						//Long passScoreLong = test.getMasteryScore();
 						// 分数大于等于测试记录中的通过分数百分比 则为通过
 						// TODO 验证长整型和float类型比较
-						if (passScoreLong.longValue() <= attemp.getScore().floatValue()) {
+						//if (passScoreLong.longValue() <= attemp.getScore().floatValue()) {
+						//	record.setStatus(new Long(CodeTable.passStatusYes));
+						//}
+						// 2016.10.28修改存储的分数为实际分数（保证和试卷分数一致），更新平时成绩时换算为100分制
+						BigDecimal total = new BigDecimal(totalScore);
+						BigDecimal mastery = new BigDecimal(test.getMasteryScore().toString());
+						BigDecimal passScoreBD = total.multiply(mastery.divide(new BigDecimal("100")));
+						Float passScore = passScoreBD.floatValue();
+						if (passScore.floatValue() <= attemp.getScore().floatValue()) {
 							record.setStatus(new Long(CodeTable.passStatusYes));
 						}
 					}
@@ -1078,14 +1394,22 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 
 				// 通过学生答案文件获得主观题分数
 				Float subscore = new Float(PaperCheckToolUtil.findSubStudentScore(studentAnswerFile));
-				BigDecimal percentageSubScore = new BigDecimal(subscore.toString()).divide(
-						new BigDecimal(totalScore.toString()), 2, BigDecimal.ROUND_CEILING).multiply(
-						new BigDecimal("100"));
+				
+				
+				//BigDecimal percentageSubScore = new BigDecimal(subscore.toString()).divide(
+				//		new BigDecimal(totalScore.toString()), 2, BigDecimal.ROUND_CEILING).multiply(
+				//		new BigDecimal("100"));
+				
 				// 存储得分按百分制存储
-				selfAttemp.setSubScore(percentageSubScore.floatValue());
+				//selfAttemp.setSubScore(percentageSubScore.floatValue());
 
 				// 存储总分按百分制存储
-				selfAttemp.setScore(new Float(selfAttemp.getObjScore().floatValue() + percentageSubScore.floatValue()));
+				//selfAttemp.setScore(new Float(selfAttemp.getObjScore().floatValue() + percentageSubScore.floatValue()));
+				
+				// 2016.10.28修改存储的分数为实际分数（保证和试卷分数一致），更新平时成绩时换算为100分制
+				selfAttemp.setSubScore(subscore.floatValue());
+				selfAttemp.setScore(new Float(selfAttemp.getObjScore().floatValue() + subscore.floatValue()));
+				
 				selfAttemp.setPagerstatus(CodeTable.subCheckYes);// 批改状态设为主观题已批改
 				this.updateEntity(selfAttemp);// 更新尝试记录
 
@@ -1094,11 +1418,19 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 					if (record.getStatus().toString().equals(CodeTable.passStatusNo)) {// 记录状态为未通过
 
 						// 在前测信息中获得通过分数
-						Long passScoreLong = selfTest.getMasteryScore();
-						// 通过分数小于 尝试记录的总分数
-						if (passScoreLong.longValue() <= selfAttemp.getScore().floatValue()) {
+//						Long passScoreLong = selfTest.getMasteryScore();
+//						// 通过分数小于 尝试记录的总分数
+//						if (passScoreLong.longValue() <= selfAttemp.getScore().floatValue()) {
+//							record.setStatus(new Long(CodeTable.passStatusYes));
+//
+//						}
+						// 2016.10.28修改存储的分数为实际分数（保证和试卷分数一致），更新平时成绩时换算为100分制
+						BigDecimal total = new BigDecimal(totalScore);
+						BigDecimal mastery = new BigDecimal(selfTest.getMasteryScore().toString());
+						BigDecimal passScoreBD = total.multiply(mastery.divide(new BigDecimal("100")));
+						Float passScore = passScoreBD.floatValue();
+						if (passScore.floatValue() <= selfAttemp.getScore().floatValue()) {
 							record.setStatus(new Long(CodeTable.passStatusYes));
-
 						}
 					}
 					this.updateEntity(record);// 更新数据库中的前测记录
@@ -1406,10 +1738,98 @@ public class StudyServiceImpl extends HibernateDaoSupport implements IStudyServi
 	public List<MeleteTestRecordModel> getTestRecordByStudyrecordId(String studyrecordId) throws Exception {
 		try {
 			String hql = "from MeleteTestRecordModel where studyrecordId =?";
-			Object[] parameters = { Long.valueOf(studyrecordId) };
+			Object[] parameters = { Long.valueOf(studyrecordId) }; 
 			List<MeleteTestRecordModel> moduleRecords = this.findEntity(hql, parameters);
 			if (moduleRecords != null && moduleRecords.size() > 0) {
 				return moduleRecords;
+			} else {
+				return null;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage(), e);
+			throw e;
+		}
+	}
+	
+	/**
+	 * 根据学习记录id得到所有Section的学习时长和
+	 * @param studyrecordId
+	 * @return
+	 */
+	public Long getSectionStudyTimeSum(String studyrecordId)throws Exception{
+		try {
+			String hql = "select sum(studyTime) from MeleteSectionRecordModel where studyrecordId =?";
+			Object[] parameters = { Long.valueOf(studyrecordId) };
+			List list = this.findEntity(hql, parameters);
+			if (list != null && !list.isEmpty()) {
+				return (Long)list.get(0) == null ? 0l : (Long)list.get(0);
+			} else {
+				return 0l;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage(), e);
+			throw e;
+		}
+	}
+	
+	/**
+	 * 根据模块学习记录id得到所有Section的学习时长和
+	 * @param studyrecordId
+	 * @return
+	 */
+	public Long getSectionStudyTimeSumByModule(Long moduleId)throws Exception{
+		try {
+			String hql = "select sum(studyTime) from MeleteSectionRecordModel where meleteModuleRecordId =?";
+			Object[] parameters = { moduleId };
+			List list = this.findEntity(hql, parameters);
+			if (list != null && !list.isEmpty()) {
+				return (Long)list.get(0) == null ? 0l : (Long)list.get(0);
+			} else {
+				return 0l;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage(), e);
+			throw e;
+		}
+	}
+	
+	/**
+	 * 根据学习节点id得到所有Section的学习时长和
+	 * @param sectionrecordId
+	 * @return
+	 */
+	public Long getSectionStudyTimeDetailSum(Long sectionrecordId)throws Exception{
+		try {
+			String hql = "select sum(studyTime) from MeleteSectionRecordDetailModel where sectionrecordId =?";
+			Object[] parameters = {sectionrecordId};
+			List list = this.findEntity(hql, parameters);
+			if (list != null && !list.isEmpty()) {
+				return (Long)list.get(0) == null ? 0l : (Long)list.get(0);
+			} else {
+				return 0l;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage(), e);
+			throw e;
+		}
+	}
+	
+	/**
+	 * 得到最早的页学习时间
+	 * @param studyrecordId
+	 * @return
+	 */
+	public Date getSectionFirstStartStudyTime(String studyrecordId)throws Exception{
+		try {
+			String hql = " select min(startStudyTime) from MeleteSectionRecordModel where studyrecordId =?";
+			Object[] parameters = { Long.valueOf(studyrecordId) };
+			List list = this.findEntity(hql, parameters);
+			if (list != null && !list.isEmpty()) {
+				return (Date)list.get(0);
 			} else {
 				return null;
 			}

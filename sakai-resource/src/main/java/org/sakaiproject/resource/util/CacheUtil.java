@@ -1,6 +1,7 @@
 package org.sakaiproject.resource.util;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -388,7 +389,7 @@ public class CacheUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	private MeleteStudyRecordModel checkStudyRecord(String courseId, String studentId) throws Exception {
+	public MeleteStudyRecordModel checkStudyRecord(String courseId, String studentId) throws Exception {
 		MeleteStudyRecordModel studyRecord = studyService.getStudyRecordById(courseId, studentId);
 		// 第一次加载课程树时保存学习记录信息
 		if (studyRecord == null) {
@@ -397,8 +398,12 @@ public class CacheUtil {
 			studyRecord.setStudentId(studentId); // 学生ID
 			studyRecord.setScore(0f); // 课程成绩
 			studyRecord.setLessonStatus(Long.valueOf(CodeTable.passStatusNo)); // 课程通过状态
-			studyRecord.setStartStudyTime(null); // 学习开始时间
+			studyRecord.setStartStudyTime(new Date()); // 学习开始时间
 			studyService.saveStudyRecord(studyRecord);
+		}else if(studyRecord.getStartStudyTime() == null){
+			Date date = studyService.getSectionFirstStartStudyTime(studyRecord.getStudyrecordId().toString());
+			studyRecord.setStartStudyTime(date);
+			studyService.updateModel(studyRecord);
 		}
 
 		return studyRecord;

@@ -44,13 +44,25 @@ Ext.onReady(function() {
 				border : false,
 				autoScroll : false,
 				region : 'center',
+				id : 'ifrm_study_manage',
+				title : '学习管理',
+				closable : false,
+				name : "frame5",
+				url : 'studyManage.do'
+			})
+		);
+		/*tab_items.push(
+			new IFrameComponent({
+				border : false,
+				autoScroll : false,
+				region : 'center',
 				id : 'ifrm_c_statistic',
 				title : '统计分析',
 				closable : false,
 				name : "frame3",
 				url : 'statistics.do'
 			})
-		);
+		);*/
 		/*tab_items.push(
 			new IFrameComponent({
 				border : false,
@@ -65,7 +77,7 @@ Ext.onReady(function() {
 		);	*/			
 	}	
 	
-	tab_items.push(
+	/*tab_items.push(
 		new IFrameComponent({
 			border : false,
 			autoScroll : false,
@@ -76,7 +88,7 @@ Ext.onReady(function() {
 			name : "frame4",
 			url : 'courseSpace_scoreInit.do'
 		})
-	);
+	);*/
 	
 	var tabs = new Ext.TabPanel({
 		id : 'centerTab',

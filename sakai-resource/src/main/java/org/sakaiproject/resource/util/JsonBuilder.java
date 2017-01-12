@@ -70,37 +70,13 @@ public class JsonBuilder {
 			Map<String, Object> attrMap = model.getAttributes();
 			model.setAttributes(null);
 			String baseAttr = xstream.toXML(model);
-			String attr = "";
 			if (attrMap != null && attrMap.size() > 0) {
-				Set<String> set = attrMap.keySet();
-				for (Iterator<String> it = set.iterator(); it.hasNext();) {
-					String key = it.next();
-					Object val = attrMap.get(key);
-					if (val == null) {
-						val = "";
-					}
-					String sn = val.getClass().getSimpleName();// 获取数据类型
-					if (sn.equals("String")) {
-						attr += "\"" + key + "\":\"" + val + "\",";
-					} else if (sn.equals("Integer")) {
-						attr += "\"" + key + "\":\"" + val + "\",";
-					} else if (sn.equals("Boolean")) {
-						attr += "\"" + key + "\":" + val + ",";
-					} else if (sn.equals("Double")) {
-						attr += "\"" + key + "\":\"" + val + "\",";
-					} else if (sn.equals("Long")) {
-						attr += "\"" + key + "\":\"" + val + "\",";
-					} else if (sn.equals("Short")) {
-						attr += "\"" + key + "\":\"" + val + "\",";
-					} else if (sn.equals("Date")) {
-						attr += "\"" + key + "\":\"" + val.toString().substring(0, 10) + "\",";
-					} else if (sn.equals("Timestamp")) {
-						attr += "\"" + key + "\":\"" + val.toString().substring(0, 19) + "\",";
-					} else {
-						attr += "\"" + key + "\":\"" + val.toString() + "\",";
-					}
+				String attr = builderMapJson(attrMap);
+				if(StringUtils.isNotBlank(attr)){
+					attr = attr.substring(1,attr.length());
+					attr = attr.substring(0,attr.length() - 1);
 				}
-				baseAttr = baseAttr.substring(0, baseAttr.length() - 1) + "," + attr.substring(0, attr.length() - 1)
+				baseAttr = baseAttr.substring(0, baseAttr.length() - 1) + "," + attr
 						+ "}";
 			}
 			sb.append(baseAttr + ",");
@@ -108,10 +84,60 @@ public class JsonBuilder {
 		String str = "[]";
 		if (sb.length() > 0) {
 			str = "[" + sb.deleteCharAt(sb.length() - 1).toString() + "]";
-			str = str.trim().replace("\r\n", "\n").trim().replace("\n", "");
 		}
 		//System.out.println("表格树的数据为：" + str);
-		return str;
+		return replaceJson(str);
+	}
+	
+	/**
+	 * 替换掉json中的特殊字符
+	 * @param str
+	 * @return
+	 */
+	private static String replaceJson(String str){
+		return str.trim().replace("\r\n", "\n").trim().replace("\n", "");
+	}
+	
+	/**
+	 * 将一个map转换为json
+	 * 
+	 * @param attrMap
+	 * @return
+	 */
+	public static String builderMapJson(Map<String, Object> attrMap) {
+		String attr = "";
+		if (attrMap != null && attrMap.size() > 0) {
+			Set<String> set = attrMap.keySet();
+			for (Iterator<String> it = set.iterator(); it.hasNext();) {
+				String key = it.next();
+				Object val = attrMap.get(key);
+				if (val == null) {
+					val = "";
+				}
+				String sn = val.getClass().getSimpleName();// 获取数据类型
+				if (sn.equals("String")) {
+					attr += "\"" + key + "\":\"" + val + "\",";
+				} else if (sn.equals("Integer")) {
+					attr += "\"" + key + "\":\"" + val + "\",";
+				} else if (sn.equals("Boolean")) {
+					attr += "\"" + key + "\":" + val + ",";
+				} else if (sn.equals("Double")) {
+					attr += "\"" + key + "\":\"" + val + "\",";
+				} else if (sn.equals("Long")) {
+					attr += "\"" + key + "\":\"" + val + "\",";
+				} else if (sn.equals("Short")) {
+					attr += "\"" + key + "\":\"" + val + "\",";
+				} else if (sn.equals("Date")) {
+					attr += "\"" + key + "\":\"" + val.toString().substring(0, 10) + "\",";
+				} else if (sn.equals("Timestamp")) {
+					attr += "\"" + key + "\":\"" + val.toString().substring(0, 19) + "\",";
+				} else {
+					attr += "\"" + key + "\":\"" + val.toString() + "\",";
+				}
+			}
+			attr = "{" + attr.substring(0, attr.length() - 1) + "}";
+		}
+		return attr;
 	}
 
 	/**

@@ -10034,7 +10034,7 @@ SiteContentAdvisorProvider, SiteContentAdvisorTypeRegistry, EntityTransferrerRef
 
 		// do our ONE security check to see if the current user can create the
 		// dropbox and all inner folders
-		if (!isDropboxMaintainer(siteId))
+		if (!isDropboxMaintainer(siteId) && !isDropboxGroups(siteId))
 		{
 			createIndividualDropbox(siteId);
 			return;
@@ -14302,7 +14302,14 @@ SiteContentAdvisorProvider, SiteContentAdvisorTypeRegistry, EntityTransferrerRef
 		//unsupported, use macro name as is.
 		return macroName;
 	}
-    
+
+		/*
+		*  Return a direct link to the asset so we can bypass streaming the asset in the JVM
+		*/
+		public URI getDirectLinkToAsset(ContentResource resource) {
+			return m_storage.getDirectLink(resource);
+		}
+
     /**
      * Implementation of HardDeleteAware to allow content to be fully purged
      */

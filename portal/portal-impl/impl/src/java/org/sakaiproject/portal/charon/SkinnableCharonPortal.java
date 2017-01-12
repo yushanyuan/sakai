@@ -49,6 +49,8 @@ import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.entity.api.ResourcePropertiesEdit;
+import org.sakaiproject.event.api.UsageSession;
+import org.sakaiproject.event.cover.UsageSessionService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.exception.SakaiException;
@@ -1769,6 +1771,7 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 			// for showing user display name and id next to logout (SAK-10492)
 			String loginUserDispName = null;
 			String loginUserDispId = null;
+			String loginUserId = null;
 			String loginUserFirstName = null;
 			boolean displayUserloginInfo = ServerConfigurationService.
 			getBoolean("display.userlogin.info", true);
@@ -1831,14 +1834,23 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 				{
 					User thisUser = UserDirectoryService.getCurrentUser();
 					loginUserDispId = Validator.escapeHtml(thisUser.getDisplayId());
+					loginUserId = Validator.escapeHtml(thisUser.getId());
 					loginUserDispName = Validator.escapeHtml(thisUser.getDisplayName());
 					loginUserFirstName = Validator.escapeHtml(thisUser.getFirstName());
 				}
+				
+				// check if current user is being impersonated (by become user/sutool)
+				String impersonatorDisplayId = getImpersonatorDisplayId();
+				if (!impersonatorDisplayId.isEmpty())
+				{
+					message = rloader.getFormattedMessage("sit_return", impersonatorDisplayId);
+				}
 
 				// check for a logout text override
-				message = StringUtils.trimToNull(ServerConfigurationService
-						.getString("logout.text"));
-				if (message == null) message = rloader.getString("sit_log");
+				if (message == null)
+				{
+					message = ServerConfigurationService.getString("logout.text", rloader.getString("sit_log"));
+				}
 
 				// check for an image for the logout
 				image1 = StringUtils.trimToNull(ServerConfigurationService
@@ -1853,11 +1865,6 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 			rcontext.put("loginTopLogin", Boolean.valueOf(topLogin));
 			rcontext.put("logoutWarningMessage", logoutWarningMessage);
 
-			// display portal links - SAK-22983
-			String portalLinks = portalService.getPortalLinks();
-			if (portalLinks != null) {
-				rcontext.put("portalLinks",portalLinks);
-			}						
 			if (!topLogin)
 			{
 
@@ -1908,6 +1915,7 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 				rcontext.put("loginUserDispName", loginUserDispName);
 				rcontext.put("loginUserFirstName", loginUserFirstName);
 				rcontext.put("loginUserDispId", loginUserDispId);
+				rcontext.put("loginUserId", loginUserId);
 			}
 			rcontext.put("displayUserloginInfo", displayUserloginInfo && loginUserDispId != null);
 		}
@@ -2302,6 +2310,36 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 		}
 		
 		return rval;
+	}
+	
+	/**
+	 * Checks if current user is being impersonated (via become user/sutool) and returns displayId of
+	 * the impersonator. Adapted from SkinnableLogin's isImpersonating()
+	 * @return displayId of impersonator, or empty string if not being impersonated
+	 */
+	private String getImpersonatorDisplayId()
+	{
+		Session currentSession = SessionManager.getCurrentSession();
+		UsageSession originalSession = (UsageSession) currentSession.getAttribute(UsageSessionService.USAGE_SESSION_KEY);
+		
+		if (originalSession != null)
+		{
+			String originalUserId = originalSession.getUserId();
+			if (!StringUtils.equals(currentSession.getUserId(), originalUserId))
+			{
+				try
+				{
+					User originalUser = UserDirectoryService.getUser(originalUserId);
+					return originalUser.getDisplayId();
+				}
+				catch (UserNotDefinedException e)
+				{
+					M_log.debug("Unable to retrieve user for id: " + originalUserId);
+				}
+			}
+		}
+		
+		return "";
 	}
 
 }

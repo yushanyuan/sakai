@@ -33,6 +33,11 @@
 			<version>14_g</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi-ooxml</artifactId>
+		    <version>3.9</version>
+		</dependency>
 		<!--
 		<dependency>
 			<groupId>org.sakaiproject.jforum</groupId>
@@ -303,40 +308,7 @@
 		</dependency>
 	</dependencies>
 	<repositories>
-		<!--
-		<repository>
-			<id>nexus</id>
-			<url>http://112.124.28.128:8081/nexus/content/groups/public/</url>
-			<releases>
-			<enabled>true</enabled>
-			<updatePolicy>always</updatePolicy>
-			<checksumPolicy>warn</checksumPolicy>
-			</releases>
-			<snapshots>
-			<enabled>true</enabled>
-			<updatePolicy>always</updatePolicy>
-			<checksumPolicy>warn</checksumPolicy>
-			</snapshots>
-		</repository>
-	
-		<repository>
-			<id>nesdu-maven</id>
-			<name>Nesdu Maven Repo</name>
-			<layout>default</layout>
-			<url>http://vpn.bupticet.com/maven2/maven2-local</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>nesdu-java-maven</id>
-			<name>Nesdu Java Maven Repo</name>
-			<layout>default</layout>
-			<url>http://vpn.bupticet.com/maven2/maven2-java</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
+		 
 		<repository>
 			<id>Maven Plugin Repository</id>
 			<url>http://struts2plugin-maven-repo.googlecode.com/svn/trunk/</url>
@@ -375,7 +347,7 @@
 			<releases>
 				<enabled>true</enabled>
 			</releases>
-		</repository>-->
+		</repository> 
 		
 	</repositories>
 	<build>

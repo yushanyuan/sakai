@@ -289,6 +289,7 @@
 	<import resource="study-component.xml" />
 	<import resource="course-component.xml" />
 	<import resource="statistics-component.xml" />
+	<import resource="studymanage-component.xml" />
 	<import resource="template-component.xml" />
 	<import resource="forum-component.xml" />
 	<import resource="rest-component.xml" />

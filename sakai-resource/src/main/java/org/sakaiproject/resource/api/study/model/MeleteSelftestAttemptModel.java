@@ -12,6 +12,9 @@ public class MeleteSelftestAttemptModel implements java.io.Serializable {
 
 	// Fields
 
+	/**
+	 * 
+	 */
 	private Long selftestattemptId;//前测尝试记录ID
 	private Long meleteSelftestRecordId;//前测记录ID
 	private String courseId;//课程ID

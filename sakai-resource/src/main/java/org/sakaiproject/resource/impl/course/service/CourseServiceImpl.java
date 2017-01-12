@@ -3384,7 +3384,7 @@ public class CourseServiceImpl extends HibernateDaoSupport implements ICourseSer
 	public List<MeleteModuleModel> getAllModule(String courseId) throws Exception {
 		String hql = "from MeleteModuleModel where courseId=? and status=?";
 		Object[] param = { courseId, Long.valueOf(CodeTable.normal) };
-		List<MeleteModuleModel> list = this.getHibernateTemplate().find(hql, param);
+		List list = this.getHibernateTemplate().find(hql, param);
 		return list;
 	}
 
@@ -3392,7 +3392,7 @@ public class CourseServiceImpl extends HibernateDaoSupport implements ICourseSer
 	public List<MeleteSectionModel> getAllSection(String courseId) throws Exception {
 		String hql = "from MeleteSectionModel where courseId=? and status=?";
 		Object[] param = { courseId, Long.valueOf(CodeTable.normal) };
-		List<MeleteSectionModel> list = this.getHibernateTemplate().find(hql, param);
+		List list = this.getHibernateTemplate().find(hql, param);
 		return list;
 	}
 
@@ -5184,7 +5184,7 @@ public class CourseServiceImpl extends HibernateDaoSupport implements ICourseSer
 	 */
 	public List<Long> getStudyrecordidListByCourseId(String courseId) {
 		String hql = "select studyrecordId from MeleteStudyRecordModel where courseId=?";
-		List<Long> list = this.getHibernateTemplate().find(hql, courseId);
+		List list = this.getHibernateTemplate().find(hql, courseId);
 		return list;
 	}
 

@@ -11,16 +11,8 @@
 		<property name="messageForumsForumManager" ref="org.sakaiproject.api.app.messageforums.MessageForumsForumManager"></property>
 		<property name="messageForumsMessageManager" ref="org.sakaiproject.api.app.messageforums.MessageForumsMessageManager"></property>
 	</bean>
-
 	<bean id="jforumService"
 		class="org.sakaiproject.resource.impl.forum.service.JForumServiceImpl"
 		scope="singleton">
 	</bean>
-	<!--
-	<bean id="jforumService"
-		class="org.sakaiproject.resource.impl.forum.service.JForumServiceImpl"
-		singleton="true">
-		<property name="jForumToolService" ref="org.sakaiproject.api.app.jforum.JForumToolService"></property>
-	</bean>
-	-->
 </beans>

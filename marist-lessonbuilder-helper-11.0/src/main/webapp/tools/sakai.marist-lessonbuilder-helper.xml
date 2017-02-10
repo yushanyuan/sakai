@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<registration>
+	<tool id="sakai.marist-lessonbuilder-helper" 
+		title="marist-lessonbuilder-helper" 
+		description="为lessonbuilder 提供导入 Melete导出包">
+
+		 <category name="course" />
+		<category name="project" />
+		<category name="myworkspace" />
+		<configuration name="functions.require" /> 
+		
+    </tool>
+</registration>
+

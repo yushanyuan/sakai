@@ -1,0 +1,78 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+	
+	<import resource="components.xml" />
+	<context:component-scan base-package="cn.net.sikai.web" />
+	<mvc:annotation-driven
+		content-negotiation-manager="contentNegotiationManager">
+		<mvc:message-converters register-defaults="true">
+			<bean
+				class="cn.net.sikai.utils.UTF8StringHttpMessageConverter" />
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+ 	
+	<bean id="multipartResolver"  
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver" p:defaultEncoding="utf-8">  
+        <property name="maxUploadSize">  
+            <value>104857600</value>  
+        </property>  
+        <property name="maxInMemorySize">  
+            <value>4096</value>  
+        </property>  
+    </bean>
+    
+	<mvc:interceptors>
+	    <mvc:interceptor>
+	        <mvc:mapping path="/**/*.htm" />
+	        <bean name="openSessionInViewInterceptor"
+		      class="org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor">
+		      <property name="sessionFactory">
+		         <ref bean="org.sakaiproject.springframework.orm.hibernate.GlobalSessionFactory"/>
+		      </property>
+		      <!-- 
+		      <property name="flushMode">
+		         <bean id="org.springframework.orm.hibernate3.HibernateAccessor.FLUSH_EAGER"
+		            class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/>
+		      </property> -->
+		   </bean>
+	    </mvc:interceptor>
+	</mvc:interceptors>
+  
+  
+	<bean id="contentNegotiationManager"
+		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="favorPathExtension" value="false" />
+		<property name="favorParameter" value="false" />
+		<property name="ignoreAcceptHeader" value="false" />
+		<property name="mediaTypes">
+			<value>
+				atom=application/atom+xml
+				html=text/html
+				json=application/json
+				*=*/*
+			</value>
+		</property>
+	</bean>
+
+
+	<!-- Spring view mappings -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+		<property name="order" value="10" />
+	</bean>
+
+
+
+</beans>

@@ -2451,9 +2451,9 @@ public class SiteAction extends PagedResourceActionII {
 								return g1.getTitle().compareToIgnoreCase(g2.getTitle());
 							}
 						});
-						context.put("joinableGroups", joinableGroups);
 					}
 				}
+				context.put("joinableGroups", joinableGroups);
 				
 			} catch (Exception e) {
 				M_log.error(this + " buildContextForTemplate chef_site-siteInfo-list.vm ", e);
@@ -5354,6 +5354,8 @@ public class SiteAction extends PagedResourceActionII {
 						if(hardDelete) {
 							//hard delete. call upon all implementing services to hard delete their own content
 							doHardDelete(site.getId());
+							// the service never deletes the site unless its already softly deleted
+							site.setSoftlyDeleted(true);
 						}
 						
 						//now delete the site

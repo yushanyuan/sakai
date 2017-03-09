@@ -371,13 +371,15 @@ public class RestFileController {
 				if(sections!=null && sections.size()>0){
 					for(Section sc : sections){
 						//查询是否建有课程站点
-						Site site = null;
+						//Site site = null;
+						Date deleteDate = null;
 						try {
-							site = siteService.getSite(sc.getEid());
+							Site site = siteService.getSite(sc.getEid());
+							deleteDate = site.getSoftlyDeletedDate();
 						} catch (IdUnusedException e) {
 							e.printStackTrace();
 						}
-						if(site!=null && site.getId()!=null){
+						if(deleteDate == null){
 							
 							Locale locale = LocaleContextHolder.getLocale();
 							model.addAttribute("alertMesage", messageSource.getMessage("msg_remove_course_error", null, locale));

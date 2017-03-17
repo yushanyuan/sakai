@@ -48,18 +48,24 @@ public interface BBBMeetingManager {
     public final static String CFG_DEFAULT_OWNER = "bbb.default.participants.owner";
     public final static String CFG_AUTOREFRESHMEETINGS = "bbb.autorefresh.meetings";
     public final static String CFG_AUTOREFRESHRECORDINGS = "bbb.autorefresh.recordings";
-    public final static String CFG_GETSITERECORDINGS = "bbb.getsiterecordings";
-    public final static String CFG_RECORDING = "bbb.recording";                             // [true|false]
     public final static String CFG_RECORDING_ENABLED = "bbb.recording.enabled";             // [true|false]
+    public final static String CFG_RECORDING_EDITABLE = "bbb.recording.editable";           // [true|false]
     public final static String CFG_RECORDING_DEFAULT = "bbb.recording.default";             // [true|false]
+    public final static String CFG_RECORDINGREADYNOTIFICATION_ENABLED = "bbb.recordingready.enabled";           // [true|false]
     public final static String CFG_DESCRIPTIONMAXLENGTH = "bbb.descriptionmaxlength";
     public final static String CFG_DESCRIPTIONTYPE = "bbb.descriptiontype";                 // [fckeditor|ckeditor|plaintext]
     public final static String CFG_DURATION_ENABLED = "bbb.duration.enabled";               // [true|false]
     public final static String CFG_DURATION_DEFAULT = "bbb.duration.default";
     public final static String CFG_WAITMODERATOR_ENABLED = "bbb.waitmoderator.enabled";     // [true|false]
+    public final static String CFG_WAITMODERATOR_EDITABLE = "bbb.waitmoderator.editable";   // [true|false]
     public final static String CFG_WAITMODERATOR_DEFAULT = "bbb.waitmoderator.default";     // [true|false]
     public final static String CFG_MULTIPLESESSIONSALLOWED_ENABLED = "bbb.multiplesessionsallowed.enabled";     // [true|false]
+    public final static String CFG_MULTIPLESESSIONSALLOWED_EDITABLE = "bbb.multiplesessionsallowed.editable";   // [true|false]
     public final static String CFG_MULTIPLESESSIONSALLOWED_DEFAULT = "bbb.multiplesessionsallowed.default";     // [true|false]
+    public final static String CFG_PREUPLOADPRESENTATION_ENABLED = "bbb.preuploadpresentation.enabled";     // [true|false]
+    public final static String CFG_GROUPSESSIONS_ENABLED = "bbb.groupsessions.enabled";               // [true|false]
+    public final static String CFG_GROUPSESSIONS_EDITABLE = "bbb.groupsessions.editable";             // [true|false]
+    public final static String CFG_GROUPSESSIONS_DEFAULT = "bbb.groupsessions.default";               // [true|false]
 
     // Permissions
     public static final String FN_PREFIX = "bbb.";
@@ -69,9 +75,15 @@ public interface BBBMeetingManager {
     public static final String FN_DELETE_OWN = "bbb.delete.own";
     public static final String FN_DELETE_ANY = "bbb.delete.any";
     public static final String FN_PARTICIPATE = "bbb.participate";
+    public static final String FN_RECORDING_VIEW = "bbb.recording.view";
+    public static final String FN_RECORDING_EDIT_OWN = "bbb.recording.edit.own";
+    public static final String FN_RECORDING_EDIT_ANY = "bbb.recording.edit.any";
+    public static final String FN_RECORDING_DELETE_OWN = "bbb.recording.delete.own";
+    public static final String FN_RECORDING_DELETE_ANY = "bbb.recording.delete.any";
     public static final String[] FUNCTIONS = new String[] { FN_CREATE,
-            FN_EDIT_OWN, FN_EDIT_ANY, FN_DELETE_OWN, FN_DELETE_ANY,
-            FN_PARTICIPATE };
+            FN_EDIT_OWN, FN_EDIT_ANY, FN_DELETE_OWN, FN_DELETE_ANY, FN_PARTICIPATE,
+            FN_RECORDING_VIEW, FN_RECORDING_EDIT_OWN, FN_RECORDING_EDIT_ANY,
+            FN_RECORDING_DELETE_OWN, FN_RECORDING_DELETE_ANY };
     // Extra function used to enable admin interface in the client
     public static final String FN_ADMIN = "bbb.admin";
 
@@ -136,7 +148,7 @@ public interface BBBMeetingManager {
      * 
      * @param meeting
      */
-    public boolean updateMeeting(BBBMeeting meeting, boolean notifyParticipants, boolean addToCalendar, boolean iCalAttached, Long iCalAlarmMinutes)
+    public boolean updateMeeting(BBBMeeting meeting, boolean notifyParticipants, boolean addToCalendar, boolean iCalAttached, Long iCalAlarmMinutes, boolean meetingOnly)
             throws SecurityException, BBBException;
 
     /**
@@ -147,15 +159,21 @@ public interface BBBMeetingManager {
             throws BBBException;
 
     /**
+     * Get all meetings from BBB server.
+     */
+    public Map<String, Object> getMeetings()
+            throws BBBException;
+
+    /**
      * Get live meeting details from BBB server.
      */
-    public Map<String, Object> getMeetingInfo(String meetingID)
+    public Map<String, Object> getMeetingInfo(String meetingID, String groupId)
             throws BBBException;
 
     /**
      * Get playback recordings from BBB server.
      */
-    public Map<String, Object> getRecordings(String meetingID)
+    public Map<String, Object> getRecordings(String meetingID, String groupId)
             throws BBBException;
 
     /**
@@ -185,7 +203,7 @@ public interface BBBMeetingManager {
     /**
      * Only executes endMeeting.
      */
-    public boolean endMeeting(String id) 
+    public boolean endMeeting(String id, String groupId, boolean endAll) 
             throws SecurityException, BBBException;
 
     /**
@@ -199,6 +217,12 @@ public interface BBBMeetingManager {
      */
     public boolean publishRecordings(String meetingID, String recordID,
             String publish) throws SecurityException, BBBException;
+
+    /**
+     * Protect and unprotect recordings using the *_______________* api command
+     */
+    public boolean protectRecordings(String meetingID, String recordID,
+            String protect) throws SecurityException, BBBException;
 
     /**
      * Check if meeting is ready to be joined.
@@ -239,6 +263,11 @@ public interface BBBMeetingManager {
      * supplied site.
      */
     public boolean getCanParticipate(String siteId);
+
+    /**
+     * Returns true if the current user can view recordings in the supplied site
+     */
+    public boolean getCanView(String siteId);
 
     /**
      * Checks tool permissions in site, apply defaults if no perms set and
@@ -284,6 +313,11 @@ public interface BBBMeetingManager {
             throws SecurityException, Exception;
 
     /**
+     * Returns true if participants were notified when recording was ready
+     */
+    public boolean recordingReady(String meetingId);
+
+    /**
      * Returns bbb.autorefresh.meetings parameter set up on sakai.properties or the one set up by default.
      */
     public String getAutorefreshForMeetings();
@@ -295,6 +329,8 @@ public interface BBBMeetingManager {
 
     public String isRecordingEnabled();
 
+    public String isRecordingEditable();
+
     public String getRecordingDefault();
 
     public String isDurationEnabled();
@@ -303,11 +339,23 @@ public interface BBBMeetingManager {
 
     public String isWaitModeratorEnabled();
 
+    public String isWaitModeratorEditable();
+
     public String getWaitModeratorDefault();
 
     public String isMultipleSessionsAllowedEnabled();
 
+    public String isMultipleSessionsAllowedEditable();
+
     public String getMultipleSessionsAllowedDefault();
+    
+    public String isPreuploadPresentationEnabled();
+
+    public String isGroupSessionsEnabled();
+
+    public String isGroupSessionsEditable();
+
+    public String getGroupSessionsDefault();
 
     public String getMaxLengthForDescription();
 
@@ -322,5 +370,7 @@ public interface BBBMeetingManager {
     public boolean isUserAllowedInLocation(String userId, String permission, String locationId);
 
     public String getUserRoleInSite(String userId, String siteId);
+
+    public List<String> getUserGroupIdsInSite(String userId, String siteId);
 
 }
